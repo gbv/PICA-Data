@@ -1,20 +1,9 @@
 package Catmandu::PICA;
+# ABSTRACT: Catmandu modules for working with PICA+ XML data.
+# VERSION
 
 use Carp        qw< carp croak confess cluck >;
 use XML::LibXML::Reader;
-
-=head1 NAME
-
-Catmandu::PICA - Catmandu modules for working with PICA+ XML data.
-
-=head1 VERSION
-
-Version 0.01
-
-=cut
-
-our $VERSION = '0.01';
-
 
 =head1 MODULES
 
@@ -126,11 +115,6 @@ sub _decode {
 }
 
 
-=head1 AUTHOR
-
-Johann Rolschewski, C<< <rolschewski at gmail.com> >>
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
@@ -146,19 +130,11 @@ You can also look for information at:
     LibreCat
         http://librecat.org/tutorial/index.html
 
-=head1 ACKNOWLEDGEMENTS
+=head1 CONTRIBUTORS
 
+=encoding utf8
 
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2013 Johann Rolschewski.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
-
+Jakob Voß <voss@gbv.de>
 
 =cut
 

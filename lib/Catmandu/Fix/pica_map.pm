@@ -1,4 +1,6 @@
 package Catmandu::Fix::pica_map;
+# ABSTRACT: copy mab values of one field to a new field
+# VERSION
 
 use Catmandu::Sane;
 use Catmandu::Util qw(:is :data);
@@ -177,10 +179,6 @@ sub pica_subfield {
 }
 
 1;
-
-=head1 NAME
-
-Catmandu::Fix::pica_map - copy mab values of one field to a new field
 
 =head1 SYNOPSIS
 
