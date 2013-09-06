@@ -1,4 +1,6 @@
 package Catmandu::Importer::PICA;
+# ABSTRACT: Package that imports PICA+ XML data
+# VERSION
 
 use Catmandu::Sane;
 use Catmandu::PICA;
@@ -38,9 +40,6 @@ sub generator {
         die "need PICA+ XML data as input";
     }
 }
-=head1 NAME
-
-Catmandu::Importer::PICA - Package that imports PICA+ XML data
 
 =head1 SYNOPSIS
 
@@ -108,22 +107,6 @@ Catmandu::Importer::PICA methods are not idempotent: PICA feeds can only be read
 =head1 SEE ALSO
 
 L<Catmandu::Iterable>
-
-=cut
-
-=head1 AUTHOR
-
-Johann Rolschewski, C<< <rolschewski at gmail.com> >>
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2013 Johann Rolschewski.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
