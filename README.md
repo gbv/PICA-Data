@@ -34,3 +34,4 @@ Build and test coverage of the `devel` branch at <https://github.com/gbv/Catmand
 
 [![Build Status](https://travis-ci.org/gbv/Catmandu-PICA.png)](https://travis-ci.org/gbv/Catmandu-PICA)
 [![Coverage Status](https://coveralls.io/repos/gbv/Catmandu-PICA/badge.png?branch=devel)](https://coveralls.io/r/gbv/Catmandu-PICA?branch=devel)
+[![Kwalitee Score](http://cpants.cpanauthors.org/dist/Catmandu-PICA.png)](http://cpants.cpanauthors.org/dist/Catmandu-PICA)
