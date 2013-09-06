@@ -32,5 +32,5 @@ Build and test your current state this way:
 
 Build and test coverage of the `devel` branch at <https://github.com/gbv/Catmandu-PICA/>:
 
-[![Build Status](https://travis-ci.org/gbv/Catmandu-PICA.png)](https://travis-ci.org/nichtich/Catmandu-PICA)
-[![Coverage Status](https://coveralls.io/repos/gbv/Catmandu-PICA/badge.png?branch=devel)](https://coveralls.io/r/nichtich/Catmandu-PICA?branch=devel)
+[![Build Status](https://travis-ci.org/gbv/Catmandu-PICA.png)](https://travis-ci.org/gbv/Catmandu-PICA)
+[![Coverage Status](https://coveralls.io/repos/gbv/Catmandu-PICA/badge.png?branch=devel)](https://coveralls.io/r/gbv/Catmandu-PICA?branch=devel)

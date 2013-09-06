@@ -2,6 +2,8 @@ package Catmandu::Importer::PICA;
 # ABSTRACT: Package that imports PICA+ XML data
 # VERSION
 
+no if $] >= 5.018, 'warnings', "experimental::smartmatch";
+
 use Catmandu::Sane;
 use Catmandu::PICA;
 use Moo;
