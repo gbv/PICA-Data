@@ -1,9 +1,10 @@
 #!perl -T
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 BEGIN {
     use_ok( 'Catmandu::PICA' ) || print "Bail out!\n";
+    use_ok( 'Catmandu::PICAplus' ) || print "Bail out!\n";
     use_ok( 'Catmandu::Importer::PICA' ) || print "Bail out!\n";
     use_ok( 'Catmandu::Fix::pica_map' ) || print "Bail out!\n";
 }
