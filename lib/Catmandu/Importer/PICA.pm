@@ -1,9 +1,11 @@
 package Catmandu::Importer::PICA;
-# ABSTRACT: Package that imports PICA+ XML data
+
+# ABSTRACT: Package that imports PICA+ data
 # VERSION
 
 use Catmandu::Sane;
 use Catmandu::PICA;
+use Catmandu::PICAplus;
 use Moo;
 
 no if $] >= 5.018, 'warnings', "experimental::smartmatch";
@@ -14,12 +16,15 @@ has type => ( is => 'ro', default => sub {'XML'} );
 
 sub pica_generator {
     my $self = shift;
-    
+
     my $file;
 
     given ( $self->type ) {
-        when ('XML') {          
+        when ('XML') {
             $file = Catmandu::PICA->new( $self->fh );
+        }
+        when ('PICAplus') {
+            $file = Catmandu::PICAplus->new( $self->fh );
         }
         die "unknown";
     }
@@ -36,10 +41,13 @@ sub generator {
     my $type = $self->type;
 
     given ($type) {
-        when (/^XML$/) {
+        when ('XML') {
             return $self->pica_generator;
         }
-        die "need PICA+ XML data as input";
+        when ('PICAplus') {
+            return $self->pica_generator;
+        }
+        die "need PICA+ data as input";
     }
 }
 
@@ -95,7 +103,7 @@ Parse PICA XML to native Perl hash containing two keys: '_id' and 'record'.
 =head2 new(file => $filename,type=>$type)
 
 Create a new PICA importer for $filename. Use STDIN when no filename is given. Type 
-describes the sytax of the PICA records. Currently we support: PICA+ XML.
+describes the sytax of the PICA records. Currently we support following types: PICAplus, XML.
 
 =head2 count
 
@@ -112,4 +120,4 @@ L<Catmandu::Iterable>
 
 =cut
 
-1; # End of Catmandu::Importer::PICA
+1;    # End of Catmandu::Importer::PICA
