@@ -4,8 +4,8 @@ package Catmandu::Importer::PICA;
 # VERSION
 
 use Catmandu::Sane;
-use Catmandu::PICA;
-use Catmandu::PICAplus;
+use PICA::Parser::XML;
+use PICA::Parser::Plus;
 use Moo;
 
 no if $] >= 5.018, 'warnings', "experimental::smartmatch";
@@ -21,10 +21,10 @@ sub pica_generator {
 
     given ( $self->type ) {
         when ('XML') {
-            $file = Catmandu::PICA->new( $self->fh );
+            $file = PICA::Parser::XML->new( $self->fh );
         }
         when ('PICAplus') {
-            $file = Catmandu::PICAplus->new( $self->fh );
+            $file = PICA::Parser::Plus->new( $self->fh );
         }
         die "unknown";
     }

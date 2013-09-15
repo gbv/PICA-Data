@@ -1,12 +1,20 @@
 #!perl -T
 
-use Test::More tests => 4;
+use Test::More;
 
 BEGIN {
-    use_ok( 'Catmandu::PICA' ) || print "Bail out!\n";
-    use_ok( 'Catmandu::PICAplus' ) || print "Bail out!\n";
-    use_ok( 'Catmandu::Importer::PICA' ) || print "Bail out!\n";
-    use_ok( 'Catmandu::Fix::pica_map' ) || print "Bail out!\n";
+    my @modules = qw(
+        PICA::Parser::Plus
+        PICA::Parser::XML
+        Catmandu::Importer::PICA
+        Catmandu::PICA
+        Catmandu::Fix::pica_map
+    );
+    foreach (@modules) {
+        use_ok($_) || print "Bail out!\n";
+    }
 }
 
 diag( "Testing Catmandu::PICA $Catmandu::PICA::VERSION, Perl $], $^X" );
+
+done_testing;

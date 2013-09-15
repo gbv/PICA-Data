@@ -1,42 +1,26 @@
-package Catmandu::PICAplus;
+package PICA::Parser::Plus;
 
-# ABSTRACT: Catmandu modules for working with PICA+ data.
+# ABSTRACT: PICA+ format parser
 # VERSION
 
 use charnames qw< :full >;
-use Carp qw< carp croak confess cluck >;
+use Carp qw(croak);
 
 use constant LEADER_LEN         => 24;
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
 
-=head1 MODULES
-
-=over
-
-=item * L<Catmandu::PICA>
-
-=item * L<Catmandu::PICAplus>
-
-=item * L<Catmandu::Importer::PICA>
-
-=item * L<Catmandu::Fix::pica_map>
-
-=back
-
 =head1 SYNOPSIS
 
+L<PICA::Parser::Plus> is a parser for PICA+ records. 
 
-L<Catmandu::PICAplus> is a parser for PICA+ records. 
+    use PICA::Parser::Plus;
 
-    use Catmandu::PICAplus;
-
-    my $parser = Catmandu::PICAplus->new( $filename );
+    my $parser = PICA::Parser::Plus->new( $filename );
 
     while ( my $record_hash = $parser->next() ) {
         # do something        
     }
-
 
 =head1 SUBROUTINES/METHODS
 
@@ -121,21 +105,11 @@ sub _decode {
     return \@record;
 }
 
-=head1 SUPPORT
+=head1 SEEALSO
 
-You can find documentation for this module with the perldoc command.
-
-    perldoc Catmandu::PICAplus
-
-You can also look for information at:
-
-    Catmandu
-        https://metacpan.org/module/Catmandu::Introduction
-        https://metacpan.org/search?q=Catmandu
-
-    LibreCat
-        http://librecat.org/tutorial/index.html
+L<PICA::PlainParser>, included in the release of L<PICA::Record> implements
+another PICA+ format parser, not aligned with the L<Catmandu> framework.
 
 =cut
 
-1;    # End of Catmandu::PICAplus
+1;    # End of PICA::Parser::Plus
