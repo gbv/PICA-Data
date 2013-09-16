@@ -85,8 +85,11 @@ sub _decode {
     chomp($reader);
     my @fields = split( END_OF_FIELD, $reader );
     my @record;
-    push( @record, [ 'LDR', undef, undef, shift(@fields) ] );
 
+    if (length($fields[0]) == LEADER_LEN-1 && $fields[0] !~ m/.*SUBFIELD_INDICATOR/){
+        push( @record, [ 'LDR', undef, undef, shift(@fields) ] );
+    }
+    
     for my $field (@fields) {
 
         my ( $tag, $occurence, $data );
