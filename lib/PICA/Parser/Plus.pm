@@ -1,8 +1,8 @@
 package PICA::Parser::Plus;
-
 # ABSTRACT: PICA+ format parser
 # VERSION
 
+use strict;
 use charnames qw< :full >;
 use Carp qw(croak);
 
