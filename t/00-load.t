@@ -1,20 +1,10 @@
-#!perl -T
-
+use strict;
 use Test::More;
 
-BEGIN {
-    my @modules = qw(
-        PICA::Parser::Plus
-        PICA::Parser::XML
-        Catmandu::Importer::PICA
-        Catmandu::PICA
-        Catmandu::Fix::pica_map
-    );
-    foreach (@modules) {
-        use_ok($_) || print "Bail out!\n";
-    }
+foreach ( map { s{^lib/|\.pm\n$}{}g; s{/}{::}g; $_ } `find lib -iname *.pm` ) {
+    use_ok $_;
 }
 
-diag( "Testing Catmandu::PICA $Catmandu::PICA::VERSION, Perl $], $^X" );
+diag "Testing Catmandu::PICA $Catmandu::PICA::VERSION, Perl $], $^X";
 
 done_testing;

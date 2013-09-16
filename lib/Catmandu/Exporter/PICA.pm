@@ -9,7 +9,7 @@ use Moo;
 
 use PICA::Writer::Plus;
 use PICA::Writer::Plain;
-# use PICA::Writer::XML;
+use PICA::Writer::XML;
 
 with 'Catmandu::Exporter';
 
@@ -19,12 +19,13 @@ has writer => (is => 'lazy');
 sub _build_writer {
     my ($self) = @_;
 
-    if ( lc($self->type) eq 'plus') {
+    my $type = lc($self->type);
+    if ( $type eq 'plus') {
         PICA::Writer::Plus->new( fh => $self->fh );
-    } elsif ( lc($self->type) eq 'plain') {
+    } elsif ( $type eq 'plain') {
         PICA::Writer::Plain->new( fh => $self->fh );
-    #} elsif ( lc($self->type) eq 'xml') {
-    #    PICA::Writer::XML->new( fh => $self->fh );
+    } elsif ( $type eq 'xml') {
+        PICA::Writer::XML->new( fh => $self->fh );
     } else {
         die "unknown type";
     }
@@ -36,9 +37,9 @@ sub add {
     $self->writer->write($data);
 }
 
-sub commit {
+sub commit { # TODO: why is this not called automatically?
     my ($self) = @_;
-    $self->writer->end if $self->writer->can('end');
+    $self->writer->end if $self->can('end');
 }
 
 1;

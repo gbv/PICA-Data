@@ -20,6 +20,12 @@ package Catmandu::PICA;
 
 =item * L<PICA::Parser::Plus>
 
+=item * L<PICA::Writer::XML>
+
+=item * L<PICA::Writer::Plus>
+
+=item * L<PICA::Writer::Plain>
+
 =back
 
 =head1 SUPPORT
