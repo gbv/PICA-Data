@@ -87,7 +87,7 @@ sub _decode {
         # get field tag number
         my $tag = $field_node->getAttribute('tag');
         my $occurrence = $field_node->getAttribute('occurrence') // '';
-        push(@field, ($tag, $occurrence, '_', ''));
+        push(@field, ($tag, $occurrence));
             
             # get all subfield nodes
             foreach my $subfield_node ( $field_node->getChildrenByTagName('*') ) {

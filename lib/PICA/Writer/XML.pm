@@ -29,7 +29,7 @@ sub _write_record {
                 defined $field->[1] && $field->[1] ne '' ?
                 " occurrence=\"$field->[1]\"" : ""
             ) . ">\n";
-            for (my $i=4; $i<scalar @$field; $i+=2) {
+            for (my $i=2; $i<scalar @$field; $i+=2) {
                 my $value = $field->[$i+1];
                 $value =~ s/</&lt;/g;
                 $value =~ s/&/&amp;/g;
