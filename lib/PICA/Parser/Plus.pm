@@ -94,7 +94,7 @@ sub _decode {
     for my $field (@fields) {
 
         my ( $tag, $occurence, $data );
-        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/xms ) {
+        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/ ) {
             $tag       = $1;
             $occurence = $3 // '';
             $data      = $4;
