@@ -35,7 +35,7 @@ sub new {
     my $self = {
         filename   => undef,
         rec_number => 0,
-        xml_reader => undef,
+        reader => undef,
     };
 
     # check for file or filehandle
@@ -87,13 +87,14 @@ sub _decode {
     my @record;
 
     if (length($fields[0]) == LEADER_LEN-1 && $fields[0] !~ m/.*SUBFIELD_INDICATOR/){
-        push( @record, [ 'LDR', undef, undef, shift(@fields) ] );
+        # drop leader because usage is unclear
+        shift(@fields);
     }
     
     for my $field (@fields) {
 
         my ( $tag, $occurence, $data );
-        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/ ) {
+        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/xms ) {
             $tag       = $1;
             $occurence = $3 // '';
             $data      = $4;
@@ -103,7 +104,7 @@ sub _decode {
         }
         my @subfields = map { substr( $_, 0, 1 ), substr( $_, 1 ) }
             split( SUBFIELD_INDICATOR, substr( $data, 1 ) );
-        push( @record, [ $tag, $occurence, '_', '', @subfields ] );
+        push( @record, [ $tag, $occurence, @subfields ] );
     }
     return \@record;
 }
