@@ -21,8 +21,7 @@ sub _write_record {
             print $fh "/".$field->[1]; # TODO: fix one-digit occ??
         }
         print $fh ' ';
-        # ignore $field->[2,3] ...
-        for (my $i=4; $i<scalar @$field; $i+=2) {
+        for (my $i=2; $i<scalar @$field; $i+=2) {
             my $value = $field->[$i+1];
             $value =~ s/\$/\$\$/g;
             print $fh SUBFIELD_INDICATOR . $field->[$i] . $value;

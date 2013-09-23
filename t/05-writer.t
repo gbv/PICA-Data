@@ -11,12 +11,12 @@ my $writer = PICA::Writer::Plain->new( fh => $fh );
 
 my @pica_records = (
     [
-      ['003@', '', '_', '', '0', '1041318383'],
-      ['021A', '', '_', '', 'a', encode('UTF-8',"Hello \$\N{U+00A5}!")],
+      ['003@', '', '0', '1041318383'],
+      ['021A', '', 'a', encode('UTF-8',"Hello \$\N{U+00A5}!")],
     ],
     {
       record => [
-        ['028C', '01', '_', '', d => 'Emma', a => 'Goldman']
+        ['028C', '01', d => 'Emma', a => 'Goldman']
       ]
     }
 );

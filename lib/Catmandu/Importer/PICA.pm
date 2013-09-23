@@ -71,15 +71,11 @@ Parse PICA XML to native Perl hash containing two keys: '_id' and 'record'.
                   [
                     '001@',
                     '',
-                    '_',
-                    '',
                     '0',
                     '703'
                   ],
                   [
                     '001A',
-                    '',
-                    '_',
                     '',
                     '0',
                     '2045:10-03-11'
@@ -87,8 +83,6 @@ Parse PICA XML to native Perl hash containing two keys: '_id' and 'record'.
                   [
                     '028B',
                     '01',
-                    '_',
-                    '',
                     'd',
                     'Thomas',
                     'a',

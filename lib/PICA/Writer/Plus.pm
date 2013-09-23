@@ -6,7 +6,7 @@ use strict;
 use charnames qw(:full);
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
-use constant END_OF_RECORD      => "\x1D\x1A"; # TODO: check
+use constant END_OF_RECORD      => "\N{LINE FEED}"; # or \N{INFORMATION SEPARATOR THREE}? I would prefer newline separated format
 
 use Moo;
 with 'PICA::Writer::Handle';
@@ -21,7 +21,7 @@ sub _write_record {
             print $fh "/".$field->[1];
         }
         print $fh ' ';
-        for (my $i=4; $i<scalar @$field; $i+=2) {
+        for (my $i=2; $i<scalar @$field; $i+=2) {
             print $fh SUBFIELD_INDICATOR . $field->[$i] . $field->[$i+1];
         }
         print $fh END_OF_FIELD;
