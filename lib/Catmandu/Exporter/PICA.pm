@@ -2,18 +2,15 @@ package Catmandu::Exporter::PICA;
 #ABSTRACT: Package that exports PICA data
 #VERSION
 
-use namespace::clean;
 use Catmandu::Sane;
-use YAML::Any qw(Dump);
-use Moo;
-
 use PICA::Writer::Plus;
 use PICA::Writer::Plain;
 use PICA::Writer::XML;
+use Moo;
 
 with 'Catmandu::Exporter';
 
-has type   => ( is => 'rw', default => sub { 'plus' } );
+has type   => ( is => 'rw', default => sub { 'xml' } );
 has writer => ( is => 'lazy' );
 
 sub _build_writer {
