@@ -1,54 +1,40 @@
 package Catmandu::Importer::PICA;
-
-# ABSTRACT: Package that imports PICA+ data
-# VERSION
+#ABSTRACT: Package that imports PICA+ data
+#VERSION
 
 use Catmandu::Sane;
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
+use PICA::Parser::Plain;
 use Moo;
-
-no if $] >= 5.018, 'warnings', "experimental::smartmatch";
 
 with 'Catmandu::Importer';
 
-has type => ( is => 'ro', default => sub {'XML'} );
+has type   => ( is => 'ro', default => sub { 'xml' } );
+has parser => ( is => 'lazy' );
 
-sub pica_generator {
-    my $self = shift;
+sub _build_parser {
+    my ($self) = @_;
 
-    my $file;
+    my $type = lc $self->type;
 
-    given ( $self->type ) {
-        when ('XML') {
-            $file = PICA::Parser::XML->new( $self->fh );
-        }
-        when ('PICAplus') {
-            $file = PICA::Parser::Plus->new( $self->fh );
-        }
-        die "unknown";
+    if ( $type =~ /^(pica)?plus$/ ) {
+        PICA::Parser::Plus->new(  $self->fh );
+    } elsif ( $type eq 'plain') {
+        PICA::Parser::Plain->new( $self->fh );
+    } elsif ( $type eq 'xml') {
+        PICA::Parser::XML->new( $self->fh );
+    } else {
+        die "unknown type: $type";
     }
-
-    sub {
-        my $record = $file->next();
-        return unless $record;
-        return $record;
-    };
 }
 
 sub generator {
     my ($self) = @_;
-    my $type = $self->type;
 
-    given ($type) {
-        when ('XML') {
-            return $self->pica_generator;
-        }
-        when ('PICAplus') {
-            return $self->pica_generator;
-        }
-        die "need PICA+ data as input";
-    }
+    sub {
+        return $self->parser->next();
+    };
 }
 
 =head1 SYNOPSIS

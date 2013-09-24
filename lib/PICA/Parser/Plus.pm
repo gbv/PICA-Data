@@ -9,6 +9,7 @@ use Carp qw(croak);
 use constant LEADER_LEN         => 24;
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
+use constant END_OF_RECORD      => "\N{LINE FEED}"; # TODO
 
 =head1 SYNOPSIS
 

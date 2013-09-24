@@ -9,7 +9,7 @@ use Catmandu::Fix;
 use Catmandu::Importer::PICA;
 
 my $fixer = Catmandu::Fix->new(fixes => ['pica_map("001B", "date")','pica_map("001U0", "encoding")','pica_map("003\@0", "id")','remove_field("record"),','remove_field("_id"),']);
-my $importer = Catmandu::Importer::PICA->new(file => "./t/picaxml.xml", type=> "XML");
+my $importer = Catmandu::Importer::PICA->new(file => "./t/files/picaxml.xml", type=> "XML");
 my @records;
 $fixer->fix($importer)->each(
     sub {

@@ -1,5 +1,5 @@
 package Catmandu::Exporter::PICA;
-#ABSTRACT:
+#ABSTRACT: Package that exports PICA data
 #VERSION
 
 use namespace::clean;
@@ -13,21 +13,22 @@ use PICA::Writer::XML;
 
 with 'Catmandu::Exporter';
 
-has type   => (is => 'rw', default => sub { 'plus' });
-has writer => (is => 'lazy');
+has type   => ( is => 'rw', default => sub { 'plus' } );
+has writer => ( is => 'lazy' );
 
 sub _build_writer {
     my ($self) = @_;
 
-    my $type = lc($self->type);
-    if ( $type eq 'plus') {
+    my $type = lc $self->type;
+
+    if ( $type =~ /^(pica)?plus$/ ) {
         PICA::Writer::Plus->new( fh => $self->fh );
     } elsif ( $type eq 'plain') {
         PICA::Writer::Plain->new( fh => $self->fh );
     } elsif ( $type eq 'xml') {
         PICA::Writer::XML->new( fh => $self->fh );
     } else {
-        die "unknown type";
+        die "unknown type: $type";
     }
 }
  

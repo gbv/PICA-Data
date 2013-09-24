@@ -7,7 +7,7 @@ use Test::More;
 use Catmandu;
 use Catmandu::Importer::PICA;
 
-my $importer = Catmandu::Importer::PICA->new(file => "./t/picaxml.xml", type=> "XML");
+my $importer = Catmandu::Importer::PICA->new(file => "./t/files/picaxml.xml", type=> "XML");
 my @records;
 $importer->each(
     sub {
@@ -20,7 +20,7 @@ is_deeply( $records[0]->{'record'}->[7], ['003@', '', '0', '658700774'],
     'record field'
 );
 
-$importer = Catmandu::Importer::PICA->new(file => "./t/picaplus.dat", type=> "PICAplus");
+$importer = Catmandu::Importer::PICA->new(file => "./t/files/picaplus.dat", type=> "PICAplus");
 @records = ();
 $importer->each(
     sub {

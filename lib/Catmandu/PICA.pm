@@ -1,12 +1,14 @@
 package Catmandu::PICA;
-# ABSTRACT: Catmandu modules for working with PICA data.
-# VERSION
+#ABSTRACT: Catmandu modules for working with PICA data.
+#VERSION
 
 =head1 CATMANDU MODULES
 
 =over
 
 =item * L<Catmandu::Importer::PICA>
+
+=item * L<Catmandu::Exporter::PICA>
 
 =item * L<Catmandu::Fix::pica_map>
 
@@ -19,6 +21,8 @@ package Catmandu::PICA;
 =item * L<PICA::Parser::XML>
 
 =item * L<PICA::Parser::Plus>
+
+=item * L<PICA::Parser::Plain>
 
 =item * L<PICA::Writer::XML>
 
