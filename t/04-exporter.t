@@ -1,9 +1,8 @@
 use strict;
+use warnings;
 use Test::More;
-use PICA::Writer::Plain;
-use PICA::Writer::Plus;
-use PICA::Writer::XML;
 
+use Catmandu::Exporter::PICA;
 use File::Temp qw(tempfile);
 use IO::File;
 use Encode qw(encode);
@@ -20,16 +19,22 @@ my @pica_records = (
     }
 );
 
-my ($fh, $filename) = tempfile();
-my $writer = PICA::Writer::Plain->new( fh => $fh );
+my ( $fh, $filename ) = tempfile();
+my $exporter = Catmandu::Exporter::PICA->new(
+    fh => $fh,
+    type => 'plain',
+);
 
-foreach my $record (@pica_records) {
-    $writer->write($record);
+for my $record (@pica_records) {
+    $exporter->add($record);
 }
+
+$exporter->commit();
 
 close($fh);
 
 my $out = do { local (@ARGV,$/)=$filename; <> };
+
 is $out, <<'PLAIN';
 003@ $01041318383
 021A $aHello $$¥!
@@ -38,27 +43,38 @@ is $out, <<'PLAIN';
 
 PLAIN
 
-($fh, $filename) = tempfile();
-$writer = PICA::Writer::Plus->new( fh => $fh );
+( $fh, $filename ) = tempfile();
+$exporter = Catmandu::Exporter::PICA->new(
+    fh => $fh,
+    type => 'plus',
+);
 
-foreach my $record (@pica_records) {
-    $writer->write($record);
+for my $record (@pica_records) {
+    $exporter->add($record);
 }
+
+$exporter->commit();
 
 close($fh);
 
 $out = do { local (@ARGV,$/)=$filename; <> };
+
 is $out, <<'PLUS';
 003@ 01041318383021A aHello $¥!
 028C/01 dEmmaaGoldman
 PLUS
 
-($fh, $filename) = tempfile();
-$writer = PICA::Writer::XML->new( fh => $fh );
+( $fh, $filename ) = tempfile();
+$exporter = Catmandu::Exporter::PICA->new(
+    fh => $fh,
+    type => 'xml',
+);
 
-foreach my $record (@pica_records) {
-    $writer->write($record);
+for my $record (@pica_records) {
+    $exporter->add($record);
 }
+
+$exporter->commit();
 
 close($fh);
 
