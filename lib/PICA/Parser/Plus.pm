@@ -6,7 +6,6 @@ use strict;
 use charnames qw< :full >;
 use Carp qw(croak);
 
-use constant LEADER_LEN         => 24;
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
 use constant END_OF_RECORD      => "\N{LINE FEED}"; # TODO
@@ -87,7 +86,7 @@ sub _decode {
     my @fields = split( END_OF_FIELD, $reader );
     my @record;
 
-    if (length($fields[0]) == LEADER_LEN-1 && $fields[0] !~ m/.*SUBFIELD_INDICATOR/){
+    if ($fields[0] !~ m/.*SUBFIELD_INDICATOR/){
         # drop leader because usage is unclear
         shift(@fields);
     }
