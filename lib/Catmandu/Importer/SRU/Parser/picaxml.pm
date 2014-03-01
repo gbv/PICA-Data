@@ -20,8 +20,8 @@ sub parse {
 =head1 SYNOPSIS
 
 my %attrs = (
-    base => 'http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.tit%3Dentwicklung&maximumRecords=10&recordSchema=picaxml',
-    query => '(isbn=0855275103 or isbn=3110035170 or isbn=9010017362 or isbn=9014026188)',
+    base => 'http://sru.gbv.de/gvk',
+    query => '1940-5758',
     recordSchema => 'picaxml' ,
     parser => 'picaxml' ,
 );
