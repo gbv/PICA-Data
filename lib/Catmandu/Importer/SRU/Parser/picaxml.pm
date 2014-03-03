@@ -1,5 +1,8 @@
 package Catmandu::Importer::SRU::Parser::picaxml;
 
+# ABSTRACT: Package transforms SRU responses into Catmandu PICA
+# VERSION
+
 use Moo;
 use PICA::Parser::XML;
 
@@ -12,10 +15,6 @@ sub parse {
 
     return $record_hash;
 }
-
-=head1 NAME
-
-  Catmandu::Importer::SRU::Parser::picaxml - Package transforms SRU responses into Catmandu PICA 
 
 =head1 SYNOPSIS
 
