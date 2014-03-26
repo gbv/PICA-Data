@@ -59,7 +59,7 @@ sub new {
         $self->{filename}   = scalar $input;
         $self->{xml_reader} = $reader;
     }
-    elsif ( -e $input ) {
+    elsif ( $input =~ /^[^\n]+$/ && -e $input ) {
         my $reader = XML::LibXML::Reader->new(location => $input)
              or croak "cannot read from file $input\n";
         $self->{filename}   = $input;
