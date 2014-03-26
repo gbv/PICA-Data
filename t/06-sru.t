@@ -2,8 +2,19 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
-use Catmandu::Importer::SRU;
+
+BEGIN {
+    eval {
+        require Catmandu::SRU;
+        require Catmandu::Importer::SRU;
+        $Catmandu::SRU::VERSION >= 0.032;
+    } or do {
+        plan skip_all => "Catmandu::SRU >= 0.032 required";
+    };
+}
+
 use Catmandu::Importer::SRU::Parser::picaxml;
+
 require 't/lib/MockFurl.pm';
 
 my %attrs = (
