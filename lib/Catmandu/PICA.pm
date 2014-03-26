@@ -8,6 +8,8 @@ package Catmandu::PICA;
 
 =item * L<Catmandu::Importer::PICA>
 
+=item * L<Catmandu::Importer::SRU::Parser::picaxml>
+
 =item * L<Catmandu::Exporter::PICA>
 
 =item * L<Catmandu::Fix::pica_map>
@@ -51,7 +53,9 @@ You can also look for information at:
 
 =encoding utf8
 
-Jakob Voß <voss@gbv.de>
+Johann Rolschewski, C<< <rolschewski at gmail.com> >>
+
+Jakob Voß C<< <voss at gbv.de> >>
 
 =cut
 
