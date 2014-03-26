@@ -1,12 +1,12 @@
 use strict;
 use Test::More;
 
-diag "Testing Catmandu::PICA $Catmandu::PICA::VERSION, Perl $], $^X";
-
 foreach ( <DATA> ) {
     chomp;
     use_ok $_;
 }
+
+diag "Testing Catmandu::PICA $Catmandu::PICA::VERSION, Perl $], $^X";
 
 done_testing;
 
