@@ -48,6 +48,10 @@ sub generator {
         # ...
     });
 
+To convert between PICA+ syntax variants with the L<catmandu> command line client:
+
+    catmandu convert PICA --type xml to PICA --type plain < picadata.xml
+
 =head1 PICA
 
 Parse PICA XML to native Perl hash containing two keys: '_id' and 'record'. 
@@ -80,24 +84,25 @@ Parse PICA XML to native Perl hash containing two keys: '_id' and 'record'.
 
 =head1 METHODS
 
-=head2 new(file => $filename,type=>$type)
+This module inherits all methods of L<Catmandu::Importer> and by this
+L<Catmandu::Iterable>.
 
-Create a new PICA importer for $filename. Use STDIN when no filename is given. Type 
-describes the sytax of the PICA records. Currently we support following types: PICAplus, XML.
+=head1 CONFIGURATION
 
-=head2 count
+In addition to the configuration provided by L<Catmandu::Importer> (C<file>,
+C<fh>, etc.) the importer can be configured with the following parameters:
 
-=head2 each(&callback)
+=over
 
-=head2 ...
+=item type
 
-Every Catmandu::Importer is a Catmandu::Iterable all its methods are inherited. The
-Catmandu::Importer::PICA methods are not idempotent: PICA feeds can only be read once.
+Describes the PICA+ syntax variant. Supported values (case ignored) include the
+default value C<xml> for PicaXML, C<plain> for human-readable PICA+
+serialization (where C<$> is used as subfield indicator) and C<plus> or
+C<picaplus> for normalized PICA+.
 
-=head1 SEE ALSO
-
-L<Catmandu::Iterable>
+=back
 
 =cut
 
-1;    # End of Catmandu::Importer::PICA
+1;

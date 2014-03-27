@@ -1,6 +1,12 @@
 package Catmandu::PICA;
-#ABSTRACT: Catmandu modules for working with PICA data.
+#ABSTRACT: Catmandu modules for working with PICA+ data.
 #VERSION
+
+=head1 DESCRIPTION
+
+Catmandu::PICA provides methods to work with PICA+ data within the L<Catmandu>
+framework.  See L<Catmandu::Introduction> and L<http://librecat.org/> for an
+introduction into Catmandu.
 
 =head1 CATMANDU MODULES
 
@@ -8,15 +14,17 @@ package Catmandu::PICA;
 
 =item * L<Catmandu::Importer::PICA>
 
-=item * L<Catmandu::Importer::SRU::Parser::picaxml>
-
 =item * L<Catmandu::Exporter::PICA>
+
+=item * L<Catmandu::Importer::SRU::Parser::picaxml>
 
 =item * L<Catmandu::Fix::pica_map>
 
 =back
 
 =head1 INTERNAL MODULES
+
+The following modules may be renamed or removed in a future release.
 
 =over
 
@@ -34,28 +42,13 @@ package Catmandu::PICA;
 
 =back
 
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Catmandu::PICA
-
-You can also look for information at:
-
-    Catmandu
-        https://metacpan.org/module/Catmandu::Introduction
-        https://metacpan.org/search?q=Catmandu
-
-    LibreCat
-        http://librecat.org/tutorial/index.html
-
 =head1 CONTRIBUTORS
 
 =encoding utf8
 
-Johann Rolschewski, C<< <rolschewski at gmail.com> >>
+Johann Rolschewski, <rolschewski@gmail.com>
 
-Jakob Voß C<< <voss at gbv.de> >>
+Jakob Voß <voss@gbv.de>
 
 =cut
 

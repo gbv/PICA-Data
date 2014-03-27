@@ -40,4 +40,12 @@ sub commit { # TODO: why is this not called automatically?
     $self->writer->end if $self->can('end');
 }
 
+=head1 CONFIGURATION
+
+In addition to the configuration provided by L<Catmandu::Exporter> the exporter
+can be configured with a C<type> parameter as described at
+L<Catmandu::Importer>.
+
+=cut
+
 1;

@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Catmandu modules for working with PICA data.",
+  "ABSTRACT" => "Catmandu modules for working with PICA+ data.",
   "AUTHOR" => "Johann Rolschewski <rolschewski\@gmail.com>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
@@ -25,7 +25,7 @@ my %WriteMakefileArgs = (
     "XML::LibXML::Reader" => "2.0"
   },
   "TEST_REQUIRES" => {},
-  "VERSION" => "0.06",
+  "VERSION" => "0.07",
   "test" => {
     "TESTS" => "t/*.t"
   }
