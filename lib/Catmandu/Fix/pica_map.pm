@@ -118,9 +118,10 @@ sub parse_pica_path {
     if ( $path =~ /(\d{3}\S)(\[(\d{2})\])?([_A-Za-z0-9]+)?(\/(\d+)(-(\d+))?)?/ ) {
         my $field    = $1;
         my $occurrence = $3;
-        my $subfield = $4 ? "[$4]" : "[_A-Za-z0-9]";
+        my $subfield = defined $4 ? "[$4]" : "[_A-Za-z0-9]";
         my $from     = $6;
         my $to       = $8;
+
         return {
             field    => $field,
             occurrence => $occurrence,
