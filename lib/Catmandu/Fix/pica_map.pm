@@ -24,13 +24,13 @@ sub emit {
     my $pica_path  = $self->pica_path;
 
     my $field_regex;
-    my ( $field, $occurence, $subfield_regex, $from, $to );
+    my ( $field, $occurrence, $subfield_regex, $from, $to );
 
     if ( $pica_path
         =~ /(\d{3}\S)(\[(\d{2})\])?([_A-Za-z0-9]+)?(\/(\d+)(-(\d+))?)?/ )
     {
         $field          = $1;
-        $occurence      = $3;
+        $occurrence     = $3;
         $subfield_regex = defined $4 ? "[$4]" : "[_A-Za-z0-9]";
         $from           = $6;
         $to             = $8;
@@ -54,6 +54,10 @@ sub emit {
             my $perl = "";
 
             $perl .= "next if ${var}->[0] !~ /${field_regex}/;";
+
+            if (defined $occurrence) {
+                $perl .= "next if (!defined ${var}->[1] || ${var}->[1] ne '${occurrence}');";
+            }
 
             if ( $self->value ) {
                 $perl .= $fixer->emit_declare_vars( $v,
