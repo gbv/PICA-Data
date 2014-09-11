@@ -8,6 +8,7 @@ use Carp qw(confess);
 use Moo;
 
 use Catmandu::Fix::Has;
+use Catmandu::PICA;
 
 has pica_path => ( fix_arg => 1 );
 has path      => ( fix_arg => 1 );
@@ -23,24 +24,8 @@ sub emit {
     my $join_char  = $fixer->emit_string( $self->join // '' );
     my $pica_path  = $self->pica_path;
 
-    my $field_regex;
-    my ( $field, $occurrence, $subfield_regex, $from, $to );
-
-    if ( $pica_path
-        =~ /(\d{3}\S)(\[(\d{2})\])?([_A-Za-z0-9]+)?(\/(\d+)(-(\d+))?)?/ )
-    {
-        $field          = $1;
-        $occurrence     = $3;
-        $subfield_regex = defined $4 ? "[$4]" : "[_A-Za-z0-9]";
-        $from           = $6;
-        $to             = $8;
-    }
-    else {
-        confess "invalid pica path";
-    }
-
-    $field_regex = $field;
-    $field_regex =~ s/\*/./g;
+    my $parsed_path = Catmandu::PICA::parse_pica_path($pica_path) or confess "invalid pica path";
+    my ( $field_regex, $occurrence_regex, $subfield_regex, $from, $to ) = @$parsed_path;
 
     my $var  = $fixer->var;
     my $vals = $fixer->generate_var;
@@ -55,8 +40,8 @@ sub emit {
 
             $perl .= "next if ${var}->[0] !~ /${field_regex}/;";
 
-            if (defined $occurrence) {
-                $perl .= "next if (!defined ${var}->[1] || ${var}->[1] ne '${occurrence}');";
+            if (defined $occurrence_regex) {
+                $perl .= "next if (!defined ${var}->[1] || ${var}->[1] !~ /${occurrence_regex}/);";
             }
 
             if ( $self->value ) {
@@ -130,5 +115,7 @@ sub emit {
 
     # Copy from field 028A with ocurrance subfields a and d to dc.contributor hash joining them by ' '
     pica_map('028B[01]ad','dcterms.ccontributor', -join => ' ');
+
+=back
 
 =cut
