@@ -56,6 +56,7 @@ sub _decode {
 
         my @subfields = split /\$([^\$])/, $data; #substr( $data, 1 ) );
         shift @subfields;
+        push @subfields, '' if @subfields % 2;
 
         push( @record, [ $tag, $occurence, @subfields ] );
     }

@@ -33,4 +33,4 @@ is_deeply( $records[0]->{'record'}->[5], ['003@', '', '0', '1041318383'],,
     'record field'
 );
 
-done_testing();
+done_testing;

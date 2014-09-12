@@ -19,6 +19,8 @@
   </datafield>
   <datafield tag="001X">
     <subfield code="0">0</subfield>
+    <subfield code="x"></subfield>
+    <subfield code="y"></subfield>
   </datafield>
   <datafield tag="002@">
     <subfield code="0">Oax</subfield>
