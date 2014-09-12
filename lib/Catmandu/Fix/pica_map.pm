@@ -8,7 +8,7 @@ use Carp qw(confess);
 use Moo;
 
 use Catmandu::Fix::Has;
-use Catmandu::PICA;
+use PICA::Data qw(parse_pica_path);
 
 has pica_path => ( fix_arg => 1 );
 has path      => ( fix_arg => 1 );
@@ -24,7 +24,7 @@ sub emit {
     my $join_char  = $fixer->emit_string( $self->join // '' );
     my $pica_path  = $self->pica_path;
 
-    my $parsed_path = Catmandu::PICA::parse_pica_path($pica_path) or confess "invalid pica path";
+    my $parsed_path = parse_pica_path($pica_path) or confess "invalid pica path";
     my ( $field_regex, $occurrence_regex, $subfield_regex, $from, $to ) = @$parsed_path;
 
     my $var  = $fixer->var;
@@ -117,5 +117,9 @@ sub emit {
     pica_map('028B[01]ad','dcterms.ccontributor', -join => ' ');
 
 =back
+
+=head1 SEE ALSO
+
+L<PICA::Data>
 
 =cut

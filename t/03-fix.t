@@ -16,14 +16,4 @@ ok( $records->[0]->{'date'} eq '2045:09-04-1318:26:39.000', 'fix date' );
 ok( $records->[0]->{'url'} eq 'http://ebooks.ciando.com/book/index.cfm/bok_id/43423', 'fix url' );
 is_deeply( $records->[1], {'id' => '65869538X', 'date' => '1999:22-11-1206:31:01.000', 'encoding' => 'utf8', 'url' => 'http://ebooks.ciando.com/book/index.cfm/bok_id/42632'}, 'fix record');
 
-use Catmandu::PICA;
-my %path = (
-    '003*abc'  => [ '003.', undef, '[abc]' ],
-    '123A[0*]/1-3' => [ '123A', '0.', '[_A-Za-z0-9]', 1, 3 ],
-);
-foreach (keys %path) {
-    my $parsed = Catmandu::PICA::parse_pica_path($_);
-    is_deeply $parsed, $path{$_}, 'parse_pica_path';
-}
-
 done_testing;
