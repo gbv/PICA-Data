@@ -14,4 +14,23 @@ foreach (keys %path) {
     is_deeply $parsed, $path{$_}, 'parse_pica_path';
 }
 
+use PICA::Parser::Plain;
+my $record = PICA::Parser::Plain->new( './t/files/plain.pica' )->next;
+
+foreach ('019@', parse_pica_path('019@')) {
+    is_deeply [ pica_values($record, $_) ], ['XB-CN'], 'pica_values';
+}
+
+bless $record, 'PICA::Data';
+my %map = (
+    '019@/0-1'  => ['XB'],
+    '019@/1'  => ['B'],
+    '019@/5'  => [],
+#    '019@/3-' => ['CN'], # FIXME: not the whole string?!
+#    '019@/-1' => ['XB'], # FIXME: not the whole string?
+);
+foreach (keys %map) {
+    is_deeply [$record->values($_)], $map{$_}, '->values';
+}
+
 done_testing;
