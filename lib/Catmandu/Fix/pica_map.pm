@@ -25,7 +25,7 @@ sub emit {
     my $pica_path  = $self->pica_path;
 
     my $parsed_path = parse_pica_path($pica_path) or confess "invalid pica path";
-    my ( $field_regex, $occurrence_regex, $subfield_regex, $from, $to ) = @$parsed_path;
+    my ( $field_regex, $occurrence_regex, $subfield_regex, $from, $length ) = @$parsed_path;
 
     my $var  = $fixer->var;
     my $vals = $fixer->generate_var;
@@ -62,8 +62,7 @@ sub emit {
                 if ( !$self->split ) {
                     $perl .= "${v} = join(${join_char}, \@{${v}});";
                     if ( defined( my $off = $from ) ) {
-                        my $len = defined $to ? $to - $off + 1 : 1;
-                        $perl .= "if (eval { ${v} = substr(${v}, ${off}, ${len}); 1 }) {";
+                        $perl .= "if (eval { ${v} = substr(${v}, ${off}, ${length}); 1 }) {";
                     }
                 }
                 $perl .= $fixer->emit_create_path(

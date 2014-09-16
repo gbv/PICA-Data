@@ -8,21 +8,49 @@ our @EXPORT_OK = qw(parse_pica_path pica_values pica_values pica_fields);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]); 
 
 use Scalar::Util qw(reftype);
+use IO::Handle;
 
 sub parse_pica_path {
     return if $_[0] !~ /([0-9*.]{3}\S)(\[([0-9*.]{2})\])?(\$?([_A-Za-z0-9]+))?(\/(\d+)(-(\d+))?)?/;
+
     my @path = (
         $1, # field
         $3, # occurrence
         defined $5 ? "[$5]" : "[_A-Za-z0-9]", # subfield_regex
     );
 
-    push(@path, $7, $9) if defined $6; # from, to
+    if (defined $6) { # from, to
+        my ($from, $to) = ($7, $9);
+        my $length = defined $to ? $to - $from + 1 : 1;
+        if ($length >= 1) {
+            push @path, $from, $length;
+        }
+    }
 
     $path[0] =~ s/\*/./g;                     # field => field_regex
     $path[1] =~ s/\*/./g if defined $path[1]; # occurrence => occurrence_regex
 
+    # TODO: compile regular expressions
+
     return \@path;
+}
+
+sub _pica_subfields { # $field => @values
+    my ($field, $subfield_regex, $from, $length) = @_;
+    my @values;
+
+    for (my $i = 2; $i < @$field; $i += 2) {
+        if ($field->[$i] =~ $subfield_regex) {
+            my $value = $field->[$i + 1];
+            if (defined $from) {
+                $value = substr($value, $from, $length);
+                next if '' eq ($value // '');
+            }
+            push @values, $value;
+        }
+    }
+
+    return @values;
 }
 
 sub pica_values {
@@ -36,8 +64,7 @@ sub pica_values {
     my $occurrence_regex = defined $path->[1] ? qr{$path->[1]} : undef;
     my $subfield_regex   = qr{$path->[2]};
     my $from             = $path->[3];
-    my $len              = defined $path->[4] ? $path->[4] - $from + 1 : 1;
-    $from = undef if $len < 1;
+    my $length           = $path->[4];
 
     my @values;
 
@@ -50,16 +77,7 @@ sub pica_values {
             }
         }
 
-        for (my $i = 2; $i < @$field; $i += 2) {
-            if ($field->[$i] =~ $subfield_regex) {
-                my $value = $field->[$i + 1];
-                if (defined $from) {
-                    $value = substr($value, $from, $len);
-                    next if '' eq ($value // '');
-                }
-                push @values, $value;
-            }
-        }
+        push @values, _pica_subfields($field, $subfield_regex, $from, $length);
     }
 
     return @values;
@@ -156,7 +174,6 @@ substring start position
 substring end position
 
 =back
-
 
 =head1 SEEALSO
 
