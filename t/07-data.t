@@ -28,9 +28,20 @@ my %map = (
     '019@/5'  => [],
 #    '019@/3-' => ['CN'], # FIXME: not the whole string?!
 #    '019@/-1' => ['XB'], # FIXME: not the whole string?
+    '1...b' => ['9330','test$$'],
+    '?+#' => [],
 );
 foreach (keys %map) {
-    is_deeply [$record->values($_)], $map{$_}, '->values';
+    is_deeply [$record->values($_)], $map{$_}, "->values($_)";
 }
+
+is_deeply [$record->value('1...b')], ['9330'], '->value';
+
+is_deeply $record->fields('010@'), 
+    [ [ '010@', '', 'a' => 'chi'] ], '->field';
+
+is scalar @{pica_fields($record,'1***')}, 5, 'pica_fields';
+
+is_deeply $record->fields('?!*~'), [ ], 'invalid PICA path';
 
 done_testing;

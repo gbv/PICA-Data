@@ -116,10 +116,8 @@ sub emit {
     # Copy from field 028A with ocurrance subfields a and d to dc.contributor hash joining them by ' '
     pica_map('028B[01]ad','dcterms.ccontributor', -join => ' ');
 
-=back
-
 =head1 SEE ALSO
 
-L<PICA::Data>
+L<PICA::Data> contains more methods for processing parsed PICA+ records
 
 =cut
