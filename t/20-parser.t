@@ -3,10 +3,12 @@ use warnings;
 use Test::More;
 use utf8;
 
+use PICA::Data qw(pica_parser);
 use PICA::Parser::XML;
-my $parser = PICA::Parser::XML->new( './t/files/picaxml.xml' );
+my $parser = pica_parser( XML => './t/files/picaxml.xml' );
 isa_ok $parser, 'PICA::Parser::XML';
-my $record = $parser->next();
+
+my $record = $parser->next;
 ok $record->{_id} eq '658700774', 'record _id';
 ok $record->{record}->[0][0] eq '001@', 'tag from first field';
 is_deeply $record->{record}->[1], ['001A', '', 0 => '2045:10-03-11'], 'second field';
@@ -20,6 +22,8 @@ ok $record->{_id} eq '658700774', 'record _id';
 ok $record->{record}->[0][0] eq '001@', 'tag from first field';
 is_deeply $record->{record}->[1], ['001A', '', '0', '2045:10-03-11'], 'second field';
 
+ok !$parser->next, 'last record';
+
 use PICA::Parser::Plus;
 $parser = PICA::Parser::Plus->new( './t/files/picaplus.dat' );
 isa_ok $parser, 'PICA::Parser::Plus';
@@ -30,6 +34,9 @@ is_deeply $record->{record}->[0], ['001A', '', '0', '1240:04-09-13'], 'first fie
 ok $parser->next()->{_id} eq '1041318464', 'next record';
 is_deeply $record->{record}->[3],
     [ '001U', '', 0 => 'utf8', x => '', 'y' => '' ], 'empty subfields';
+my $count = 0;
+while( $parser->next ) { $count++ }
+is $count, 8, 'remaining records';
 
 use PICA::Parser::Plain;
 $parser = PICA::Parser::Plain->new( './t/files/plain.pica' );
@@ -38,8 +45,8 @@ $record = $parser->next;
 is $record->{record}->[4]->[7], '柳经纬主编;', 'unicode from plain pica';
 is_deeply $record->{record}->[9],
     [ '145Z', '40', 'a', '$$', 'b', 'test$$', 'c', '...' ], 'sub field with $';
-
 is_deeply $record->{record}->[13],
     [ '203@', '01', 0 => '917400194', x => '', y => '' ], 'empty subfields';
+ok !$parser->next, 'last record';
 
 done_testing;

@@ -1,8 +1,6 @@
 package PICA::Parser::Plain;
-#ABSTRACT: Plain PICA+ format parser
-#VERSION
-
 use strict;
+
 use charnames qw(:full);
 use constant SUBFIELD_INDICATOR => '$';
 use constant END_OF_FIELD       => "\N{LINE FEED}";
@@ -63,11 +61,16 @@ sub _decode {
     return \@record;
 }
 
+1;
+__END__
+
+=head1 NAME
+
+PICA::Parser::Plain - Plain PICA+ format parser
+
 =head1 SEEALSO
 
 L<PICA::PlainParser>, included in the release of L<PICA::Record> implements
 another PICA+ format parser, not aligned with the L<Catmandu> framework.
 
 =cut
-
-1;

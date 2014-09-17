@@ -1,5 +1,7 @@
 use strict;
 use Test::More;
+
+use PICA::Data qw(pica_writer);
 use PICA::Writer::Plain;
 use PICA::Writer::Plus;
 use PICA::Writer::XML;
@@ -21,7 +23,7 @@ my @pica_records = (
 );
 
 my ($fh, $filename) = tempfile();
-my $writer = PICA::Writer::Plain->new( fh => $fh );
+my $writer = pica_writer( 'plain', fh => $fh );
 
 foreach my $record (@pica_records) {
     $writer->write($record);
@@ -60,6 +62,7 @@ foreach my $record (@pica_records) {
     $writer->write($record);
 }
 
+$writer->end;
 close($fh);
 
 $out = do { local (@ARGV,$/)=$filename; <> };
@@ -81,6 +84,7 @@ is $out, <<'XML';
     <subfield code="a">Goldman</subfield>
   </datafield>
 </record>
+</collection>
 XML
 
 done_testing;

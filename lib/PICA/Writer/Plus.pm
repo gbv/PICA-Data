@@ -1,6 +1,4 @@
 package PICA::Writer::Plus;
-# ABSTRACT: Normalized PICA+ format serializer
-# VERSION
 
 use strict;
 use charnames qw(:full);
@@ -29,7 +27,14 @@ sub _write_record {
     print $fh END_OF_RECORD;
 }
 
-=head1 DESCRIPTION
+1;
+__END__
+
+=head1 NAME
+
+PICA::Writer::Plus - Normalized PICA+ format serializer
+
+=head1 SYNOPSIS
 
     use PICA::Writer::Plus;
 
@@ -40,17 +45,20 @@ sub _write_record {
         $writer->write($record);
     }
 
-=method write ( @records )
+=head2 MODULES
+
+=head2 write ( @records )
 
 Writes one or more records, given as hash with key 'C<record>' or as array
-reference with a list of fields, as described in L<Catmandu::PICA>.
+reference with a list of fields, as described in L<PICA::Data>.
 
 =head1 SEEALSO
 
-The counterpart of this module is L<PICA::Parser::Plus>. An alternative writer,
-not aligned with the L<Catmandu> framework, has been implemented as
-L<PICA::Writer> included in the release of L<PICA::Record>.
+The counterpart of this module is L<PICA::Parser::Plus>.
+
+See L<Catmandu::Exporter::PICA> for usage of this module in L<Catmandu>.
+
+An alternative writer had been implemented as L<PICA::Writer> included in the
+release of L<PICA::Record>.
 
 =cut
-
-1;

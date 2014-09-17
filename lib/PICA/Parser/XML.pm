@@ -1,45 +1,8 @@
 package PICA::Parser::XML;
-# ABSTRACT: PICA+ XML parser
-# VERSION
+use strict;
 
 use Carp qw(croak);
 use XML::LibXML::Reader;
-
-=head1 SYNOPSIS
-
-L<PICA::Parser::XML> is a parser for PICA+ XML records. 
-
-    use PICA::Parser::XML;
-
-    my $parser = PICA::Parser::XML->new( $filename );
-
-    while ( my $record_hash = $parser->next() ) {
-        # do something        
-    }
-
-=head1 Arguments
-
-=over
-
-=item C<file>
- 
-Path to file with PICA XML records.
-
-=item C<fh>
-
-Open filehandle for file with PICA XML records.
-
-=item C<string>
-
-XML string with PICA XML records.
-
-=back
-
-=head1 METHODS
-
-=head2 new($filename | $filehandle | $string)
-
-=cut
 
 sub new {
     my $class = shift;
@@ -77,12 +40,6 @@ sub new {
     return ( bless $self, $class );
 }
 
-=head2 next()
-
-Reads the next record from PICA+ XML input stream. Returns a Perl hash.
-
-=cut
-
 sub next {
     my $self = shift;
     if ( $self->{xml_reader}->nextElement( 'record' ) ) {
@@ -93,12 +50,6 @@ sub next {
     } 
     return;
 }
-
-=head2 _decode()
-
-Deserialize a PICA+ XML record to an array of field arrays.
-
-=cut
 
 sub _decode {
     my $reader = shift;
@@ -124,11 +75,54 @@ sub _decode {
     return \@record;
 }
 
+1;
+__END__
+
+=head1 NAME
+
+PICA::Parser::XML - PICA+ XML parser
+
+=head1 SYNOPSIS
+
+    use PICA::Parser::XML;
+
+    my $parser = PICA::Parser::XML->new( $filename );
+
+    while ( my $record_hash = $parser->next() ) {
+        # do something        
+    }
+
+=head1 METHODS
+
+=head2 new($filename | $filehandle | $string)
+
+=over
+
+=item C<file>
+ 
+Path to file with PICA XML records.
+
+=item C<fh>
+
+Open filehandle for file with PICA XML records.
+
+=item C<string>
+
+XML string with PICA XML records.
+
+=back
+
+=head2 next()
+
+Reads the next record from PICA+ XML input stream. Returns a Perl hash.
+
+=head2 _decode()
+
+Deserialize a PICA+ XML record to an array of field arrays.
+
 =head1 SEEALSO
 
 L<PICA::XMLParser>, included in the release of L<PICA::Record> implements
 another PICA+ XML format parser, not aligned with the L<Catmandu> framework.
 
 =cut
-
-1; # End of PICA::Parser::XML

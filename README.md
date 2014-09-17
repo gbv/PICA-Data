@@ -1,38 +1,134 @@
-Catmandu::PICA - Catmandu modules for working with PICA+ data.
+# NAME
 
-# Installation
+PICA::Data - PICA record processing
 
-Install the latest distribution from CPAN:
+[![Build Status](https://travis-ci.org/gbv/PICA-Data.png)](https://travis-ci.org/gbv/PICA-Data)
+[![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.png)](https://coveralls.io/r/gbv/PICA-Data)
+[![Kwalitee Score](http://cpants.cpanauthors.org/dist/PICA-Data.png)](http://cpants.cpanauthors.org/dist/PICA-Data)
 
-    cpanm Catmandu::PICA
+# SYNOPSIS
 
-Install the latest developer version from GitHub:
+  use PICA::Data ':all';
+  $parser = pica_parser( xml => @options );
+  $writer = pica_writer( plain => @options );
 
-    cpanm git@github.com:gbv/Catmandu-PICA.git@devel
+  use PICA::Parser::XML;
+  use PICA::Writer::Plain;
+  $parser = PICA::Parser::XML->new( @options );
+  $writer = PICA::Writer::Plain->new( @options );
 
-# Contribution
+  while ( my $record = $parser->next ) {
+      my $ppn = pica_value($record, '003@0');
+      ...
+  }
+  
 
-For bug reports and feature requests use <https://github.com/gbv/Catmandu-PICA/issues>.
+# DESCRIPTION
 
-For contributions to the source code create a fork or use the `devel` branch. The master
-branch should only contain merged and stashed changes to appear in Changelog.
+PICA::Data provides methods, classes, and functions to process PICA+ records
+in Perl.
 
-Dist::Zilla and build requirements can be installed this way:
+PICA+ is the internal data format of the Local Library System (LBS) and the
+Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
+are the MAchine Readable Cataloging format (MARC) and the Maschinelles
+Austauschformat fuer Bibliotheken (MAB). In addition to PICA+ in CBS there is
+the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
+versa.
 
-    cpan Dist::Zilla
-    dzil authordeps | cpanm
+Records in PICA::Data are encoded either as as array of arrays, the inner
+arrays representing PICA fields, or as an object with two fields, C<_id> and
+C<record>, the latter holding the record as array of arrays, and the former
+holding the record identifier, stored in field C<003@>, subfield C<0>. For
+instance a minimal record with just one field C<003@>:
 
-Build and test your current state this way:
+  {
+    _id    => '12345X',
+    record => [
+      [ '003@', undef, '0' => '12345X' ]
+    ]
+  }
 
-    dzil build
-    dzil test 
-    dzil smoke --release --author # test more
 
-# Status
+or in short form:
 
-Build and test coverage of the `master` and `devel` branches at <https://github.com/gbv/Catmandu-PICA/>:
+  [ [ '003@', undef, '0' => '12345X' ] ]
 
-[![Build Status](https://travis-ci.org/gbv/Catmandu-PICA.png)](https://travis-ci.org/gbv/Catmandu-PICA)
-[![Coverage Status](https://coveralls.io/repos/gbv/Catmandu-PICA/badge.png?branch=master)](https://coveralls.io/r/gbv/Catmandu-PICA?branch=master)
-[![Coverage Status](https://coveralls.io/repos/gbv/Catmandu-PICA/badge.png?branch=devel)](https://coveralls.io/r/gbv/Catmandu-PICA?branch=devel)
-[![Kwalitee Score](http://cpants.cpanauthors.org/dist/Catmandu-PICA.png)](http://cpants.cpanauthors.org/dist/Catmandu-PICA)
+
+PICA path expressions can be used to facilitate processing PICA+ records.
+
+# FUNCTIONS
+
+## pica\_parser( $type \[, @options\] )
+
+Create a PICA parsers object. Case of the type is ignored and additional
+parameters are passed to the parser's constructor.
+
+- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML)
+
+    Type `xml` or `picaxml` for PICA+ in XML
+
+- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus)
+
+    Type `plus` or `picaplus` for normalizes PICA+
+
+- [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain)
+
+    Type `plain` for plain, human-readable PICA+
+
+## pica\_writer( $type \[, @options\] )
+
+Create a PICA writer object in the same way as `pica_parser` with one of
+
+- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML)
+- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus)
+- [PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain)
+
+## pica\_values( $record, $path )
+
+Extract a list of subfield values from a PICA record based on a PICA path
+expression.
+
+This function can also be called as `values` on a blessed PICA::Data record:
+
+    bless $record, 'PICA::Data';
+    $record->values($path);
+
+## pica\_value( $record, $path )
+
+Same as `pica_values` but only returns the first value. Can also be called as
+`value` on a blessed PICA::Data record.
+
+## pica\_fields( $record, $path )
+
+Returns a PICA record limited to fields specified in a PICA path expression.
+Always returns an array reference. Can also be called as `fields` on a blessed
+PICA::Data record. 
+
+## pica\_path( $path )
+
+Equivalent to `PICA::Path->new($path)`.
+
+# CONTRIBUTORS
+
+Johann Rolschewski, `<rolschewski@gmail.com>`
+
+Jakob Voss `<voss@gbv.de>`
+
+# COPYRIGHT
+
+Copyright 2014- Johann Rolschewski and Jakob Voss
+
+# LICENSE
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+# SEE ALSO
+
+Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
+for instance to convert PICA XML to plain PICA+:
+
+    catmandu convert PICA --type xml to PICA --type plain < picadata.xml
+
+[PICA::Record](https://metacpan.org/pod/PICA::Record) implements an alternative framework for processing PICA+
+records but development of the module is stalled.

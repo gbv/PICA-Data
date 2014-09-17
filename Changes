@@ -1,0 +1,5 @@
+Revision history for PICA::Data
+
+{{$NEXT}}
+    - split from Catmandu::PICA after heavy refactoring
+

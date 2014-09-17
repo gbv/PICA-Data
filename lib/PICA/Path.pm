@@ -1,12 +1,6 @@
 package PICA::Path;
 
-=head1 NAME
-
-PICA::Path - PICA path expression to match field and subfield values
-
-=cut
-
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use strict;
 use Carp qw(confess);
@@ -117,6 +111,13 @@ sub stringify {
     $str;
 }
 
+1;
+__END__
+
+=head1 NAME
+
+PICA::Path - PICA path expression to match field and subfield values
+
 =head1 DESCRIPTION
 
 PICA path expressions can be used to match fields and subfields of
@@ -164,6 +165,8 @@ without inspection of field and occurrence values.
 Stringifies the PICA path to normalized form. Subfields are separated with
 C<$>, unless called as C<stringify(1)> or the first subfield is C<$>.
 
-=cut
+=head1 SEE ALSO
 
-1;
+L<Catmandu::Fix::pica_map>
+
+=cut

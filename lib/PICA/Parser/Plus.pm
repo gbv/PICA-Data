@@ -1,32 +1,12 @@
 package PICA::Parser::Plus;
-# ABSTRACT: PICA+ format parser
-# VERSION
-
 use strict;
+
 use charnames qw< :full >;
 use Carp qw(croak);
 
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
 use constant END_OF_RECORD      => "\N{LINE FEED}"; # TODO
-
-=head1 SYNOPSIS
-
-L<PICA::Parser::Plus> is a parser for PICA+ records. 
-
-    use PICA::Parser::Plus;
-
-    my $parser = PICA::Parser::Plus->new( $filename );
-
-    while ( my $record_hash = $parser->next() ) {
-        # do something        
-    }
-
-=head1 SUBROUTINES/METHODS
-
-=head2 new
-
-=cut
 
 sub new {
     my $class = shift;
@@ -55,12 +35,6 @@ sub new {
     return ( bless $self, $class );
 }
 
-=head2 next()
-
-Reads the next record from PICA+ XML input stream. Returns a Perl hash.
-
-=cut
-
 sub next {
     my $self = shift;
     if ( my $line = $self->{reader}->getline() ) {
@@ -73,12 +47,6 @@ sub next {
     }
     return;
 }
-
-=head2 _decode()
-
-Deserialize a PICA+ record to an array of field arrays.
-
-=cut
 
 sub _decode {
     my $reader = shift;
@@ -109,11 +77,40 @@ sub _decode {
     return \@record;
 }
 
+1;
+__END__
+
+=head1 NAME
+
+PICA::Parser::Plus - Normalized PICA+ format parser
+
+=head1 SYNOPSIS
+
+    use PICA::Parser::Plus;
+
+    my $parser = PICA::Parser::Plus->new( $filename );
+
+    while ( my $record_hash = $parser->next ) {
+        # do something        
+    }
+
+=head1 METHODS
+
+=head2 next
+
+Reads the next record from PICA+ XML input stream. Returns a Perl hash.
+
+=head2 _decode
+
+Deserialize a PICA+ record to an array of field arrays.
+
 =head1 SEEALSO
 
-L<PICA::PlainParser>, included in the release of L<PICA::Record> implements
-another PICA+ format parser, not aligned with the L<Catmandu> framework.
+The counterpart of this module is L<PICA::Writer::Plus>.
+
+See L<Catmandu::Importer::PICA> for usage of this module in L<Catmandu>.
+
+An alternative writer had been implemented as L<PICA::PlainParser> included in
+the release of L<PICA::Record>.
 
 =cut
-
-1;    # End of PICA::Parser::Plus

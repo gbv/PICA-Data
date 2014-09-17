@@ -1,21 +1,16 @@
 package PICA::Writer::XML;
-#ABSTRACT: PICA+ XML format serializer
-#VERSION
-
 use strict;
+
 use Moo;
 with 'PICA::Writer::Handle';
 
 sub BUILD {
-    my ($self) = @_;
-    $self->start;
+    $_[0]->start;
 }
 
 sub start {
-    my ($self) = @_;
-
-    print {$self->fh} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    print {$self->fh} "<collection xlmns=\"info:srw/schema/5/picaXML-v1.0\">\n";
+    print {$_[0]->fh} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    print {$_[0]->fh} "<collection xlmns=\"info:srw/schema/5/picaXML-v1.0\">\n";
 }
 
 sub _write_record {
@@ -42,9 +37,14 @@ sub _write_record {
 }
 
 sub end {
-    my ($self) = @_;
-    
-    print {$self->fh} "</collection>\n";
+    print {$_[0]->fh} "</collection>\n";
 }
 
 1;
+__END__
+
+=head1 NAME
+
+PICA::Writer::XML - PICA+ XML format serializer
+
+=cut
