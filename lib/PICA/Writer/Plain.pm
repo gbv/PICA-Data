@@ -1,6 +1,8 @@
 package PICA::Writer::Plain;
-
 use strict;
+
+our $VERSION = '0.20';
+
 use charnames qw(:full);
 use constant SUBFIELD_INDICATOR => '$';
 use constant END_OF_FIELD       => "\n";

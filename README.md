@@ -8,19 +8,19 @@ PICA::Data - PICA record processing
 
 # SYNOPSIS
 
-  use PICA::Data ':all';
-  $parser = pica_parser( xml => @options );
-  $writer = pica_writer( plain => @options );
+    use PICA::Data ':all';
+    $parser = pica_parser( xml => @options );
+    $writer = pica_writer( plain => @options );
+   
+    use PICA::Parser::XML;
+    use PICA::Writer::Plain;
+    $parser = PICA::Parser::XML->new( @options );
+    $writer = PICA::Writer::Plain->new( @options );
 
-  use PICA::Parser::XML;
-  use PICA::Writer::Plain;
-  $parser = PICA::Parser::XML->new( @options );
-  $writer = PICA::Writer::Plain->new( @options );
-
-  while ( my $record = $parser->next ) {
-      my $ppn = pica_value($record, '003@0');
-      ...
-  }
+    while ( my $record = $parser->next ) {
+        my $ppn = pica_value($record, '003@0');
+        ...
+    }
   
 
 # DESCRIPTION
@@ -41,17 +41,17 @@ C<record>, the latter holding the record as array of arrays, and the former
 holding the record identifier, stored in field C<003@>, subfield C<0>. For
 instance a minimal record with just one field C<003@>:
 
-  {
-    _id    => '12345X',
-    record => [
-      [ '003@', undef, '0' => '12345X' ]
-    ]
-  }
+    {
+      _id    => '12345X',
+      record => [
+        [ '003@', undef, '0' => '12345X' ]
+      ]
+    }
 
 
 or in short form:
 
-  [ [ '003@', undef, '0' => '12345X' ] ]
+    [ [ '003@', undef, '0' => '12345X' ] ]
 
 
 PICA path expressions can be used to facilitate processing PICA+ records.

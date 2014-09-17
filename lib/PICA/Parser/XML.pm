@@ -1,6 +1,8 @@
 package PICA::Parser::XML;
 use strict;
 
+our $VERSION = '0.20';
+
 use Carp qw(croak);
 use XML::LibXML::Reader;
 

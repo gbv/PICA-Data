@@ -1,8 +1,8 @@
 package PICA::Path;
-
-our $VERSION = '0.15';
-
 use strict;
+
+our $VERSION = '0.1501';
+
 use Carp qw(confess);
 
 sub new {

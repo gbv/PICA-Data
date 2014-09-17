@@ -1,8 +1,8 @@
 package PICA::Writer::Handle;
-# ABSTRACT: Utility class that implements a filehandle attribute to write to
-# VERSION
-
 use strict;
+
+our $VERSION = '0.20';
+
 use Moo::Role;
 use Scalar::Util qw(blessed openhandle);
 use Carp qw(croak);
@@ -29,3 +29,10 @@ sub write {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+PICA::Writer::Handle - Utility class that implements a filehandle attribute to write to
+
+=cut
