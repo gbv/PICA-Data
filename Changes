@@ -1,5 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+0.20  2014-09-17 15:05:55 CEST
     - split from Catmandu::PICA after heavy refactoring
 
