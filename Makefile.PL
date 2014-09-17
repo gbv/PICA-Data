@@ -23,7 +23,7 @@ my %WriteMakefileArgs = (
     "Catmandu" => "0.9",
     "XML::LibXML" => "1.78"
   },
-  "VERSION" => "0.13",
+  "VERSION" => "0.14",
   "test" => {
     "TESTS" => "t/*.t"
   }

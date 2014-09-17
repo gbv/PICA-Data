@@ -4,11 +4,10 @@ package Catmandu::Fix::pica_map;
 # VERSION
 
 use Catmandu::Sane;
-use Carp qw(confess);
 use Moo;
 
 use Catmandu::Fix::Has;
-use PICA::Data qw(parse_pica_path);
+use PICA::Path;
 
 has pica_path => ( fix_arg => 1 );
 has path      => ( fix_arg => 1 );
@@ -22,14 +21,25 @@ sub emit {
     my $path       = $fixer->split_path( $self->path );
     my $record_key = $fixer->emit_string( $self->record // 'record' );
     my $join_char  = $fixer->emit_string( $self->join // '' );
-    my $pica_path  = $self->pica_path;
+    my $pica_path  = PICA::Path->new($self->pica_path); 
 
-    my $parsed_path = parse_pica_path($pica_path) or confess "invalid pica path";
-    my ( $field_regex, $occurrence_regex, $subfield_regex, $from, $length ) = @$parsed_path;
+    my ($field_regex, $occurrence_regex, $subfield_regex, $from, $length) = @$pica_path;
 
     my $var  = $fixer->var;
     my $vals = $fixer->generate_var;
     my $perl = $fixer->emit_declare_vars( $vals, '[]' );
+
+    my $field_regex_var = $fixer->generate_var;
+    $perl .= $fixer->emit_declare_vars( $field_regex_var, "qr{$field_regex}" );
+
+    my $subfield_regex_var = $fixer->generate_var;
+    $perl .= $fixer->emit_declare_vars( $subfield_regex_var, "qr{$subfield_regex}" );
+
+    my $occurrence_regex_var;
+    if (defined $occurrence_regex) {
+        $occurrence_regex_var = $fixer->generate_var;
+        $perl .= $fixer->emit_declare_vars( $occurrence_regex_var, "qr{$occurrence_regex}" );
+    }
 
     $perl .= $fixer->emit_foreach(
         "${var}->{${record_key}}",
@@ -38,10 +48,10 @@ sub emit {
             my $v    = $fixer->generate_var;
             my $perl = "";
 
-            $perl .= "next if ${var}->[0] !~ /${field_regex}/;";
+            $perl .= "next if ${var}->[0] !~ ${field_regex_var};";
 
             if (defined $occurrence_regex) {
-                $perl .= "next if (!defined ${var}->[1] || ${var}->[1] !~ /${occurrence_regex}/);";
+                $perl .= "next if (!defined ${var}->[1] || ${var}->[1] !~ ${occurrence_regex_var});";
             }
 
             if ( $self->value ) {
@@ -53,7 +63,7 @@ sub emit {
                 my $add_subfields = sub {
                     my $start = shift;
                     "for (my ${i} = ${start}; ${i} < \@{${var}}; ${i} += 2) {"
-                        . "if (${var}->[${i}] =~ /${subfield_regex}/) {"
+                        . "if (${var}->[${i}] =~ ${subfield_regex_var}) {"
                         . "push(\@{${v}}, ${var}->[${i} + 1]);" . "}" . "}";
                 };
                 $perl .= $fixer->emit_declare_vars( $v, "[]" );
@@ -117,6 +127,7 @@ sub emit {
 
 =head1 SEE ALSO
 
-L<PICA::Data> contains more methods for processing parsed PICA+ records
+See L<PICA::Path> for a definition of PICA path expressions and L<PICA::Data>
+for more methods to process parsed PICA+ records.
 
 =cut

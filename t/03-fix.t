@@ -9,7 +9,7 @@ use Catmandu::Importer::PICA;
 my $fixer = Catmandu::Fix->new(fixes => [
         'pica_map("001B", "date")',
         'pica_map("001U0", "encoding")',
-        'pica_map("003@0/1-7", "id")',
+        'pica_map("003*0/1-7", "id")',
         'pica_map("009P[05]a", "url")',
         'remove_field("record")',
         'remove_field("_id")']);

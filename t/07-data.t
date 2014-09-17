@@ -3,21 +3,26 @@ use warnings;
 use Test::More;
 
 use PICA::Data ':all';
+use PICA::Path;
 
-my %path = (
-    '003*abc'      => [ '003.', undef, '[abc]' ],
-    '001B$0'       => [ '001B', undef, '[0]' ],
-    '123A[0*]/1-3' => [ '123A', '0.', '[_A-Za-z0-9]', 1, 3 ],
+my %pathes = (
+    '003*$abc'     => [ qr{003.}, undef, qr{[abc]} ],
+    '001B$0'       => [ qr{001B}, undef, qr{[0]} ],
+    '123A[0*]/1-3' => [ qr{123A}, qr{0.}, qr{[_A-Za-z0-9]}, 1, 3 ],
 );
-foreach (keys %path) {
-    my $parsed = parse_pica_path($_);
-    is_deeply $parsed, $path{$_}, 'parse_pica_path';
+foreach my $path (keys %pathes) {
+    my $parsed = PICA::Path->new($path);
+    is_deeply [@$parsed], $pathes{$path}, 'PICA::Path';
+    is "$parsed", $path, 'stringify';
 }
+
+is "".PICA::Path->new('003*abc'), '003*$abc', 'stringify';
+is "".PICA::Path->new('003*abc')->stringify(1), '003*abc', 'stringify';
 
 use PICA::Parser::Plain;
 my $record = PICA::Parser::Plain->new( './t/files/plain.pica' )->next;
 
-foreach ('019@', parse_pica_path('019@')) {
+foreach ('019@', PICA::Path->new('019@')) {
     is_deeply [ pica_values($record, $_) ], ['XB-CN'], 'pica_values';
 }
 
@@ -40,8 +45,7 @@ is_deeply [$record->value('1...b')], ['9330'], '->value';
 is_deeply $record->fields('010@'), 
     [ [ '010@', '', 'a' => 'chi'] ], '->field';
 
-is scalar @{pica_fields($record,'1***')}, 5, 'pica_fields';
-
 is_deeply $record->fields('?!*~'), [ ], 'invalid PICA path';
+is scalar @{pica_fields($record,'1***')}, 5, 'pica_fields';
 
 done_testing;
