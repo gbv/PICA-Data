@@ -1,7 +1,7 @@
 package PICA::Parser::Plus;
 use strict;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 use charnames qw< :full >;
 use Carp qw(croak);
@@ -11,71 +11,66 @@ use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
 use constant END_OF_RECORD      => "\N{LINE FEED}"; # TODO
 
 sub new {
-    my $class = shift;
-    my $file  = shift;
+    my ($class, $input) = @_;
 
-    my $self = {
-        filename   => undef,
-        rec_number => 0,
-        reader => undef,
-    };
+    my $self = bless { }, $class;
 
     # check for file or filehandle
-    my $ishandle = eval { fileno($file); };
+    my $ishandle = eval { fileno($input); };
     if ( !$@ && defined $ishandle ) {
-        $self->{filename} = scalar $file;
-        $self->{reader}   = $file;
+        $self->{filename} = scalar $input;
+        $self->{reader}   = $input;
+    } elsif ( -e $input ) {
+        open $self->{reader}, '<:encoding(UTF-8)', $input
+            or croak "cannot read from file $input\n";
+        $self->{filename} = $input;
+    } else {
+        croak "file or filehandle $input does not exists";
     }
-    elsif ( -e $file ) {
-        open $self->{reader}, '<:encoding(UTF-8)', $file
-            or croak "cannot read from file $file\n";
-        $self->{filename} = $file;
-    }
-    else {
-        croak "file or filehande $file does not exists";
-    }
-    return ( bless $self, $class );
+
+    bless $self, $class;
 }
 
 sub next {
-    my $self = shift;
-    if ( my $line = $self->{reader}->getline() ) {
-        $self->{rec_number}++;
-        my $record = _decode($line);
+    my ($self) = @_;
 
-        # get last subfield from 003@ as id
+    # get last subfield from 003@ as id
+    if ( my $record = $self->next_record ) {
         my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
         return { _id => $id, record => $record };
     }
+
     return;
 }
 
-sub _decode {
-    my $reader = shift;
-    chomp($reader);
-    my @fields = split( END_OF_FIELD, $reader );
+sub next_record {
+    my ($self) = @_;
+     
+    my $line = $self->{reader}->getline // return;
+    chomp $line;
+
+    my @fields = split END_OF_FIELD, $line;
     my @record;
 
     if ($fields[0] !~ m/.*SUBFIELD_INDICATOR/){
         # drop leader because usage is unclear
-        shift(@fields);
+        shift @fields;
     }
     
-    for my $field (@fields) {
-
-        my ( $tag, $occurence, $data );
-        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/ ) {
+    foreach my $field (@fields) {
+        my ($tag, $occurence, $data);
+        if ($field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/) {
             $tag       = $1;
             $occurence = $3 // '';
             $data      = $4;
-        }
-        else {
+        } else {
             croak 'ERROR: no valid PICA field structure';
         }
         my @subfields = map { substr( $_, 0, 1 ), substr( $_, 1 ) }
-            split( SUBFIELD_INDICATOR, substr( $data, 1 ) );
-        push( @record, [ $tag, $occurence, @subfields ] );
+                        split( SUBFIELD_INDICATOR, substr( $data, 1 ) );
+        push @record, [ $tag, $occurence, @subfields ];
     }
+
     return \@record;
 }
 
@@ -98,13 +93,18 @@ PICA::Parser::Plus - Normalized PICA+ format parser
 
 =head1 METHODS
 
+=head2 new( $input )
+
+Initialize parser to read from a given file, handle (e.g. L<IO::Handle>), or
+string reference.
+
 =head2 next
 
-Reads the next record from PICA+ XML input stream. Returns a Perl hash.
+Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>.
 
-=head2 _decode
+=head2 next_record
 
-Deserialize a PICA+ record to an array of field arrays.
+Reads the next PICA+ record. Returns an array of field arrays.
 
 =head1 SEEALSO
 

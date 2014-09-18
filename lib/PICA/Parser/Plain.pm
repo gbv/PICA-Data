@@ -1,7 +1,7 @@
 package PICA::Parser::Plain;
 use strict;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 use charnames qw(:full);
 use constant SUBFIELD_INDICATOR => '$';
@@ -12,34 +12,18 @@ use Carp qw(croak);
 
 use parent 'PICA::Parser::Plus';
 
-# copied from PICA::Parser::Plus (TODO: refactor)
-sub next {
-    my $self = shift;
+sub next_record {
+    my ($self) = @_;
 
-    my $record;
-    while ( my $line = $self->{reader}->getline() ) {
+    my $plain = undef;
+    while ( my $line = $self->{reader}->getline ) {
         last if $line =~ /^\s*$/;
-
-        $record .= $line;
+        $plain .= $line;
     }
+    return unless defined $plain;
 
-    if ($record) {
-        $self->{rec_number}++;
-
-        $record = _decode($record);
-
-        # get last subfield from 003@ as id
-        my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
-        return { _id => $id, record => $record };
-    }
-
-    return;
-}
-
-sub _decode {
-    my $line = shift;
-    chomp $line;
-    my @fields = split( END_OF_FIELD, $line );
+    chomp $plain;
+    my @fields = split END_OF_FIELD, $plain;
     my @record;
     
     for my $field (@fields) {
@@ -49,16 +33,15 @@ sub _decode {
             $tag       = $1;
             $occurence = $3 // '';
             $data      = $4;
-        }
-        else {
+        } else {
             croak 'ERROR: no valid PICA field structure';
         }
 
-        my @subfields = split /\$([^\$])/, $data; #substr( $data, 1 ) );
+        my @subfields = split /\$([^\$])/, $data;
         shift @subfields;
         push @subfields, '' if @subfields % 2;
 
-        push( @record, [ $tag, $occurence, @subfields ] );
+        push @record, [ $tag, $occurence, @subfields ];
     }
     return \@record;
 }
@@ -69,6 +52,31 @@ __END__
 =head1 NAME
 
 PICA::Parser::Plain - Plain PICA+ format parser
+
+=head1 SYNOPSIS
+
+    use PICA::Parser::Plain;
+
+    my $parser = PICA::Parser::Plain->new( $filename );
+
+    while ( my $record_hash = $parser->next ) {
+        # do something        
+    }
+
+=head1 METHODS
+
+=head2 new( $input )
+
+Initialize parser to read from a given file, handle (e.g. L<IO::Handle>), or
+string reference.
+
+=head2 next
+
+Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>.
+
+=head2 next_record
+
+Reads the next PICA+ record. Returns an array of field arrays.
 
 =head1 SEEALSO
 

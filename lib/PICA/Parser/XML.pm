@@ -1,60 +1,60 @@
 package PICA::Parser::XML;
 use strict;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 use Carp qw(croak);
 use XML::LibXML::Reader;
 
 sub new {
-    my $class = shift;
-    my $input = shift;
+    my ($class, $input) = @_;
 
-    my $self = {
-        filename    => undef,
-        rec_number  => 0,
-        xml_reader  => undef,
-    };
-
+    my $self = bless { }, $class;
+    
     # check for file or filehandle
     my $ishandle = eval { fileno($input); };
     if ( !$@ && defined $ishandle ) {
         binmode $input; # drop all PerlIO layers, as required by libxml2
         my $reader = XML::LibXML::Reader->new(IO => $input)
-             or croak "cannot read from filehandle $input\n";
+            or croak "cannot read from filehandle $input\n";
         $self->{filename}   = scalar $input;
         $self->{xml_reader} = $reader;
-    }
-    elsif ( defined $input && $input !~ /\n/ && -e $input ) {
+    } elsif ( defined $input && $input !~ /\n/ && -e $input ) {
         my $reader = XML::LibXML::Reader->new(location => $input)
-             or croak "cannot read from file $input\n";
+            or croak "cannot read from file $input\n";
         $self->{filename}   = $input;
         $self->{xml_reader} = $reader;
-    }
-    elsif ( defined $input && length $input > 0 ) {
+    } elsif ( defined $input && length $input > 0 ) {
+        $input = ${$input} if (ref($input) // '' eq 'SCALAR'); 
         my $reader = XML::LibXML::Reader->new( string => $input )
             or croak "cannot read XML string $input\n";
         $self->{xml_reader} = $reader;
-    } 
-    else {
+    } else {
         croak "file, filehande or string $input does not exists";
     }
-    return ( bless $self, $class );
+
+    $self;
 }
 
+# duplicated in PICA::Data::Plus because no common superclass exists
 sub next {
-    my $self = shift;
-    if ( $self->{xml_reader}->nextElement( 'record' ) ) {
-        $self->{rec_number}++;
-        my $record = _decode( $self->{xml_reader} );
+    my ($self) = @_;
+
+    # get last subfield from 003@ as id
+    if ( my $record = $self->next_record ) {
         my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
         return { _id => $id, record => $record };
-    } 
+    }
+
     return;
 }
 
-sub _decode {
-    my $reader = shift;
+sub next_record {
+    my ($self) = @_;
+
+    my $reader = $self->{xml_reader};
+    return unless $reader->nextElement('record');
+
     my @record;
 
     # get all field nodes from PICA record;
@@ -90,37 +90,24 @@ PICA::Parser::XML - PICA+ XML parser
 
     my $parser = PICA::Parser::XML->new( $filename );
 
-    while ( my $record_hash = $parser->next() ) {
-        # do something        
+    while ( my $record_hash = $parser->next ) {
+        # do something
     }
 
 =head1 METHODS
 
-=head2 new($filename | $filehandle | $string)
+=head2 new( $input )
 
-=over
+Initialize parser to read from a given XML file, handle (e.g. L<IO::Handle>),
+string reference, or XML string.
 
-=item C<file>
- 
-Path to file with PICA XML records.
+=head2 next
 
-=item C<fh>
+Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>.
 
-Open filehandle for file with PICA XML records.
+=head2 next_record
 
-=item C<string>
-
-XML string with PICA XML records.
-
-=back
-
-=head2 next()
-
-Reads the next record from PICA+ XML input stream. Returns a Perl hash.
-
-=head2 _decode()
-
-Deserialize a PICA+ XML record to an array of field arrays.
+Reads the next PICA+ record. Returns an array of field arrays.
 
 =head1 SEEALSO
 
