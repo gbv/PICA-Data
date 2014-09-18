@@ -1,7 +1,7 @@
 package PICA::Data;
 use strict;
 
-our $VERSION = '0.21';
+our $VERSION = '0.21_01';
 
 use Exporter 'import';
 our @EXPORT_OK = map { "pica_$_" } 
