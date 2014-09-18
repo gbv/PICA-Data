@@ -1,7 +1,8 @@
 package PICA::Writer::XML;
 use strict;
+use warnings;
 
-our $VERSION = '0.20';
+our $VERSION = '0.23';
 
 use Moo;
 with 'PICA::Writer::Handle';
