@@ -29,7 +29,7 @@ $parser = PICA::Parser::XML->new(\$xml);
 ok $parser->next_record, 'read from string reference';
 
 use PICA::Parser::Plus;
-$parser = PICA::Parser::Plus->new( './t/files/picaplus.dat' );
+$parser = pica_parser('plus' => './t/files/picaplus.dat');
 isa_ok $parser, 'PICA::Parser::Plus';
 $record = $parser->next();
 ok $record->{_id} eq '1041318383', 'record _id';
@@ -52,5 +52,8 @@ is_deeply $record->{record}->[9],
 is_deeply $record->{record}->[13],
     [ '203@', '01', 0 => '917400194', x => '', y => '' ], 'empty subfields';
 ok !$parser->next, 'last record';
+
+eval { pica_parser('unknown') };
+ok $@, 'unknown parser';
 
 done_testing;
