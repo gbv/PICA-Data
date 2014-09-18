@@ -26,6 +26,7 @@ foreach (keys %map) {
 }
 
 is_deeply [$record->value('1...b')], ['9330'], '->value';
+is_deeply [$record->value('234X')], [], '->value (empty)';
 
 is_deeply $record->fields('010@'), 
     [ [ '010@', '', 'a' => 'chi'] ], '->field';
