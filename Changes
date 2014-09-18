@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - added pica_holdings and pica_items (close #1)
 
 0.2001  2014-09-17 15:17:28 CEST
     - added missing version numbers

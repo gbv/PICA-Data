@@ -1,11 +1,15 @@
 package PICA::Data;
 use strict;
 
-our $VERSION = '0.2001';
+our $VERSION = '0.21';
 
 use Exporter 'import';
-our @EXPORT_OK = qw(pica_parser pica_writer pica_values pica_values pica_fields);
+our @EXPORT_OK = map { "pica_$_" } 
+                 qw(parser writer values value fields holdings items);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]); 
+
+our $ILN_PATH = PICA::Path->new('101@a');
+our $EPN_PATH = PICA::Path->new('203@/**0');
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype);
@@ -55,9 +59,81 @@ sub pica_value {
     return;
 }
 
-*values = *pica_values;
-*value  = *pica_value;
-*fields = *pica_fields;
+sub pica_items {
+    my ($record) = @_;
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+    my (@items, $current, $occurrence);
+
+    foreach my $field (@$record) {
+        if ($field->[0] =~ /^2/) {
+            
+            if ( ($occurrence // '') ne $field->[1] ) {
+                if ($current) {
+                    push @items, $current;
+                    $current = undef;
+                }
+                $occurrence = $field->[1];
+            }
+            
+            $current //= { record => [] };
+
+            push @{$current->{record}}, [ @$field ];
+            if ($field->[0] eq '203@') {
+                ($current->{_id}) = $EPN_PATH->match_subfields($field);
+            }
+        } elsif ($current) {
+            push @items, $current;
+            $current    = undef;
+            $occurrence = undef;
+        }
+    }
+
+    push @items, $current if $current;
+
+    return \@items;
+}
+
+sub pica_holdings {
+    my ($record) = @_;
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+    my (@holdings, $field_buffer, $iln);
+
+    foreach my $field (@$record) {
+        my $tag = substr $field->[0], 0, 1;
+        if ($tag eq '0') {
+            next;
+        } elsif ($tag eq '1') {
+            if ($field->[0] eq '101@') {
+                my ($id) = $ILN_PATH->match_subfields($field);
+                if ( defined $iln && ($id // '') ne $iln ) {
+                    push @holdings, { record => $field_buffer, _id => $iln };
+                }
+                $field_buffer = [ [@$field] ];
+                $iln = $id;
+                next;
+            }
+        }
+        push @$field_buffer, [@$field];
+    }
+
+    if (@$field_buffer) {
+        push @holdings, { record => $field_buffer, _id => $iln };
+    }
+
+    return \@holdings;
+}
+
+*values   = *pica_values;
+*value    = *pica_value;
+*fields   = *pica_fields;
+*holdings = *pica_holdings;
+*items    = *pica_items;
+
+use PICA::Parser::XML;
+use PICA::Parser::Plus;
+use PICA::Parser::Plain;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_)
@@ -70,10 +146,6 @@ sub pica_writer {
 sub pica_path {
     PICA::Path->new(@_)
 }
-
-use PICA::Parser::XML;
-use PICA::Parser::Plus;
-use PICA::Parser::Plain;
 
 sub _pica_module {
     my $base = shift;
@@ -115,10 +187,15 @@ PICA::Data - PICA record processing
     $writer = PICA::Writer::Plain->new( @options );
 
     while ( my $record = $parser->next ) {
-        my $ppn = pica_value($record, '003@0');
+        my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+        my $holdings = pica_holdings($record);
+        my $items    = pica_holdings($record);
         ...
     }
   
+    # parse single record from string
+    my $record = pica_parser('plain', \"...")->next;
+
 =head1 DESCRIPTION
 
 PICA::Data provides methods, classes, and functions to process PICA+ records
@@ -194,11 +271,6 @@ Create a PICA writer object in the same way as C<pica_parser> with one of
 Extract a list of subfield values from a PICA record based on a PICA path
 expression.
 
-This function can also be called as C<values> on a blessed PICA::Data record:
-
-    bless $record, 'PICA::Data';
-    $record->values($path);
-
 =head2 pica_value( $record, $path )
 
 Same as C<pica_values> but only returns the first value. Can also be called as
@@ -210,9 +282,31 @@ Returns a PICA record limited to fields specified in a PICA path expression.
 Always returns an array reference. Can also be called as C<fields> on a blessed
 PICA::Data record. 
 
+=head2 pica_holdings( $record )
+
+Returns a list (as array reference) of local holding records (level 1 and 2),
+where the C<_id> of each record contains the ILN (subfield C<101@a>).
+
+=head2 pica_items( $record )
+
+Returns a list (as array reference) of item records (level 1),
+where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
+ 
+=head2 pica_items( $record )
+
 =head2 pica_path( $path )
 
 Equivalent to C<< PICA::Path->new($path) >>.
+
+=head1 OBJECT ORIENTED INTERFACE
+
+All C<pica_...> function that expect a record as first argument can also be called 
+as method on a blessed PICA::Data record by stripping the C<pica_...> prefix:
+
+    bless $record, 'PICA::Data';
+    $record->values($path);
+    $record->items;
+    ...
 
 =head1 CONTRIBUTORS
 
