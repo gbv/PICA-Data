@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - extend PICA path expressions
     - fix dependency
 
 0.21  2014-09-18 11:06:29 CEST

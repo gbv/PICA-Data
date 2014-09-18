@@ -1,11 +1,11 @@
 package PICA::Data;
 use strict;
 
-our $VERSION = '0.21_01';
+our $VERSION = '0.22';
 
 use Exporter 'import';
 our @EXPORT_OK = map { "pica_$_" } 
-                 qw(parser writer values value fields holdings items);
+                 qw(parser writer values value fields holdings items path);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]); 
 
 our $ILN_PATH = PICA::Path->new('101@a');

@@ -38,8 +38,8 @@
       "runtime" : {
          "requires" : {
             "Moo" : "0",
-            "Perl" : "v5.10.0",
-            "XML::LibXML" : "1.78"
+            "XML::LibXML" : "1.78",
+            "perl" : "v5.10.0"
          }
       }
    },
@@ -55,7 +55,7 @@
          "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "0.21",
+   "version" : "0.22",
    "x_contributors" : [
       "Jakob Voss <jakob@nichtich.de>",
       "Jakob Voss <voss@gbv.de>",

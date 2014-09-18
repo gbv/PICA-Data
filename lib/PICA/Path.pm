@@ -1,18 +1,20 @@
 package PICA::Path;
 use strict;
 
-our $VERSION = '0.1501';
+our $VERSION = '0.22';
 
 use Carp qw(confess);
+
+use overload '""' => \&stringify;
 
 sub new {
     my ($class, $path) = @_;
 
     confess "invalid pica path" if $path !~ /
-        ([0-9*.]{3}\S)
-        (\[([0-9*.]{2})\])?
-        (\$?([_A-Za-z0-9]+))?
-        (\/(\d+)(-(\d+))?)?
+        ([012*.][0-9*.][0-9*.][A-Z@*.]) # tag
+        (\[([0-9*.]{2})\])?             # occurence
+        (\$?([_A-Za-z0-9]+))?           # subfields
+        (\/(\d+)?(-(\d+)?)?)?           # position
     /x;
 
     my $field      = $1;
@@ -21,10 +23,29 @@ sub new {
 
     my @position;
     if (defined $6) { # from, to
-        my ($from, $to) = ($7, $9);
-        my $length = defined $to ? $to - $from + 1 : 1;
-        if ($length >= 1) {
-            @position = ($from, $length);
+        my ($from, $dash, $to, $length) = ($7, $8, $9, 0);
+
+        if ($dash) {
+            confess "invalid pica path" unless defined($from // $to); # /-
+        }
+
+        if (defined $to) {
+            if (!$from and $dash) { # /-X
+                $from = 0;
+            }
+            $length = $to - $from + 1;
+        } else {
+            if ($8) {
+                $length = undef;
+            } else {
+                $length = 1;
+            }
+        }
+
+        if (!defined $length or $length >= 1) {
+            unless (!$from and !defined $length) { # /0-
+                @position = ($from, $length);
+            }
         }
     }
 
@@ -65,7 +86,8 @@ sub match_subfields {
         if ($field->[$i] =~ $subfield_regex) {
             my $value = $field->[$i + 1];
             if (defined $from) {
-                $value = substr($value, $from, $length);
+                $value = $length ? substr($value, $from, $length) :
+                                   substr($value, $from);
                 next if '' eq ($value // '');
             }
             push @values, $value;
@@ -74,8 +96,6 @@ sub match_subfields {
 
     return @values;
 }
-
-use overload '""' => \&stringify;
 
 sub stringify {
     my ($self, $short) = @_;
@@ -101,12 +121,23 @@ sub stringify {
         $str .= $subfields;
     }
 
-    if (defined $self->[3]) {
-        $str .= '/' . $self->[3];
-        if (defined $self->[4]) {
-            $str .= '-' . ($self->[4] - $self->[3] + 1);
+    my ($from, $length, $pos) = ($self->[3], $self->[4]);
+    if (defined $from) {
+        if ($from) {
+            $pos = $from;
+        }         
+        if (!defined $length) {
+            if ($from) {
+                $pos = "$from-";
+            }
+        } elsif ($length > 1) {
+            $pos .= '-' . ($from + $length - 1);
+        } elsif ($length == 1 && !$from) {
+            $pos = 0;
         }
     }
+
+    $str .= "/$pos" if defined $pos;
 
     $str;
 }
@@ -128,7 +159,7 @@ consisting of the following fields:
 
 =item
 
-regular expression to match fields against
+regular expression to match field tags against
 
 =item
 
@@ -149,6 +180,32 @@ substring end position
 =back
 
 =head1 METHODS
+
+=head2 new( $expression )
+
+Create a PICA path by parsing the path expression. The expression consists of
+
+=item
+
+A tag, constisting of three digits, the first C<0> to C<2>, followed by a digit
+or C<@>.  The character C<*> can be used as wildcard.
+
+=item
+
+An optional occurrence, given by two digits (or C<*> as wildcard) in brackets,
+e.g. C<[12]> or C<[0*]>.
+
+=item
+
+An optional list of subfields
+
+=item
+
+An optional position, preceeded by C</>. Both single characters (e.g. C</0> for
+the first), and character ranges (such as C<2-4>, C<-3>, C<2->...) are
+supported.
+
+=back
 
 =head2 match_field( $field )
 
