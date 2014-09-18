@@ -185,6 +185,8 @@ substring end position
 
 Create a PICA path by parsing the path expression. The expression consists of
 
+=over
+
 =item
 
 A tag, constisting of three digits, the first C<0> to C<2>, followed by a digit
@@ -197,7 +199,7 @@ e.g. C<[12]> or C<[0*]>.
 
 =item
 
-An optional list of subfields
+An optional list of subfields. Allowed subfield codes include C<_A-Za-z0-9>.
 
 =item
 
