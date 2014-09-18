@@ -153,7 +153,7 @@ sub _pica_module {
 
     if ( $type =~ /^(pica)?plus$/ ) {
         "${base}::Plus"->new(@_);
-    } elsif ( $type eq 'plain' ) {
+    } elsif ( $type =~ /^(pica)?plain$/ ) {
         "${base}::Plain"->new(@_);
     } elsif ( $type =~ /^(pica)?xml$/ ) {
         "${base}::XML"->new(@_);
@@ -174,6 +174,8 @@ PICA::Data - PICA record processing
 [![Build Status](https://travis-ci.org/gbv/PICA-Data.png)](https://travis-ci.org/gbv/PICA-Data)
 [![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.png)](https://coveralls.io/r/gbv/PICA-Data)
 [![Kwalitee Score](http://cpants.cpanauthors.org/dist/PICA-Data.png)](http://cpants.cpanauthors.org/dist/PICA-Data)
+
+=end markdown
 
 =head1 SYNOPSIS
 
@@ -227,9 +229,7 @@ or in short form:
 
 PICA path expressions can be used to facilitate processing PICA+ records.
 
-=end markdown
-
-=head1 FUNCTIONS
+=head1 CONSTRUCTORS
 
 =head2 pica_parser( $type [, @options] )
 
@@ -238,17 +238,17 @@ parameters are passed to the parser's constructor.
 
 =over
 
-=item L<PICA::Parser::XML>
+=item 
 
-Type C<xml> or C<picaxml> for PICA+ in XML
+L<PICA::Parser::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
-=item L<PICA::Parser::Plus>
+=item 
 
-Type C<plus> or C<picaplus> for normalizes PICA+
+L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
-=item L<PICA::Parser::Plain>
+=item 
 
-Type C<plain> for plain, human-readable PICA+
+L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =back
 
@@ -258,13 +258,34 @@ Create a PICA writer object in the same way as C<pica_parser> with one of
 
 =over
 
-=item L<PICA::Writer::XML>
+=item 
 
-=item L<PICA::Writer::Plus>
+L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
-=item L<PICA::Writer::Plain>
+
+=item 
+
+L<PICA::Writer::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
+
+=item 
+
+L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =back
+
+=head2 pica_path( $path )
+
+Equivalent to C<< PICA::Path->new($path) >>.
+
+=head1 ACCESSORS
+
+The following function can also be called as method on a blessed PICA::Data
+record by stripping the C<pica_...> prefix:
+
+    bless $record, 'PICA::Data';
+    $record->values($path);
+    $record->items;
+    ...
 
 =head2 pica_values( $record, $path )
 
@@ -292,22 +313,6 @@ where the C<_id> of each record contains the ILN (subfield C<101@a>).
 Returns a list (as array reference) of item records (level 1),
 where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
  
-=head2 pica_items( $record )
-
-=head2 pica_path( $path )
-
-Equivalent to C<< PICA::Path->new($path) >>.
-
-=head1 OBJECT ORIENTED INTERFACE
-
-All C<pica_...> function that expect a record as first argument can also be called 
-as method on a blessed PICA::Data record by stripping the C<pica_...> prefix:
-
-    bless $record, 'PICA::Data';
-    $record->values($path);
-    $record->items;
-    ...
-
 =head1 CONTRIBUTORS
 
 Johann Rolschewski, C<< <rolschewski@gmail.com> >>
