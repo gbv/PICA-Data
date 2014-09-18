@@ -18,10 +18,15 @@ PICA::Data - PICA record processing
     $writer = PICA::Writer::Plain->new( @options );
 
     while ( my $record = $parser->next ) {
-        my $ppn = pica_value($record, '003@0');
+        my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+        my $holdings = pica_holdings($record);
+        my $items    = pica_holdings($record);
         ...
     }
   
+    # parse single record from string
+    my $record = pica_parser('plain', \"...")->next;
+
 
 # DESCRIPTION
 
@@ -88,11 +93,6 @@ Create a PICA writer object in the same way as `pica_parser` with one of
 Extract a list of subfield values from a PICA record based on a PICA path
 expression.
 
-This function can also be called as `values` on a blessed PICA::Data record:
-
-    bless $record, 'PICA::Data';
-    $record->values($path);
-
 ## pica\_value( $record, $path )
 
 Same as `pica_values` but only returns the first value. Can also be called as
@@ -104,9 +104,31 @@ Returns a PICA record limited to fields specified in a PICA path expression.
 Always returns an array reference. Can also be called as `fields` on a blessed
 PICA::Data record. 
 
+## pica\_holdings( $record )
+
+Returns a list (as array reference) of local holding records (level 1 and 2),
+where the `_id` of each record contains the ILN (subfield `101@a`).
+
+## pica\_items( $record )
+
+Returns a list (as array reference) of item records (level 1),
+where the `_id` of each record contains the EPN (subfield `203@/**0`).
+
+## pica\_items( $record )
+
 ## pica\_path( $path )
 
 Equivalent to `PICA::Path->new($path)`.
+
+# OBJECT ORIENTED INTERFACE
+
+All `pica_...` function that expect a record as first argument can also be called 
+as method on a blessed PICA::Data record by stripping the `pica_...` prefix:
+
+    bless $record, 'PICA::Data';
+    $record->values($path);
+    $record->items;
+    ...
 
 # CONTRIBUTORS
 
