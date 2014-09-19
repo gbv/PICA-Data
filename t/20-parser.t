@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use utf8;
 
-use PICA::Data qw(pica_parser);
+use PICA::Data qw(pica_parser pica_writer);
 use PICA::Parser::XML;
 my $parser = pica_parser( XML => './t/files/picaxml.xml' );
 isa_ok $parser, 'PICA::Parser::XML';
@@ -53,7 +53,31 @@ is_deeply $record->{record}->[13],
     [ '203@', '01', 0 => '917400194', x => '', y => '' ], 'empty subfields';
 ok !$parser->next, 'last record';
 
+my $str = '003@ '.PICA::Parser::Plus::SUBFIELD_INDICATOR.'01234'
+        . PICA::Parser::Plus::END_OF_FIELD
+        . '021A '.PICA::Parser::Plus::SUBFIELD_INDICATOR.'aHello $¥!'
+        . PICA::Parser::Plus::END_OF_RECORD;
+
+# TODO: why UTF-8 encoded while PICA plain is not?
+use Encode;
+$record = [
+     [ '003@', '', '0', '1234' ],
+     [ '021A', '', 'a', encode('UTF-8',"Hello \$\N{U+00A5}!") ]
+#     [ '021A', '', 'a', 'Hello $¥!' ]
+    ];
+ 
+open my $fh, '<', \$str;
+is_deeply pica_parser( plus => $fh )->next, { 
+    _id => 1234, record => $record
+}, 'Plus format UTF-8 from string';
+
 eval { pica_parser('unknown') };
 ok $@, 'unknown parser';
+
+eval { pica_parser( xml => '' ) };
+ok $@, 'invalid handle';
+
+eval { pica_parser( plus => '' ) };
+ok $@, 'invalid handle';
 
 done_testing;

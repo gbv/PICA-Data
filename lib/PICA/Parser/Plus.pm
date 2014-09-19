@@ -9,7 +9,7 @@ use Carp qw(croak);
 
 use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
 use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
-use constant END_OF_RECORD      => "\N{LINE FEED}"; # TODO
+use constant END_OF_RECORD      => "\N{LINE FEED}";
 
 sub new {
     my ($class, $input) = @_;
@@ -19,12 +19,10 @@ sub new {
     # check for file or filehandle
     my $ishandle = eval { fileno($input); };
     if ( !$@ && defined $ishandle ) {
-        $self->{filename} = scalar $input;
         $self->{reader}   = $input;
     } elsif ( -e $input ) {
         open $self->{reader}, '<:encoding(UTF-8)', $input
             or croak "cannot read from file $input\n";
-        $self->{filename} = $input;
     } else {
         croak "file or filehandle $input does not exists";
     }
@@ -47,17 +45,18 @@ sub next {
 sub next_record {
     my ($self) = @_;
      
+    # TODO: does only work if END_OF_RECORD is LINE FEED
     my $line = $self->{reader}->getline // return;
     chomp $line;
 
     my @fields = split END_OF_FIELD, $line;
     my @record;
 
-    if ($fields[0] !~ m/.*SUBFIELD_INDICATOR/){
+    if (index($fields[0],SUBFIELD_INDICATOR) == -1) {
         # drop leader because usage is unclear
         shift @fields;
     }
-    
+
     foreach my $field (@fields) {
         my ($tag, $occurence, $data);
         if ($field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.*)/) {

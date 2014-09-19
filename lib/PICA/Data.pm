@@ -135,6 +135,9 @@ sub pica_holdings {
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
+use PICA::Writer::XML;
+use PICA::Writer::Plus;
+use PICA::Writer::Plain;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_)

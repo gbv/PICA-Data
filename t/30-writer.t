@@ -85,8 +85,9 @@ XML
 
 is $out, $xml, 'XML writer';
 
-package MyStringWriter {
-    sub print { $_[0]->{out} .= $_[1]; }
+{ 
+  package MyStringWriter;
+  sub print { $_[0]->{out} .= $_[1] } 
 }
 
 my $string = bless { }, 'MyStringWriter';
@@ -95,5 +96,15 @@ $writer = PICA::Writer::XML->new( fh => $string, start => 0 );
 $writer->write($_) for map { bless $_, 'PICA::Data' } @pica_records;
 $writer->end;
 like $string->{out}, qr{^<record.+record>}sm, 'XML writer (to object, no start)';
+
+my (undef, $filename) = tempfile(OPEN => 0);
+pica_writer('plain', fh => $filename);
+ok -e $filename, 'write to file';
+
+eval { pica_writer('plain', fh => '') };
+ok $@, 'invalid filename';
+
+eval { pica_writer('plain', fh => {} ) };
+ok $@, 'invalid handle';
 
 done_testing;
