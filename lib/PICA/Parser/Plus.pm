@@ -20,7 +20,7 @@ sub new {
     my $ishandle = eval { fileno($input); };
     if ( !$@ && defined $ishandle ) {
         $self->{reader}   = $input;
-    } elsif ( -e $input ) {
+    } elsif ( (ref $input and ref $input eq 'SCALAR') or -e $input ) {
         open $self->{reader}, '<:encoding(UTF-8)', $input
             or croak "cannot read from file $input\n";
     } else {

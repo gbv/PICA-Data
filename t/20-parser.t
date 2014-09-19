@@ -77,13 +77,27 @@ SKIP: {
     }, 'Plus format UTF-8 from string';
 };
 
-eval { pica_parser('unknown') };
+# what can possibly go wrong...
+
+eval { pica_parser('doesnotexist') };
 ok $@, 'unknown parser';
 
 eval { pica_parser( xml => '' ) };
 ok $@, 'invalid handle';
 
-eval { pica_parser( plus => '' ) };
+eval { pica_parser( plus => [] ) };
 ok $@, 'invalid handle';
+
+eval { pica_parser( plain => bless({},'MyFooBar') ) };
+ok $@, 'invalid handle';
+
+ok pica_parser('plus', \"003@ \x{1F}01")->next;
+foreach ("0033 \x{1F}01", "003@/0 \x{1F}01") {
+    eval { pica_parser('plus', \$_)->next };
+    ok $@, 'invalid PICA field structure in PICA plus';
+    my  $field = $_; $field =~ s/\x{1F}/\$/g;
+    eval { pica_parser('plain', \$field)->next };
+    ok $@, 'invalid PICA field structure in PICA plain';
+}
 
 done_testing;
