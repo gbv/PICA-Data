@@ -7,6 +7,8 @@ our $VERSION = '0.23';
 use Carp qw(croak);
 use XML::LibXML::Reader;
 
+use parent 'PICA::Parser::Base';
+
 sub new {
     my ($class, $input) = @_;
 
@@ -33,19 +35,6 @@ sub new {
     }
 
     $self;
-}
-
-# duplicated in PICA::Data::Plus because no common superclass exists
-sub next {
-    my ($self) = @_;
-
-    # get last subfield from 003@ as id
-    if ( my $record = $self->next_record ) {
-        my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
-        return { _id => $id, record => $record };
-    }
-
-    return;
 }
 
 sub next_record {
@@ -83,34 +72,10 @@ __END__
 
 PICA::Parser::XML - PICA+ XML parser
 
-=head1 SYNOPSIS
+=head2 DESCRIPTION
 
-    use PICA::Parser::XML;
+See L<PICA::Parser::Base> for synopsis and details.
 
-    my $parser = PICA::Parser::XML->new( $filename );
-
-    while ( my $record_hash = $parser->next ) {
-        # do something
-    }
-
-=head1 METHODS
-
-=head2 new( $input )
-
-Initialize parser to read from a given XML file, handle (e.g. L<IO::Handle>),
-string reference, or XML string.
-
-=head2 next
-
-Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>.
-
-=head2 next_record
-
-Reads the next PICA+ record. Returns an array of field arrays.
-
-=head1 SEEALSO
-
-L<PICA::XMLParser>, included in the release of L<PICA::Record> implements
-another PICA+ XML format parser, not aligned with the L<Catmandu> framework.
+The counterpart of this module is L<PICA::Writer::XML>.
 
 =cut

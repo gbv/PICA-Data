@@ -54,34 +54,10 @@ __END__
 
 PICA::Parser::Plain - Plain PICA+ format parser
 
-=head1 SYNOPSIS
+=head2 DESCRIPTION
 
-    use PICA::Parser::Plain;
+See L<PICA::Parser::Base> for synopsis and details.
 
-    my $parser = PICA::Parser::Plain->new( $filename );
-
-    while ( my $record_hash = $parser->next ) {
-        # do something        
-    }
-
-=head1 METHODS
-
-=head2 new( $input )
-
-Initialize parser to read from a given file, handle (e.g. L<IO::Handle>), or
-string reference.
-
-=head2 next
-
-Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>.
-
-=head2 next_record
-
-Reads the next PICA+ record. Returns an array of field arrays.
-
-=head1 SEEALSO
-
-L<PICA::PlainParser>, included in the release of L<PICA::Record> implements
-another PICA+ format parser, not aligned with the L<Catmandu> framework.
+The counterpart of this module is L<PICA::Writer::Plain>.
 
 =cut
