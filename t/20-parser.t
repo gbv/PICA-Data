@@ -31,7 +31,7 @@ ok $parser->next_record, 'read from string reference';
 use PICA::Parser::Plus;
 $parser = pica_parser('plus' => './t/files/picaplus.dat');
 isa_ok $parser, 'PICA::Parser::Plus';
-$record = $parser->next();
+$record = $parser->next;
 ok $record->{_id} eq '1041318383', 'record _id';
 ok $record->{record}->[0][0] eq '001A', 'tag from first field';
 is_deeply $record->{record}->[0], ['001A', '', '0', '1240:04-09-13'], 'first field';
@@ -41,6 +41,12 @@ is_deeply $record->{record}->[3],
 my $count = 0;
 while( $parser->next ) { $count++ }
 is $count, 8, 'remaining records';
+
+open my $fh, '<', 't/files/picaplus.dat';
+$parser = PICA::Parser::Plus->new($fh);
+$count = 0;
+while( $parser->next ) { $count++ };
+is $count, 10, 'parse plus from file handle';
 
 use PICA::Parser::Plain;
 $parser = PICA::Parser::Plain->new( './t/files/plain.pica' );
