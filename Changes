@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+0.23  2014-09-19 12:12:23 CEST
     - removed dependency on Moo (close #6)
     - fixed PICA::Parser::Plus
 

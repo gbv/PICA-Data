@@ -8,25 +8,24 @@ PICA::Data - PICA record processing
 
 # SYNOPSIS
 
-    use PICA::Data ':all';
-    $parser = pica_parser( xml => @options );
-    $writer = pica_writer( plain => @options );
-   
-    use PICA::Parser::XML;
-    use PICA::Writer::Plain;
-    $parser = PICA::Parser::XML->new( @options );
-    $writer = PICA::Writer::Plain->new( @options );
+      use PICA::Data ':all';
+      $parser = pica_parser( xml => @options );
+      $writer = pica_writer( plain => @options );
+     
+      use PICA::Parser::XML;
+      use PICA::Writer::Plain;
+      $parser = PICA::Parser::XML->new( @options );
+      $writer = PICA::Writer::Plain->new( @options );
 
-    while ( my $record = $parser->next ) {
-        my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
-        my $holdings = pica_holdings($record);
-        my $items    = pica_holdings($record);
-        ...
-    }
-  
-    # parse single record from string
-    my $record = pica_parser('plain', \"...")->next;
-
+      while ( my $record = $parser->next ) {
+          my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+          my $holdings = pica_holdings($record);
+          my $items    = pica_holdings($record);
+          ...
+      }
+    
+      # parse single record from string
+      my $record = pica_parser('plain', \"...")->next;
 
 # DESCRIPTION
 
@@ -41,10 +40,10 @@ the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
 versa.
 
 Records in PICA::Data are encoded either as as array of arrays, the inner
-arrays representing PICA fields, or as an object with two fields, C<_id> and
-C<record>, the latter holding the record as array of arrays, and the former
-holding the record identifier, stored in field C<003@>, subfield C<0>. For
-instance a minimal record with just one field C<003@>:
+arrays representing PICA fields, or as an object with two fields, `_id` and
+`record`, the latter holding the record as array of arrays, and the former
+holding the record identifier, stored in field `003@`, subfield `0`. For
+instance a minimal record with just one field `003@`:
 
     {
       _id    => '12345X',
@@ -53,40 +52,44 @@ instance a minimal record with just one field C<003@>:
       ]
     }
 
-
 or in short form:
 
     [ [ '003@', undef, '0' => '12345X' ] ]
 
-
 PICA path expressions can be used to facilitate processing PICA+ records.
 
-# FUNCTIONS
+# CONSTRUCTORS
 
 ## pica\_parser( $type \[, @options\] )
 
 Create a PICA parsers object. Case of the type is ignored and additional
 parameters are passed to the parser's constructor.
 
-- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML)
-
-    Type `xml` or `picaxml` for PICA+ in XML
-
-- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus)
-
-    Type `plus` or `picaplus` for normalizes PICA+
-
-- [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain)
-
-    Type `plain` for plain, human-readable PICA+
+- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain) for type `plain` or `picaplain` (human-readable PICA+)
 
 ## pica\_writer( $type \[, @options\] )
 
 Create a PICA writer object in the same way as `pica_parser` with one of
 
-- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML)
-- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus)
-- [PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain)
+- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+
+## pica\_path( $path )
+
+Equivalent to `PICA::Path->new($path)`.
+
+# ACCESSORS
+
+The following function can also be called as method on a blessed PICA::Data
+record by stripping the `pica_...` prefix:
+
+    bless $record, 'PICA::Data';
+    $record->values($path);
+    $record->items;
+    ...
 
 ## pica\_values( $record, $path )
 
@@ -113,22 +116,6 @@ where the `_id` of each record contains the ILN (subfield `101@a`).
 
 Returns a list (as array reference) of item records (level 1),
 where the `_id` of each record contains the EPN (subfield `203@/**0`).
-
-## pica\_items( $record )
-
-## pica\_path( $path )
-
-Equivalent to `PICA::Path->new($path)`.
-
-# OBJECT ORIENTED INTERFACE
-
-All `pica_...` function that expect a record as first argument can also be called 
-as method on a blessed PICA::Data record by stripping the `pica_...` prefix:
-
-    bless $record, 'PICA::Data';
-    $record->values($path);
-    $record->items;
-    ...
 
 # CONTRIBUTORS
 
