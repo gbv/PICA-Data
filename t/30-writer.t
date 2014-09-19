@@ -24,15 +24,13 @@ my @pica_records = (
 
 my ($fh, $filename) = tempfile();
 my $writer = pica_writer( 'plain', fh => $fh );
-
 foreach my $record (@pica_records) {
     $writer->write($record);
 }
-
-close($fh);
+close $fh;
 
 my $out = do { local (@ARGV,$/)=$filename; <> };
-is $out, <<'PLAIN';
+is $out, <<'PLAIN', 'Plain writer';
 003@ $01041318383
 021A $aHello $$¥!
 
@@ -46,11 +44,10 @@ $writer = PICA::Writer::Plus->new( fh => $fh );
 foreach my $record (@pica_records) {
     $writer->write($record);
 }
-
-close($fh);
+close $fh;
 
 $out = do { local (@ARGV,$/)=$filename; <> };
-is $out, <<'PLUS';
+is $out, <<'PLUS', 'Plus Writer';
 003@ 01041318383021A aHello $¥!
 028C/01 dEmmaaGoldman
 PLUS
@@ -61,13 +58,12 @@ $writer = PICA::Writer::XML->new( fh => $fh );
 foreach my $record (@pica_records) {
     $writer->write($record);
 }
-
 $writer->end;
-close($fh);
+close $fh;
 
 $out = do { local (@ARGV,$/)=$filename; <> };
 
-is $out, <<'XML';
+my $xml = <<'XML';
 <?xml version="1.0" encoding="UTF-8"?>
 <collection xlmns="info:srw/schema/5/picaXML-v1.0">
 <record>
@@ -86,5 +82,18 @@ is $out, <<'XML';
 </record>
 </collection>
 XML
+
+is $out, $xml, 'XML writer';
+
+package MyStringWriter {
+    sub print { $_[0]->{out} .= $_[1]; }
+}
+
+my $string = bless { }, 'MyStringWriter';
+
+$writer = PICA::Writer::XML->new( fh => $string, start => 0 );
+$writer->write($_) for map { bless $_, 'PICA::Data' } @pica_records;
+$writer->end;
+like $string->{out}, qr{^<record.+record>}sm, 'XML writer (to object, no start)';
 
 done_testing;

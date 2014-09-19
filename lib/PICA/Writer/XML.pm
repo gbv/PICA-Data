@@ -4,43 +4,45 @@ use warnings;
 
 our $VERSION = '0.23';
 
-use Moo;
-with 'PICA::Writer::Handle';
+use parent 'PICA::Writer::Base';
 
-sub BUILD {
-    $_[0]->start;
+sub new {
+    my $self = PICA::Writer::Base::new(@_);
+    $self->start if $self->{start} // 1;
+    $self;
 }
 
 sub start {
-    print {$_[0]->fh} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    print {$_[0]->fh} "<collection xlmns=\"info:srw/schema/5/picaXML-v1.0\">\n";
+    my $fh = $_[0]->{fh};
+    $fh->print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    $fh->print("<collection xlmns=\"info:srw/schema/5/picaXML-v1.0\">\n");
 }
 
 sub _write_record {
     my ($self, $record) = @_;
-    my $fh = $self->fh;
+    my $fh = $self->{fh};
 
-    print $fh "<record>\n";
+    $fh->print("<record>\n");
     foreach my $field (@$record) {
-        # this will break on bad tag/occurrence values
-        print $fh "  <datafield tag=\"$field->[0]\"" . ( 
+        # this may break on invalid tag/occurrence values
+        $fh->print("  <datafield tag=\"$field->[0]\"" . ( 
                 defined $field->[1] && $field->[1] ne '' ?
                 " occurrence=\"$field->[1]\"" : ""
-            ) . ">\n";
+            ) . ">\n");
             for (my $i=2; $i<scalar @$field; $i+=2) {
                 my $value = $field->[$i+1];
                 $value =~ s/</&lt;/g;
                 $value =~ s/&/&amp;/g;
                 # TODO: disallowed code points (?)
-                print $fh "    <subfield code=\"$field->[$i]\">$value</subfield>\n";
+                $fh->print("    <subfield code=\"$field->[$i]\">$value</subfield>\n");
             } 
-        print $fh "  </datafield>\n";
+        $fh->print("  </datafield>\n");
     }
-    print $fh "</record>\n";
+    $fh->print("</record>\n");
 }
 
 sub end {
-    print {$_[0]->fh} "</collection>\n";
+    $_[0]->{fh}->print("</collection>\n");
 }
 
 1;
@@ -49,5 +51,23 @@ __END__
 =head1 NAME
 
 PICA::Writer::XML - PICA+ XML format serializer
+
+=head2 DESCRIPTION
+
+See L<PICA::Writer::Base> for synopsis and details.
+
+The counterpart of this module is L<PICA::Parser::XML>.
+
+=head2 METHODS
+
+In addition to C<write>, this writer also contains methods C<start> and C<end>
+to emit an XML header with start tag C<< <collection> >> or an end tag,
+respectively. The start method is automatically called on construction, unless
+suppressed with option C<< start => 0 >>:
+
+    my $writer = PICA::Writer::XML->new( fh => $file, start => 0 );
+    $writer->write( $record ); # no <collection> start tag
+
+The C<end> method does not close the underlying file handle.
 
 =cut
