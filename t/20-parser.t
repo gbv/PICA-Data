@@ -29,7 +29,7 @@ $parser = PICA::Parser::XML->new(\$xml);
 ok $parser->next_record, 'read from string reference';
 
 use PICA::Parser::Plus;
-$parser = pica_parser('plus' => './t/files/picaplus.dat');
+$parser = pica_parser( plus => './t/files/picaplus.dat' );
 isa_ok $parser, 'PICA::Parser::Plus';
 $record = $parser->next;
 ok $record->{_id} eq '1041318383', 'record _id';
@@ -42,8 +42,9 @@ my $count = 0;
 while( $parser->next ) { $count++ }
 is $count, 8, 'remaining records';
 
+# parse from file handle
 open my $fh, '<', 't/files/picaplus.dat';
-$parser = PICA::Parser::Plus->new($fh);
+$parser = PICA::Parser::Plus->new( fh => $fh);
 $count = 0;
 while( $parser->next ) { $count++ };
 is $count, 10, 'parse plus from file handle';
