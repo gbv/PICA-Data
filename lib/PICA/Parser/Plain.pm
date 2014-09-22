@@ -11,7 +11,7 @@ use constant END_OF_RECORD      => "\N{LINE FEED}";
 
 use Carp qw(croak);
 
-use parent 'PICA::Parser::Plus';
+use parent 'PICA::Parser::Base';
 
 sub next_record {
     my ($self) = @_;
