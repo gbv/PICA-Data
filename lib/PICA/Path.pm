@@ -2,7 +2,7 @@ package PICA::Path;
 use strict;
 use warnings;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Carp qw(confess);
 
@@ -220,7 +220,7 @@ Returns the C<$field> on success.
 Returns a list of matching subfields (optionally trimmed by from and length)
 without inspection of field and occurrence values.
 
-=head2 stringify( [ short ] )
+=head2 stringify( [ $short ] )
 
 Stringifies the PICA path to normalized form. Subfields are separated with
 C<$>, unless called as C<stringify(1)> or the first subfield is C<$>.

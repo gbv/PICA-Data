@@ -5,8 +5,8 @@ use warnings;
 our $VERSION = '0.24';
 
 use Exporter 'import';
-our @EXPORT_OK = map { "pica_$_" } 
-                 qw(parser writer values value fields holdings items path);
+our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
+    pica_values pica_value pica_fields pica_holdings pica_items);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]); 
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -166,6 +166,24 @@ sub _pica_module {
     }
 }
 
+sub pica_xml_struct {
+    my ($xml, %options) = @_;
+    my $record;
+
+    foreach my $f (@{$xml->[2]}) {
+        next unless $f->[0] eq 'datafield';
+        push @$record, [
+            map ( { $f->[1]->{$_} } qw(tag occurrence) ),
+            map ( { $_->[1]->{code} => $_->[2]->[0] } @{$f->[2]} )
+        ]
+    }
+
+    my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @$record;
+    $record = { _id => $id, record => $record };
+    bless $record, 'PICA::Data' if !!$options{bless};
+    return $record;
+}
+
 1;
 __END__
 
@@ -303,6 +321,11 @@ Equivalent to L<<PICA::Path->new($path)|PICA::Path>>.
 =head2 pica_holdings( $record )
 
 =head2 pica_head2s( $record )
+
+=head2 pica_xml_struct( $xml, %options )
+
+Convert PICA-XML, expressed in L<XML::Struct> structure into an (optionally
+blessed) PICA record structure.
 
 =head1 ACCESSORS
 
