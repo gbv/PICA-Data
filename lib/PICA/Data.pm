@@ -244,14 +244,12 @@ or in short form:
 PICA path expressions (see L<PICA::Path>) can be used to facilitate processing
 PICA+ records.
 
-=head2 FUNCTIONS
+=head1 FUNCTIONS
 
 The following functions can be exported on request (use export tag C<:all> to
 get all of them):
 
-=over
-
-=item pica_parser( $type [, @options] )
+=head2 pica_parser( $type [, @options] )
 
 Create a PICA parsers object. Case of the type is ignored and additional
 parameters are passed to the parser's constructor:
@@ -339,11 +337,11 @@ where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
 
 Johann Rolschewski, C<< <rolschewski@gmail.com> >>
 
-Jakob Voß C<< <voss@gbv.de> >>
+Jakob Voss C<< <voss@gbv.de> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2014- Johann Rolschewski and Jakob Voß
+Copyright 2014- Johann Rolschewski and Jakob Voss
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

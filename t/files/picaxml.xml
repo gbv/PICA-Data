@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <collection xmlns="info:srw/schema/5/picaXML-v1.0">
-<record xmlns="info:srw/schema/5/picaXML-v1.0">
+<record>
   <datafield tag="001@">
     <subfield code="0">703</subfield>
   </datafield>
