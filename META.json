@@ -26,7 +26,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.037"
+            "Module::Build::Tiny" : "0.039"
          }
       },
       "develop" : {
@@ -54,7 +54,7 @@
          "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "0.23",
+   "version" : "0.24",
    "x_contributors" : [
       "Jakob Voss <jakob@nichtich.de>",
       "Jakob Voss <voss@gbv.de>",

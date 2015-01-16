@@ -18,10 +18,20 @@ PICA::Data - PICA record processing
       $writer = PICA::Writer::Plain->new( @options );
 
       while ( my $record = $parser->next ) {
-          my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+          
+          # function accessors
+          my $ppn      = pica_value($record, '003@0');
           my $holdings = pica_holdings($record);
-          my $items    = pica_holdings($record);
+          my $items    = pica_items($record);
           ...
+
+          # object accessors (if parser option 'bless' enabled)
+          my $ppn      = $record->{_id};
+          my $ppn      = $record->value('003@0');
+          my $holdings = $record->holdings;
+          my $items    = $record->items;
+          ...
+
       }
     
       # parse single record from string
@@ -56,14 +66,18 @@ or in short form:
 
     [ [ '003@', undef, '0' => '12345X' ] ]
 
-PICA path expressions can be used to facilitate processing PICA+ records.
+PICA path expressions (see [PICA::Path](https://metacpan.org/pod/PICA::Path)) can be used to facilitate processing
+PICA+ records.
 
-# CONSTRUCTORS
+# FUNCTIONS
+
+The following functions can be exported on request (use export tag `:all` to
+get all of them):
 
 ## pica\_parser( $type \[, @options\] )
 
 Create a PICA parsers object. Case of the type is ignored and additional
-parameters are passed to the parser's constructor.
+parameters are passed to the parser's constructor:
 
 - [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
@@ -79,40 +93,48 @@ Create a PICA writer object in the same way as `pica_parser` with one of
 
 ## pica\_path( $path )
 
-Equivalent to `PICA::Path->new($path)`.
+Equivalent to [<PICA::Path-](https://metacpan.org/pod/<PICA::Path-)new($path)|PICA::Path>>.
+
+## pica\_values( $record, $path )
+
+## pica\_value( $record, $path )
+
+## pica\_fields( $record, $path )
+
+## pica\_holdings( $record )
+
+## pica\_head2s( $record )
+
+## pica\_xml\_struct( $xml, %options )
+
+Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into an (optionally
+blessed) PICA record structure.
 
 # ACCESSORS
 
-The following function can also be called as method on a blessed PICA::Data
-record by stripping the `pica_...` prefix:
+All accessors of `PICA::Data` are also available as ["FUNCTIONS"](#functions), prefixed
+with `pica_` (see ["SYNOPSIS"](#synopsis)).
 
-    bless $record, 'PICA::Data';
-    $record->values($path);
-    $record->items;
-    ...
-
-## pica\_values( $record, $path )
+## values( $path )
 
 Extract a list of subfield values from a PICA record based on a PICA path
 expression.
 
-## pica\_value( $record, $path )
+## value( $path )
 
-Same as `pica_values` but only returns the first value. Can also be called as
-`value` on a blessed PICA::Data record.
+Same as `values` but only returns the first value.
 
-## pica\_fields( $record, $path )
+## fields( $path )
 
 Returns a PICA record limited to fields specified in a PICA path expression.
-Always returns an array reference. Can also be called as `fields` on a blessed
-PICA::Data record. 
+Always returns an array reference.
 
-## pica\_holdings( $record )
+## holdings
 
 Returns a list (as array reference) of local holding records (level 1 and 2),
 where the `_id` of each record contains the ILN (subfield `101@a`).
 
-## pica\_items( $record )
+## items
 
 Returns a list (as array reference) of item records (level 1),
 where the `_id` of each record contains the EPN (subfield `203@/**0`).
@@ -123,21 +145,18 @@ Johann Rolschewski, `<rolschewski@gmail.com>`
 
 Jakob Voss `<voss@gbv.de>`
 
-# COPYRIGHT
+# COPYRIGHT AND LICENSE
 
 Copyright 2014- Johann Rolschewski and Jakob Voss
-
-# LICENSE
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 # SEE ALSO
 
-Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
+- [PICA::Record](https://metacpan.org/pod/PICA::Record) (deprecated) implemented an alternative framework for
+processing PICA+ records.
+- Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
 for instance to convert PICA XML to plain PICA+:
 
-    catmandu convert PICA --type xml to PICA --type plain < picadata.xml
-
-[PICA::Record](https://metacpan.org/pod/PICA::Record) implements an alternative framework for processing PICA+
-records but development of the module is stalled.
+        catmandu convert PICA --type xml to PICA --type plain < picadata.xml
