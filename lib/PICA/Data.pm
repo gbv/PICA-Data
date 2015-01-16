@@ -2,7 +2,7 @@ package PICA::Data;
 use strict;
 use warnings;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Exporter 'import';
 our @EXPORT_OK = map { "pica_$_" } 
@@ -193,10 +193,20 @@ PICA::Data - PICA record processing
     $writer = PICA::Writer::Plain->new( @options );
 
     while ( my $record = $parser->next ) {
-        my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+        
+        # function accessors
+        my $ppn      = pica_value($record, '003@0');
         my $holdings = pica_holdings($record);
-        my $items    = pica_holdings($record);
+        my $items    = pica_items($record);
         ...
+
+        # object accessors (if parser option 'bless' enabled)
+        my $ppn      = $record->{_id};
+        my $ppn      = $record->value('003@0');
+        my $holdings = $record->holdings;
+        my $items    = $record->items;
+        ...
+
     }
   
     # parse single record from string
@@ -231,14 +241,20 @@ or in short form:
 
     [ [ '003@', undef, '0' => '12345X' ] ]
 
-PICA path expressions can be used to facilitate processing PICA+ records.
+PICA path expressions (see L<PICA::Path>) can be used to facilitate processing
+PICA+ records.
 
-=head1 CONSTRUCTORS
+=head2 FUNCTIONS
 
-=head2 pica_parser( $type [, @options] )
+The following functions can be exported on request (use export tag C<:all> to
+get all of them):
+
+=over
+
+=item pica_parser( $type [, @options] )
 
 Create a PICA parsers object. Case of the type is ignored and additional
-parameters are passed to the parser's constructor.
+parameters are passed to the parser's constructor:
 
 =over
 
@@ -266,7 +282,6 @@ Create a PICA writer object in the same way as C<pica_parser> with one of
 
 L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
-
 =item 
 
 L<PICA::Writer::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
@@ -279,40 +294,43 @@ L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =head2 pica_path( $path )
 
-Equivalent to C<< PICA::Path->new($path) >>.
+Equivalent to L<<PICA::Path->new($path)|PICA::Path>>.
+
+=head2 pica_values( $record, $path )
+
+=head2 pica_value( $record, $path )
+
+=head2 pica_fields( $record, $path )
+
+=head2 pica_holdings( $record )
+
+=head2 pica_head2s( $record )
 
 =head1 ACCESSORS
 
-The following function can also be called as method on a blessed PICA::Data
-record by stripping the C<pica_...> prefix:
+All accessors of C<PICA::Data> are also available as L</FUNCTIONS>, prefixed
+with C<pica_> (see L</SYNOPSIS>).
 
-    bless $record, 'PICA::Data';
-    $record->values($path);
-    $record->items;
-    ...
-
-=head2 pica_values( $record, $path )
+=head2 values( $path )
 
 Extract a list of subfield values from a PICA record based on a PICA path
 expression.
 
-=head2 pica_value( $record, $path )
+=head2 value( $path )
 
-Same as C<pica_values> but only returns the first value. Can also be called as
-C<value> on a blessed PICA::Data record.
+Same as C<values> but only returns the first value.
 
-=head2 pica_fields( $record, $path )
+=head2 fields( $path )
 
 Returns a PICA record limited to fields specified in a PICA path expression.
-Always returns an array reference. Can also be called as C<fields> on a blessed
-PICA::Data record. 
+Always returns an array reference.
 
-=head2 pica_holdings( $record )
+=head2 holdings
 
 Returns a list (as array reference) of local holding records (level 1 and 2),
 where the C<_id> of each record contains the ILN (subfield C<101@a>).
 
-=head2 pica_items( $record )
+=head2 items
 
 Returns a list (as array reference) of item records (level 1),
 where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
@@ -321,25 +339,31 @@ where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
 
 Johann Rolschewski, C<< <rolschewski@gmail.com> >>
 
-Jakob Voss C<< <voss@gbv.de> >>
+Jakob Voß C<< <voss@gbv.de> >>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2014- Johann Rolschewski and Jakob Voss
-
-=head1 LICENSE
+Copyright 2014- Johann Rolschewski and Jakob Voß
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =head1 SEE ALSO
 
+=over
+
+=item
+
+L<PICA::Record> (deprecated) implemented an alternative framework for
+processing PICA+ records.
+
+=item 
+
 Use L<Catmandu::PICA> for processing PICA records with the L<Catmandu> toolkit,
 for instance to convert PICA XML to plain PICA+:
 
    catmandu convert PICA --type xml to PICA --type plain < picadata.xml
 
-L<PICA::Record> implements an alternative framework for processing PICA+
-records but development of the module is stalled.
+=back
 
 =cut

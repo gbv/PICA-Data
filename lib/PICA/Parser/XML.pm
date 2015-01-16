@@ -2,7 +2,7 @@ package PICA::Parser::XML;
 use strict;
 use warnings;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Carp qw(croak);
 use XML::LibXML::Reader;
@@ -10,9 +10,11 @@ use XML::LibXML::Reader;
 use parent 'PICA::Parser::Base';
 
 sub new {
-    my ($class, $input) = @_;
+    my ($class, $input, %options) = @_;
 
-    my $self = bless { }, $class;
+    my $self = bless { 
+        bless => !!$options{bless},
+    }, $class;
     
     # check for file or filehandle
     my $ishandle = eval { fileno($input); };

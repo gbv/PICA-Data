@@ -2,7 +2,7 @@ package PICA::Parser::Base;
 use strict;
 use warnings;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Carp qw(croak);
 
@@ -12,7 +12,9 @@ sub new {
 
     my $input = $options{fh} || \*STDIN;
 
-    my $self = bless { }, $class;
+    my $self = bless { 
+        bless => !!$options{bless},
+    }, $class;
 
     # check for file or filehandle
     my $ishandle = eval { fileno($input); };
@@ -34,7 +36,9 @@ sub next {
     # get last subfield from 003@ as id
     if ( my $record = $self->next_record ) {
         my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
-        return { _id => $id, record => $record };
+        $record = { _id => $id, record => $record };
+        bless $record, 'PICA::Data' if $self->{bless};
+        return $record;
     }
 
     return;
@@ -52,13 +56,13 @@ PICA::Parser::Base - abstract base class of PICA parsers
     use PICA::Parser::Plain;
     my $parser = PICA::Parser::Plain->new( $filename );
 
-    while ( my $record_hash = $parser->next ) {
+    while ( my $record = $parser->next ) {
         # do something        
     }
 
     use PICA::Parser::Plus;
-    my $parser = PICA::Parser::Plus->new( $filename );
-    ...
+    my $parser = PICA::Parser::Plus->new( $filename, bless => 1 );
+    ... # records will be instances of PICA::Data
 
     use PICA::Parser::XML;
     my $parser = PICA::Parser::XML->new( $filename, start => 1 );
@@ -84,22 +88,24 @@ Use one of the following subclasses instead:
 =head2 new( [ $input | fh => $input ] [ %options ] )
 
 Initialize parser to read from a given file, handle (e.g. L<IO::Handle>), or
-string reference. The L<PICA::Parser::XML> also detects plain XML strings.
+string reference. L<PICA::Parser::XML> also detects plain XML strings. The
+common option C<blessed> (disabled by default) can be used to return records as
+instances of L<PICA::Data>.
 
 =head2 next
 
-Reads the next PICA+ record. Returns a hash with keys C<_id> and C<record>,
-as defined in L<PICA::Data>.
+Reads the next PICA+ record. Returns a (optionally blessed) hash with keys
+C<_id> and C<record>, as defined in L<PICA::Data>.
 
 =head2 next_record
 
 Reads the next PICA+ record. Returns an array of field arrays.
 
-=head1 SEEALSO
+=head1 SEE ALSO
 
 See L<Catmandu::Importer::PICA> for usage of this module in L<Catmandu>.
 
 Alternative PICA parsers had been implemented as L<PICA::PlainParser> and
-L<PICA::XMLParser> and included in the release of L<PICA::Record> (outdated).
+L<PICA::XMLParser> and included in the release of L<PICA::Record> (deprecated).
 
 =cut
