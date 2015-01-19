@@ -224,7 +224,7 @@ Austauschformat fuer Bibliotheken (MAB). In addition to PICA+ in CBS there is
 the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
 versa.
 
-Records in PICA::Data are encoded either as as array of arrays, the inner
+Records in PICA::Data are encoded either as array of arrays, the inner
 arrays representing PICA fields, or as an object with two fields, C<_id> and
 C<record>, the latter holding the record as array of arrays, and the former
 holding the record identifier, stored in field C<003@>, subfield C<0>. For
