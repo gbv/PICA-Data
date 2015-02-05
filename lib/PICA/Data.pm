@@ -221,8 +221,8 @@ PICA::Data - PICA record processing
 =head1 SYNOPSIS
 
     use PICA::Data ':all';
-    $parser = pica_parser( xml => @options );
-    $writer = pica_writer( plain => @options );
+    $parser = pica_parser( xml => 'picadata.xml' );
+    $writer = pica_writer( plain => \*STDOUT );
    
     use PICA::Parser::XML;
     use PICA::Writer::Plain;
@@ -300,8 +300,8 @@ get all of them):
 
 =head2 pica_parser( $type [, @options] )
 
-Create a PICA parsers object. Case of the type is ignored and additional
-parameters are passed to the parser's constructor:
+Create a PICA parsers object (see L<PICA::Parser::Base>). Case of the type is
+ignored and additional parameters are passed to the parser's constructor:
 
 =over
 
@@ -326,7 +326,8 @@ blessed) PICA record structure.
 
 =head2 pica_writer( $type [, @options] )
 
-Create a PICA writer object in the same way as C<pica_parser> with one of
+Create a PICA writer object (see L<PICA::Writer::Base>) in the same way as
+C<pica_parser> with one of
 
 =over
 
