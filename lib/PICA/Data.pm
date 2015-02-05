@@ -210,6 +210,7 @@ PICA::Data - PICA record processing
     $parser = PICA::Parser::XML->new( @options );
     $writer = PICA::Writer::Plain->new( @options );
 
+    # parse records
     while ( my $record = $parser->next ) {
         
         # function accessors
@@ -225,6 +226,8 @@ PICA::Data - PICA record processing
         my $items    = $record->items;
         ...
 
+        # write record
+        $writer->write($record);
     }
   
     # parse single record from string
