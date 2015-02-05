@@ -2,7 +2,7 @@ package PICA::Parser::Plus;
 use strict;
 use warnings;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use charnames qw< :full >;
 use Carp qw(croak);

@@ -9,8 +9,8 @@ PICA::Data - PICA record processing
 # SYNOPSIS
 
       use PICA::Data ':all';
-      $parser = pica_parser( xml => @options );
-      $writer = pica_writer( plain => @options );
+      $parser = pica_parser( xml => 'picadata.xml' );
+      $writer = pica_writer( plain => \*STDOUT );
      
       use PICA::Parser::XML;
       use PICA::Writer::Plain;
@@ -35,6 +35,15 @@ PICA::Data - PICA record processing
 
           # write record
           $writer->write($record);
+          
+          # write record via method (if blessed)
+          $record->write($writer);
+          $record->write( xml => @options );
+          $record->write; # default "plain" writer
+
+          # stringify record
+          my $plain = $record->string;
+          my $xml = $record->string('xml');
       }
     
       # parse single record from string
@@ -79,8 +88,8 @@ get all of them):
 
 ## pica\_parser( $type \[, @options\] )
 
-Create a PICA parsers object. Case of the type is ignored and additional
-parameters are passed to the parser's constructor:
+Create a PICA parsers object (see [PICA::Parser::Base](https://metacpan.org/pod/PICA::Parser::Base)). Case of the type is
+ignored and additional parameters are passed to the parser's constructor:
 
 - [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
@@ -93,7 +102,8 @@ blessed) PICA record structure.
 
 ## pica\_writer( $type \[, @options\] )
 
-Create a PICA writer object in the same way as `pica_parser` with one of
+Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::Base)) in the same way as
+`pica_parser` with one of
 
 - [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus) for type `plus` or `picaplus` (normalized PICA+)
@@ -156,6 +166,17 @@ where the `_id` of each record contains the ILN (subfield `101@a`).
 
 Returns a list (as array reference) of item records (level 1),
 where the `_id` of each record contains the EPN (subfield `203@/**0`).
+
+# METHODS
+
+## write( \[ $type \[, @options\] \] | $writer )
+
+Write PICA record with given [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::) or
+PICA::Writer::Plain by default. This method is a shortcut for blessed
+record objects:
+
+    pica_writer( xml => $file )->write( $record );
+    $record->write( xml => $file ); # equivalent if $record is blessed 
 
 # CONTRIBUTORS
 
