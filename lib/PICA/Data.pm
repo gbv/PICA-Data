@@ -291,6 +291,11 @@ L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =back
 
+=head2 pica_xml_struct( $xml, %options )
+
+Convert PICA-XML, expressed in L<XML::Struct> structure into an (optionally
+blessed) PICA record structure.
+
 =head2 pica_writer( $type [, @options] )
 
 Create a PICA writer object in the same way as C<pica_parser> with one of
@@ -313,22 +318,32 @@ L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =head2 pica_path( $path )
 
-Equivalent to L<<PICA::Path->new($path)|PICA::Path>>.
+Equivalent to L<PICA::Path>-E<gt>new($path).
 
 =head2 pica_values( $record, $path )
 
+Extract a list of subfield values from a PICA record based on a PICA path
+expression. Also available as accessor C<values($path)>.
+
 =head2 pica_value( $record, $path )
+
+Extract the first subfield values from a PICA record based on a PICA path
+expression. Also available as accessor C<value($path)>.
 
 =head2 pica_fields( $record, $path )
 
+Returns a PICA record (or empty array reference) limited to fields specified in
+a PICA path expression. Also available as accessor C<fields($path)>.
+
 =head2 pica_holdings( $record )
 
-=head2 pica_head2s( $record )
+Returns a list (as array reference) of local holding records. Also available as
+accessor C<holdings>.
 
-=head2 pica_xml_struct( $xml, %options )
+=head2 pica_items( $record )
 
-Convert PICA-XML, expressed in L<XML::Struct> structure into an (optionally
-blessed) PICA record structure.
+Returns a list (as array reference) of item records. Also available as
+accessor C<items>.
 
 =head1 ACCESSORS
 
