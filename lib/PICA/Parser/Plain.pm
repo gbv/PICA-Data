@@ -38,9 +38,32 @@ sub next_record {
             croak 'ERROR: no valid PICA field structure';
         }
 
-        my @subfields = split /\$([^\$])/, $data;
+        # data is byte sequence, no character sequence!
+        my @subfields = split /\$(\$+|.)/, $data;
         shift @subfields;
-        push @subfields, '' if @subfields % 2;
+        push @subfields, '' if @subfields % 2; # last subfield without value
+
+        if ($data =~ /\$\$/) {
+            my @tokens = (shift @subfields, shift @subfields);
+            while (@subfields) {
+                my $code  = shift @subfields;
+                my $value = shift @subfields;
+                if  ($code =~ /^\$+$/) {
+                    my $length = length $code;
+                    $code =~ s/\$\$/\$/g;
+                    if ($length % 2) {
+                        $tokens[-1] .= "$code$value";
+                        next;
+                    } else {
+                        $tokens[-1] .= $code;
+                        $code = substr $value, 0, 1; 
+                        $value = substr $value, 1;
+                    }
+                }
+                push @tokens, $code, $value;
+            }
+            @subfields = @tokens;
+        }
 
         push @record, [ $tag, $occurence, @subfields ];
     }

@@ -1,6 +1,9 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - fix parsing double-encoded $$ in plain format
+    - support writing to scalar
+    - new methods write and string
 
 0.25  2015-02-05 10:26:29 CET
     - documentation

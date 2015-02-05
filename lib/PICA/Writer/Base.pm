@@ -20,6 +20,9 @@ sub new {
         } else {
             croak "cannot open file for writing: $fh\n";
         }
+    } elsif (reftype $fh eq 'SCALAR' and !blessed $fh) {
+        open(my $handle, '>>', $fh);
+        $fh = $handle; 
     } elsif (!openhandle($fh) and !(blessed $fh && $fh->can('print'))) {
         croak 'expect filehandle or object with method print!'
     }    

@@ -59,7 +59,7 @@ $record = $parser->next;
 isa_ok $record, 'PICA::Data';
 is $record->{record}->[4]->[7], '柳经纬主编;', 'unicode from plain pica';
 is_deeply $record->{record}->[9],
-    [ '145Z', '40', 'a', '$$', 'b', 'test$$', 'c', '...' ], 'sub field with $';
+    [ '145Z', '40', 'a', '$', 'b', 'test$', 'c', '...' ], 'sub field with $';
 is_deeply $record->{record}->[13],
     [ '203@', '01', 0 => '917400194', x => '', y => '' ], 'empty subfields';
 ok !$parser->next, 'last record';

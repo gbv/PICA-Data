@@ -13,7 +13,7 @@ our $ILN_PATH = PICA::Path->new('101@a');
 our $EPN_PATH = PICA::Path->new('203@/**0');
 
 use Carp qw(croak);
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
 use List::Util qw(first);
 use IO::Handle;
 use PICA::Path;
@@ -166,6 +166,25 @@ sub _pica_module {
     }
 }
 
+sub write {
+    my $pica = shift;
+    my $writer = $_[0];
+    unless (blessed $writer) {
+        $writer = pica_writer(@_ ? @_ : 'plain');
+    }
+    $writer->write($pica);
+}
+
+sub string {
+    my ($pica, $type, %options) = @_;
+    my $string = "";
+    $type ||= 'plain';
+    $options{fh} = \$string;
+    $options{start} //= 0;
+    pica_writer( $type => %options )->write($pica);
+    return $string;
+}
+
 sub pica_xml_struct {
     my ($xml, %options) = @_;
     my $record;
@@ -228,6 +247,15 @@ PICA::Data - PICA record processing
 
         # write record
         $writer->write($record);
+        
+        # write record via method (if blessed)
+        $record->write($writer);
+        $record->write( xml => @options );
+        $record->write; # default "plain" writer
+
+        # stringify record
+        my $plain = $record->string;
+        my $xml = $record->string('xml');
     }
   
     # parse single record from string
@@ -373,7 +401,18 @@ where the C<_id> of each record contains the ILN (subfield C<101@a>).
 
 Returns a list (as array reference) of item records (level 1),
 where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
- 
+
+=head1 METHODS
+
+=head2 write( [ $type [, @options] ] | $writer )
+
+Write PICA record with given L<PICA::Writer::Base|PICA::Writer::> or
+PICA::Writer::Plain by default. This method is a shortcut for blessed
+record objects:
+
+    pica_writer( xml => $file )->write( $record );
+    $record->write( xml => $file ); # equivalent if $record is blessed 
+
 =head1 CONTRIBUTORS
 
 Johann Rolschewski, C<< <rolschewski@gmail.com> >>

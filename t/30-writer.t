@@ -1,7 +1,7 @@
 use strict;
 use Test::More;
 
-use PICA::Data qw(pica_writer);
+use PICA::Data qw(pica_writer pica_parser);
 use PICA::Writer::Plain;
 use PICA::Writer::Plus;
 use PICA::Writer::XML;
@@ -29,14 +29,16 @@ foreach my $record (@pica_records) {
 }
 close $fh;
 
-my $out = do { local (@ARGV,$/)=$filename; <> };
-is $out, <<'PLAIN', 'Plain writer';
+my $PLAIN = <<'PLAIN';
 003@ $01041318383
 021A $aHello $$¥!
 
 028C/01 $dEmma$aGoldman
 
 PLAIN
+
+my $out = do { local (@ARGV,$/)=$filename; <> };
+is $out, $PLAIN, 'Plain writer';
 
 ($fh, $filename) = tempfile();
 $writer = PICA::Writer::Plus->new( fh => $fh );
@@ -84,6 +86,18 @@ my $xml = <<'XML';
 XML
 
 is $out, $xml, 'XML writer';
+
+my $s = "";
+foreach my $record (@pica_records) {
+    bless $record, 'PICA::Data';
+    $record->write( plain => \$s );
+
+    my $s = $record->string;
+    $s = encode('UTF-8', $s);
+    my $r = pica_parser('plain', \$s)->next;
+    is_deeply $r->{record}, $record, 'record->string';
+}
+is $s, $PLAIN, 'record->write';
 
 { 
   package MyStringWriter;
