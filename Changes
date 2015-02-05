@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - documentation
 
 0.24  2015-01-16 14:25:24 CET
     - new function pica_xml_struct

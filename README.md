@@ -17,6 +17,7 @@ PICA::Data - PICA record processing
       $parser = PICA::Parser::XML->new( @options );
       $writer = PICA::Writer::Plain->new( @options );
 
+      # parse records
       while ( my $record = $parser->next ) {
           
           # function accessors
@@ -32,6 +33,8 @@ PICA::Data - PICA record processing
           my $items    = $record->items;
           ...
 
+          # write record
+          $writer->write($record);
       }
     
       # parse single record from string
@@ -49,7 +52,7 @@ Austauschformat fuer Bibliotheken (MAB). In addition to PICA+ in CBS there is
 the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
 versa.
 
-Records in PICA::Data are encoded either as as array of arrays, the inner
+Records in PICA::Data are encoded either as array of arrays, the inner
 arrays representing PICA fields, or as an object with two fields, `_id` and
 `record`, the latter holding the record as array of arrays, and the former
 holding the record identifier, stored in field `003@`, subfield `0`. For
@@ -83,6 +86,11 @@ parameters are passed to the parser's constructor:
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
 - [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain) for type `plain` or `picaplain` (human-readable PICA+)
 
+## pica\_xml\_struct( $xml, %options )
+
+Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into an (optionally
+blessed) PICA record structure.
+
 ## pica\_writer( $type \[, @options\] )
 
 Create a PICA writer object in the same way as `pica_parser` with one of
@@ -93,22 +101,32 @@ Create a PICA writer object in the same way as `pica_parser` with one of
 
 ## pica\_path( $path )
 
-Equivalent to [<PICA::Path-](https://metacpan.org/pod/<PICA::Path-)new($path)|PICA::Path>>.
+Equivalent to [PICA::Path](https://metacpan.org/pod/PICA::Path)->new($path).
 
 ## pica\_values( $record, $path )
 
+Extract a list of subfield values from a PICA record based on a PICA path
+expression. Also available as accessor `values($path)`.
+
 ## pica\_value( $record, $path )
+
+Extract the first subfield values from a PICA record based on a PICA path
+expression. Also available as accessor `value($path)`.
 
 ## pica\_fields( $record, $path )
 
+Returns a PICA record (or empty array reference) limited to fields specified in
+a PICA path expression. Also available as accessor `fields($path)`.
+
 ## pica\_holdings( $record )
 
-## pica\_head2s( $record )
+Returns a list (as array reference) of local holding records. Also available as
+accessor `holdings`.
 
-## pica\_xml\_struct( $xml, %options )
+## pica\_items( $record )
 
-Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into an (optionally
-blessed) PICA record structure.
+Returns a list (as array reference) of item records. Also available as
+accessor `items`.
 
 # ACCESSORS
 
