@@ -2,7 +2,7 @@ package PICA::Parser::Plain;
 use strict;
 use warnings;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 use charnames qw(:full);
 use constant SUBFIELD_INDICATOR => '$';
