@@ -1,19 +1,22 @@
 use strict;
 use warnings;
 use Test::More;
-
+use Scalar::Util qw(blessed);
 use PICA::Data ':all';
 
 my $record = pica_parser('plain', "t/files/bgb.example")->next;
-bless $record, 'PICA::Data';
+ok !blessed(pica_items($record)->[0]), 'not blessed';
 
-my $items    = $record->items;
+bless $record, 'PICA::Data';
+my $items = $record->items;
 is scalar @$items, 353, 'items';
+isa_ok $items->[0], 'PICA::Data';
 is $items->[0]->{_id}, 851700055, 'epn';
 
 my $holdings = $record->holdings;
 
 is scalar @$holdings, 56, 'holdings';
+isa_ok $holdings->[0], 'PICA::Data';
 is $holdings->[0]->{_id}, 252, 'iln';
 is $holdings->[-1]->{_id}, 164, 'iln';
 

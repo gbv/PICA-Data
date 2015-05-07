@@ -2,7 +2,7 @@ package PICA::Data;
 use strict;
 use warnings;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
@@ -62,7 +62,8 @@ sub pica_value {
 
 sub pica_items {
     my ($record) = @_;
-
+    
+    my $blessed = blessed($record);
     $record = $record->{record} if reftype $record eq 'HASH';
     my (@items, $current, $occurrence);
 
@@ -92,12 +93,17 @@ sub pica_items {
 
     push @items, $current if $current;
 
+    if ($blessed) {
+        bless $_, $blessed for @items; 
+    }
+
     return \@items;
 }
 
 sub pica_holdings {
     my ($record) = @_;
 
+    my $blessed = blessed($record);
     $record = $record->{record} if reftype $record eq 'HASH';
     my (@holdings, $field_buffer, $iln);
 
@@ -121,6 +127,10 @@ sub pica_holdings {
 
     if (@$field_buffer) {
         push @holdings, { record => $field_buffer, _id => $iln };
+    }
+
+    if ($blessed) {
+        bless $_, $blessed for @holdings; 
     }
 
     return \@holdings;

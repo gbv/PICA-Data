@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - bless holdings and items (close #11)
 
 0.26  2015-02-05 12:17:28 CET
     - fix parsing double-encoded $$ in plain format
