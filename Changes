@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+0.27  2015-05-07 16:08:19 CEST
     - bless holdings and items (close #11)
 
 0.26  2015-02-05 12:17:28 CET
