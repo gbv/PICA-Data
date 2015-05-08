@@ -4,7 +4,7 @@ use Test::More;
 use PICA::Data ':all';
 
 use PICA::Parser::Plain;
-my $record = PICA::Parser::Plain->new( './t/files/plain.pica' )->next;
+my $record = PICA::Parser::Plain->new( './t/files/pica.plain' )->next;
 
 foreach ('019@', pica_path('019@')) {
     is_deeply [ pica_values($record, $_) ], ['XB-CN'], 'pica_values';
