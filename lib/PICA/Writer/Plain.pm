@@ -5,30 +5,17 @@ use warnings;
 our $VERSION = '0.23';
 
 use charnames qw(:full);
-use constant SUBFIELD_INDICATOR => '$';
-use constant END_OF_FIELD       => "\n";
-use constant END_OF_RECORD      => "\n";
 
 use parent 'PICA::Writer::Base';
 
-sub _write_record {
-    my ($self, $record) = @_;
-    my $fh = $self->{fh};
+sub SUBFIELD_INDICATOR {'$' }
+sub END_OF_FIELD       { "\n" }
+sub END_OF_RECORD      { "\n" }
 
-    foreach my $field (@$record) {
-        $fh->print($field->[0]);
-        if (defined $field->[1] and $field->[1] ne '') {
-            $fh->print("/".$field->[1]); # TODO: fix one-digit occ??
-        }
-        print $fh ' ';
-        for (my $i=2; $i<scalar @$field; $i+=2) {
-            my $value = $field->[$i+1];
-            $value =~ s/\$/\$\$/g;
-            $fh->print(SUBFIELD_INDICATOR . $field->[$i] . $value);
-        }
-        $fh->print(END_OF_FIELD);
-    }
-    $fh->print(END_OF_RECORD);
+sub write_subfield {
+    my ($self, $code, $value) = @_;
+    $value =~ s/\$/\$\$/g;
+    $self->{fh}->print($self->SUBFIELD_INDICATOR . $code . $value);
 }
 
 1;

@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - add new binary PICA format
 
 0.27  2015-05-07 16:08:19 CEST
     - bless holdings and items (close #11)

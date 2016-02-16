@@ -6,7 +6,7 @@ use utf8;
 use PICA::Data qw(pica_parser pica_writer pica_value);
 use PICA::Parser::XML;
 
-foreach my $type (qw(Plain Plus XML)) {
+foreach my $type (qw(Plain Plus XML Binary)) {
     my $module = "PICA::Parser::$type";
     my $file   = 't/files/pica.' . lc($type);
 

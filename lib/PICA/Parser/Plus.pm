@@ -4,26 +4,27 @@ use warnings;
 
 our $VERSION = '0.26';
 
-use charnames qw< :full >;
+use charnames qw(:full);
 use Carp qw(croak);
 
-use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
-use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
-use constant END_OF_RECORD      => "\N{LINE FEED}";
-
 use parent 'PICA::Parser::Base';
+
+sub SUBFIELD_INDICATOR { "\N{INFORMATION SEPARATOR ONE}" }
+sub END_OF_FIELD       { "\N{INFORMATION SEPARATOR TWO}" }
+sub END_OF_RECORD      { "\N{LINE FEED}" }
 
 sub next_record {
     my ($self) = @_;
      
     # TODO: does only work if END_OF_RECORD is LINE FEED
+    local $/ = $self->END_OF_RECORD;
     my $line = $self->{reader}->getline // return;
     chomp $line;
 
-    my @fields = split END_OF_FIELD, $line;
+    my @fields = split $self->END_OF_FIELD, $line;
     my @record;
 
-    if (index($fields[0],SUBFIELD_INDICATOR) == -1) {
+    if (@fields and index($fields[0],$self->SUBFIELD_INDICATOR) == -1) {
         # drop leader because usage is unclear
         shift @fields;
     }
@@ -38,7 +39,7 @@ sub next_record {
             croak 'ERROR: no valid PICA field structure';
         }
         my @subfields = map { substr( $_, 0, 1 ), substr( $_, 1 ) }
-                        split( SUBFIELD_INDICATOR, substr( $data, 1 ) );
+                        split( $self->SUBFIELD_INDICATOR, substr( $data, 1 ) );
         push @record, [ $tag, $occurence, @subfields ];
     }
 

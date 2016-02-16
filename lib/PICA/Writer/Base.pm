@@ -33,11 +33,27 @@ sub new {
 
 sub write {
     my $self = shift;
+    $self->write_record($_) for @_;
+}
 
-    foreach my $record (@_) {
-        $record = $record->{record} if reftype $record eq 'HASH';
-        $self->_write_record($record);
+sub write_record {
+    my ($self, $record) = @_;
+    $record = $record->{record} if reftype $record eq 'HASH';
+
+    my $fh = $self->{fh};
+
+    foreach my $field (@$record) {
+        $fh->print($field->[0]);
+        if (defined $field->[1] and $field->[1] ne '') {
+            $fh->print(sprintf("/%02d",$field->[1]));
+        }
+        $fh->print(' ');
+        for (my $i=2; $i<scalar @$field; $i+=2) {
+            $self->write_subfield($field->[$i], $field->[$i+1]);
+        }
+        $fh->print($self->END_OF_FIELD);
     }
+    $fh->print($self->END_OF_RECORD);
 }
 
 1;
@@ -93,6 +109,10 @@ L<PICA::Data> also provides a functional constructor C<pica_writer>.
 
 Writes one or more records, given as hash with key 'C<record>' or as array
 reference with a list of fields, as described in L<PICA::Data>.
+
+=head2 write_record ( $record ) 
+
+Writes one record.
 
 =head1 SEEALSO
 

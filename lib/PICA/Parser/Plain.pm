@@ -4,14 +4,14 @@ use warnings;
 
 our $VERSION = '0.26';
 
-use charnames qw(:full);
-use constant SUBFIELD_INDICATOR => '$';
-use constant END_OF_FIELD       => "\N{LINE FEED}";
-use constant END_OF_RECORD      => "\N{LINE FEED}";
-
+use charnames ':full';
 use Carp qw(croak);
 
 use parent 'PICA::Parser::Base';
+
+sub SUBFIELD_INDICATOR { '$' }
+sub END_OF_FIELD       { "\N{LINE FEED}" }
+sub END_OF_RECORD      { "\N{LINE FEED}" }
 
 sub next_record {
     my ($self) = @_;
@@ -24,7 +24,7 @@ sub next_record {
     return unless defined $plain;
 
     chomp $plain;
-    my @fields = split END_OF_FIELD, $plain;
+    my @fields = split $self->END_OF_FIELD, $plain;
     my @record;
     
     for my $field (@fields) {

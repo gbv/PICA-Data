@@ -5,28 +5,16 @@ use warnings;
 our $VERSION = '0.23';
 
 use charnames qw(:full);
-use constant SUBFIELD_INDICATOR => "\N{INFORMATION SEPARATOR ONE}";
-use constant END_OF_FIELD       => "\N{INFORMATION SEPARATOR TWO}";
-use constant END_OF_RECORD      => "\N{LINE FEED}"; # or \N{INFORMATION SEPARATOR THREE}? I would prefer newline separated format
 
 use parent 'PICA::Writer::Base';
 
-sub _write_record {
-    my ($self, $record) = @_;
-    my $fh = $self->{fh};
+sub SUBFIELD_INDICATOR { "\N{INFORMATION SEPARATOR ONE}" }
+sub END_OF_FIELD       { "\N{INFORMATION SEPARATOR TWO}" }
+sub END_OF_RECORD      { "\N{LINE FEED}"; } # or \N{INFORMATION SEPARATOR THREE}? I would prefer newline separated format
 
-    foreach my $field (@$record) {
-        $fh->print($field->[0]);
-        if (defined $field->[1] and $field->[1] ne '') {
-            $fh->print("/".$field->[1]);
-        }
-        $fh->print(' ');
-        for (my $i=2; $i<scalar @$field; $i+=2) {
-            $fh->print(SUBFIELD_INDICATOR . $field->[$i] . $field->[$i+1]);
-        }
-        $fh->print(END_OF_FIELD);
-    }
-    $fh->print(END_OF_RECORD);
+sub write_subfield {
+    my ($self, $code, $value) = @_;
+    $self->{fh}->print($self->SUBFIELD_INDICATOR . $code . $value);
 }
 
 1;

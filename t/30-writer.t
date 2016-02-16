@@ -9,6 +9,7 @@ use PICA::Writer::XML;
 use File::Temp qw(tempfile);
 use IO::File;
 use Encode qw(encode);
+use Scalar::Util qw(reftype);
 
 my @pica_records = (
     [
@@ -87,17 +88,18 @@ XML
 
 is $out, $xml, 'XML writer';
 
-my $s = "";
+my $append = "";
 foreach my $record (@pica_records) {
     bless $record, 'PICA::Data';
-    $record->write( plain => \$s );
+    $record->write( plain => \$append );
 
-    my $s = $record->string;
-    $s = encode('UTF-8', $s);
-    my $r = pica_parser('plain', \$s)->next;
+    my $str = encode('UTF-8', $record->string);
+    my $r = pica_parser('plain', \$str)->next;
+
+    $record = $record->{record} if reftype $record eq 'HASH';
     is_deeply $r->{record}, $record, 'record->string';
 }
-is $s, $PLAIN, 'record->write';
+is $append, $PLAIN, 'record->write';
 
 { 
   package MyStringWriter;

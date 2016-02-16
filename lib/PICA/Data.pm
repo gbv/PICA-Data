@@ -145,9 +145,11 @@ sub pica_holdings {
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
+use PICA::Parser::Binary;
 use PICA::Writer::XML;
 use PICA::Writer::Plus;
 use PICA::Writer::Plain;
+use PICA::Writer::Binary;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_)
@@ -167,6 +169,8 @@ sub _pica_module {
 
     if ( $type =~ /^(pica)?plus$/ ) {
         "${base}::Plus"->new(@_);
+    } elsif ( $type eq 'binary' ) {
+        "${base}::Binary"->new(@_);
     } elsif ( $type =~ /^(pica)?plain$/ ) {
         "${base}::Plain"->new(@_);
     } elsif ( $type =~ /^(pica)?xml$/ ) {

@@ -4,6 +4,8 @@ use warnings;
 
 our $VERSION = '0.23';
 
+use Scalar::Util qw(reftype);
+
 use parent 'PICA::Writer::Base';
 
 sub new {
@@ -18,8 +20,10 @@ sub start {
     $fh->print("<collection xlmns=\"info:srw/schema/5/picaXML-v1.0\">\n");
 }
 
-sub _write_record {
+sub write_record {
     my ($self, $record) = @_;
+    $record = $record->{record} if reftype $record eq 'HASH';
+
     my $fh = $self->{fh};
 
     $fh->print("<record>\n");
