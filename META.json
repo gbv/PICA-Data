@@ -54,7 +54,7 @@
          "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "0.28",
+   "version" : "0.29",
    "x_contributors" : [
       "Jakob Voss <jakob@nichtich.de>",
       "Jakob Voss <voss@gbv.de>",
