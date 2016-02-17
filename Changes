@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - skip empty records when parsing
 
 0.28  2016-02-16 14:58:57 CET
     - add new binary PICA format

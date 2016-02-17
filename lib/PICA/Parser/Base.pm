@@ -34,8 +34,9 @@ sub next {
     my ($self) = @_;
 
     # get last subfield from 003@ as id
-    if ( my $record = $self->next_record ) {
-        my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @{$record};
+    while ( my $record = $self->next_record ) {
+        next unless @$record;
+        my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @$record;
         $record = { _id => $id, record => $record };
         bless $record, 'PICA::Data' if $self->{bless};
         return $record;
