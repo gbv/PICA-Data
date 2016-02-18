@@ -46,6 +46,20 @@ foreach my $type (qw(Plain Plus XML Binary)) {
 
 }
 
+note 'PICA::Parser::PPXML'; 
+{
+    use PICA::Parser::PPXML;
+    my $parser = PICA::Parser::PPXML->new('./t/files/ppxml.xml');
+    is ref($parser), "PICA::Parser::PPXML", "parser from file";
+    my $record = $parser->next;
+    isnt ref($record), 'PICA::Data', 'not blessed by default';
+    ok $record->{_id} eq '1027146724', 'record _id';
+    ok $record->{record}->[0][0] eq '001@', 'tag from first field';
+    is_deeply $record->{record}->[7], ['003@', '', '0', '1027146724'], 'id field';
+    ok $parser->next()->{_id} eq '988352591', 'next record';
+    ok !$parser->next, 'parsed all records';
+}
+
 # TODO: dump.dat, bgb.example, sru_picaxml.xml
 # test XML with BOM
 
