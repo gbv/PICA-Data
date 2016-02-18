@@ -2,7 +2,7 @@ package PICA::Parser::Binary;
 use strict;
 use warnings;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use charnames qw(:full);
 use Carp qw(croak);

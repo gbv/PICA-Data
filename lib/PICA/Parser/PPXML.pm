@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.008_005;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use Carp qw(croak);
 use XML::LibXML::Reader;
