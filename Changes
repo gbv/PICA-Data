@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+0.30  2016-02-18 20:19:47 CET
     - add parser for PPXML (PICA+ XML format variant of DNB)
 
 0.29  2016-02-17 09:17:17 CET
