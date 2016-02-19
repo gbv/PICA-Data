@@ -5,6 +5,7 @@ use warnings;
 our $VERSION = '0.30';
 
 use Carp qw(confess);
+use Scalar::Util qw(reftype);
 
 use overload '""' => \&stringify;
 
@@ -98,6 +99,27 @@ sub match_subfields {
     return @values;
 }
 
+sub record_fields {
+    my ($self, $record) = @_;
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+    return [ grep { $self->match_field($_) } @$record ];
+}
+
+sub record_subfields {
+    my ($self, $record) = @_;
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+
+    my @values;
+
+    foreach my $field (grep { $self->match_field($_) } @$record) {
+        push @values, $self->match_subfields($field);
+    }
+
+    return @values;
+}
+
 sub stringify {
     my ($self, $short) = @_;
 
@@ -150,11 +172,23 @@ __END__
 
 PICA::Path - PICA path expression to match field and subfield values
 
+=head1 SYNOPSIS
+
+    use PICA::Path;
+    use PICA::Parser::Plain;
+
+    # extract URLs from PIC Records, given from STDIN
+    my $urlpath = PICA::Path->new('009P$a');
+    my $parser = PICA::Parser::Plain->new(\*STDIN);
+    while ( my $record = $parser->next ) {
+        print "$_\n" for $urlpath->record_subfields($record);
+    }
+
 =head1 DESCRIPTION
 
 PICA path expressions can be used to match fields and subfields of
-L<PICA::Data> records. An instance of PICA::Path is a blessed array reference,
-consisting of the following fields:
+L<PICA::Data> records or equivalent record structures. An instance of
+PICA::Path is a blessed array reference, consisting of the following fields:
 
 =over
 
@@ -215,10 +249,15 @@ supported.
 Check whether a given PICA field matches the field and occurrence of this path.
 Returns the C<$field> on success.
 
+=head2 filter_record_fields( $record )
+
+Returns an array reference with fields of a L<PICA::Data> that match the path.
+Subfield codes are ignore.
+
 =head2 match_subfields( $field )
 
 Returns a list of matching subfields (optionally trimmed by from and length)
-without inspection of field and occurrence values.
+without inspection field and occurrence values.
 
 =head2 stringify( [ $short ] )
 

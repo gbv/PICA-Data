@@ -21,27 +21,19 @@ use PICA::Path;
 sub pica_values {
     my ($record, $path) = @_;
 
-    $record = $record->{record} if reftype $record eq 'HASH';
     $path = eval { PICA::Path->new($path) } unless ref $path;
     return unless ref $path;
 
-    my @values;
-
-    foreach my $field (grep { $path->match_field($_) } @$record) {
-        push @values, $path->match_subfields($field);
-    }
-
-    return @values;
+    return $path->record_subfields($record);
 }
 
 sub pica_fields {
     my ($record, $path) = @_;
 
-    $record = $record->{record} if reftype $record eq 'HASH';
     $path = eval { PICA::Path->new($path) } unless ref $path;
     return [] unless defined $path;
 
-    return [ grep { $path->match_field($_) } @$record ];
+    return $path->record_fields($record);
 }
 
 sub pica_value {
@@ -321,15 +313,19 @@ ignored and additional parameters are passed to the parser's constructor:
 
 =item 
 
-L<PICA::Parser::XML> for type C<xml> or C<picaxml> (PICA-XML)
-
-=item 
-
 L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
 =item 
 
 L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
+
+=item 
+
+L<PICA::Parser::XML> for type C<xml> or C<picaxml> (PICA-XML)
+
+=item 
+
+L<PICA::Parser::PPXML> for type C<ppxml> (PicaPlus-XML)
 
 =back
 
@@ -363,20 +359,28 @@ L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 Equivalent to L<PICA::Path>-E<gt>new($path).
 
-=head2 pica_values( $record, $path )
-
-Extract a list of subfield values from a PICA record based on a PICA path
-expression. Also available as accessor C<values($path)>.
-
 =head2 pica_value( $record, $path )
 
 Extract the first subfield values from a PICA record based on a PICA path
 expression. Also available as accessor C<value($path)>.
 
+=head2 pica_values( $record, $path )
+
+Extract a list of subfield values from a PICA record based on a PICA path
+expression. The following are virtually equivalent:
+
+    pica_values($record, $path);
+    $path->record_subfields($record);
+    $record->values($path); # if $record is blessed
+
 =head2 pica_fields( $record, $path )
 
 Returns a PICA record (or empty array reference) limited to fields specified in
-a PICA path expression. Also available as accessor C<fields($path)>.
+a PICA path expression. The following are virtually equivalent:
+
+    pica_fields($record, $path);
+    $path->record_fields($record);
+    $record->fields($path); # if $record is blessed
 
 =head2 pica_holdings( $record )
 
@@ -395,7 +399,7 @@ with C<pica_> (see L</SYNOPSIS>).
 
 =head2 values( $path )
 
-Extract a list of subfield values from a PICA record based on a PICA path
+Extract a list of subfield values from a PICA record based on a L<PICA::Path>
 expression.
 
 =head2 value( $path )
@@ -404,8 +408,8 @@ Same as C<values> but only returns the first value.
 
 =head2 fields( $path )
 
-Returns a PICA record limited to fields specified in a PICA path expression.
-Always returns an array reference.
+Returns a PICA record limited to fields specified in a L<PICA::path>
+expression.  Always returns an array reference.
 
 =head2 holdings
 
