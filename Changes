@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - refactor parser
+    - add PICA::Path::record_field and ::record_subfields
 
 0.30  2016-02-18 20:19:47 CET
     - add parser for PPXML (PICA+ XML format variant of DNB)

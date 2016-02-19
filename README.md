@@ -91,9 +91,10 @@ get all of them):
 Create a PICA parsers object (see [PICA::Parser::Base](https://metacpan.org/pod/PICA::Parser::Base)). Case of the type is
 ignored and additional parameters are passed to the parser's constructor:
 
-- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
 - [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Parser::PPXML](https://metacpan.org/pod/PICA::Parser::PPXML) for type `ppxml` (PicaPlus-XML)
 
 ## pica\_xml\_struct( $xml, %options )
 
@@ -113,20 +114,28 @@ Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/P
 
 Equivalent to [PICA::Path](https://metacpan.org/pod/PICA::Path)->new($path).
 
-## pica\_values( $record, $path )
-
-Extract a list of subfield values from a PICA record based on a PICA path
-expression. Also available as accessor `values($path)`.
-
 ## pica\_value( $record, $path )
 
 Extract the first subfield values from a PICA record based on a PICA path
 expression. Also available as accessor `value($path)`.
 
+## pica\_values( $record, $path )
+
+Extract a list of subfield values from a PICA record based on a PICA path
+expression. The following are virtually equivalent:
+
+    pica_values($record, $path);
+    $path->record_subfields($record);
+    $record->values($path); # if $record is blessed
+
 ## pica\_fields( $record, $path )
 
 Returns a PICA record (or empty array reference) limited to fields specified in
-a PICA path expression. Also available as accessor `fields($path)`.
+a PICA path expression. The following are virtually equivalent:
+
+    pica_fields($record, $path);
+    $path->record_fields($record);
+    $record->fields($path); # if $record is blessed
 
 ## pica\_holdings( $record )
 
@@ -145,7 +154,7 @@ with `pica_` (see ["SYNOPSIS"](#synopsis)).
 
 ## values( $path )
 
-Extract a list of subfield values from a PICA record based on a PICA path
+Extract a list of subfield values from a PICA record based on a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression.
 
 ## value( $path )
@@ -154,8 +163,8 @@ Same as `values` but only returns the first value.
 
 ## fields( $path )
 
-Returns a PICA record limited to fields specified in a PICA path expression.
-Always returns an array reference.
+Returns a PICA record limited to fields specified in a [PICA::path](https://metacpan.org/pod/PICA::path)
+expression.  Always returns an array reference.
 
 ## holdings
 
