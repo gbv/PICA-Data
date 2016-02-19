@@ -13,7 +13,7 @@ sub SUBFIELD_INDICATOR { "\N{INFORMATION SEPARATOR ONE}" }
 sub END_OF_FIELD       { "\N{INFORMATION SEPARATOR TWO}" }
 sub END_OF_RECORD      { "\N{LINE FEED}" }
 
-sub next_record {
+sub _next_record {
     my ($self) = @_;
      
     # TODO: does only work if END_OF_RECORD is LINE FEED

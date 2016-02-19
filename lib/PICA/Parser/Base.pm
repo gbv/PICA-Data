@@ -34,7 +34,7 @@ sub next {
     my ($self) = @_;
 
     # get last subfield from 003@ as id
-    while ( my $record = $self->next_record ) {
+    while ( my $record = $self->_next_record ) {
         next unless @$record;
         my ($id) = map { $_->[-1] } grep { $_->[0] =~ '003@' } @$record;
         $record = { _id => $id, record => $record };
@@ -97,10 +97,6 @@ instances of L<PICA::Data>.
 
 Reads the next PICA+ record. Returns a (optionally blessed) hash with keys
 C<_id> and C<record>, as defined in L<PICA::Data>.
-
-=head2 next_record
-
-Reads the next PICA+ record. Returns an array of field arrays.
 
 =head1 SEE ALSO
 

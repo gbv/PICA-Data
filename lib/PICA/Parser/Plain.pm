@@ -13,7 +13,7 @@ sub SUBFIELD_INDICATOR { '$' }
 sub END_OF_FIELD       { "\N{LINE FEED}" }
 sub END_OF_RECORD      { "\N{LINE FEED}" }
 
-sub next_record {
+sub _next_record {
     my ($self) = @_;
 
     my $plain = undef;

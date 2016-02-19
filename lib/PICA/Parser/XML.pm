@@ -39,7 +39,7 @@ sub new {
     $self;
 }
 
-sub next_record {
+sub _next_record {
     my ($self) = @_;
 
     my $reader = $self->{xml_reader};
