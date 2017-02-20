@@ -1,28 +1,21 @@
 language: perl
 perl:
+    - "5.22"
     - "5.20"
     - "5.18"
     - "5.16"
     - "5.14"
-    - "5.12"
-
 before_install:
     - cpanm --notest --force Pod::Readme
-
-before_install:
-    - cpanm --notest --force Pod::Readme
-
 install:
-    - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-    - dzil authordeps | grep -vP '[^\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied
+    - cpanm --quiet --notest --skip-installed Dist::Zilla
+    - dzil authordeps | grep -vP '[^\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-installed
     - dzil listdeps | grep -vP '[^\w:]' | cpanm --verbose --notest
-
 script:
     - dzil smoke --release --author
-
 after_success:
-    - cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Coveralls
-    - cpanm --quiet --notest --skip-satisfied Dist::Zilla::App::Command::cover
+    - cpanm --quiet --notest --skip-installed Devel::Cover::Report::Coveralls
+    - cpanm --quiet --notest --skip-installed Dist::Zilla::App::Command::cover
     - dzil cover -outputdir cover_db -report coveralls
-
 env: RELEASE_TESTING=1 AUTOMATED_TESTING=1 AUTHOR_TESTING=1
+sudo: false
