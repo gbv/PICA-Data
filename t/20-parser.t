@@ -28,12 +28,16 @@ foreach my $type (qw(Plain Plus XML Binary)) {
     ok $parser->next()->{_id} eq '67890', 'next record';
     ok !$parser->next, 'parsed all records';
 
-    foreach my $mode ('<','<:utf8') {
-        next if $mode eq '<' and $type ne 'XML';
-        open(my $fh, $mode, $file);
-        my $record  = pica_parser( $type => $fh )->next;
-        is_deeply pica_value($record,'021A$h'), '柳经纬主编;', 'read from handle';
+    foreach my $mode ( '<', '<:utf8' ) {
+        next
+            if ( $mode eq '<' and $type ne 'XML' )
+            or ( $mode eq '<:utf8' and $type eq 'XML' );
+        open( my $fh, $mode, $file );
+        my $record = pica_parser( $type => $fh )->next;
+        is_deeply pica_value( $record, '021A$h' ), '柳经纬主编;',
+            'read from handle';
     }
+
 
     my $data = do { local (@ARGV,$/) = $file; <> };
 
