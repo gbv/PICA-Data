@@ -42,6 +42,8 @@ sub write_record {
 
     my $fh = $self->{fh};
 
+    @$record = sort  { $a->[0] cmp $b->[0] } @$record;
+
     foreach my $field (@$record) {
         $fh->print($field->[0]);
         if (defined $field->[1] and $field->[1] ne '') {
