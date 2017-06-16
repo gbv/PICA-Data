@@ -8,10 +8,8 @@ perl:
   - "5.14"
   - "5.12"
   - "5.10"
-
 before_install:
     - cpanm --notest --force Pod::Readme
-
 install: 
   - cpanm --quiet --installdeps --notest --skip-installed .
   - cpanm --quiet --notest --skip-satisfied Devel::Cover
@@ -21,3 +19,4 @@ after_success:
   - cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Coveralls
   - cover -report coveralls
 env: RELEASE_TESTING=1 AUTOMATED_TESTING=1 AUTHOR_TESTING=1
+sudo: false
