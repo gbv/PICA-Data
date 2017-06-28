@@ -2,7 +2,7 @@ package PICA::Writer::Base;
 use strict;
 use warnings;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use Carp qw(croak);
