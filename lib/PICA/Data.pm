@@ -434,9 +434,11 @@ record objects:
 
 =head1 CONTRIBUTORS
 
-Johann Rolschewski, C<< <rolschewski@gmail.com> >>
+Johann Rolschewski, C<< <jorol@cpan.org> >>
 
 Jakob Voss C<< <voss@gbv.de> >>
+
+Carsten Klee C<< <klee@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
