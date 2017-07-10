@@ -189,9 +189,11 @@ record objects:
 
 # CONTRIBUTORS
 
-Johann Rolschewski, `<rolschewski@gmail.com>`
+Johann Rolschewski, `<jorol@cpan.org>`
 
 Jakob Voss `<voss@gbv.de>`
+
+Carsten Klee `<klee@cpan.org>`
 
 # COPYRIGHT AND LICENSE
 
