@@ -103,6 +103,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::XML>
 
+=item L<PICA::Writer::PPXML>
+
 =back
 
 =head1 METHODS
