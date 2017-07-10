@@ -142,6 +142,7 @@ use PICA::Writer::XML;
 use PICA::Writer::Plus;
 use PICA::Writer::Plain;
 use PICA::Writer::Binary;
+use PICA::Writer::PPXML;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_)
@@ -167,6 +168,8 @@ sub _pica_module {
         "${base}::Plain"->new(@_);
     } elsif ( $type =~ /^(pica)?xml$/ ) {
         "${base}::XML"->new(@_);
+    } elsif ( $type =~ /^(pica)?ppxml$/ ) {
+        "${base}::PPXML"->new(@_);
     } else {
         croak "unknown PICA parser type: $type";
     }
@@ -434,9 +437,11 @@ record objects:
 
 =head1 CONTRIBUTORS
 
-Johann Rolschewski, C<< <rolschewski@gmail.com> >>
+Johann Rolschewski, C<< <jorol@cpan.org> >>
 
 Jakob Voss C<< <voss@gbv.de> >>
+
+Carsten Klee C<< <klee@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
