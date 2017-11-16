@@ -15,18 +15,13 @@ use Encode qw(encode);
 use Scalar::Util qw(reftype);
 
 my @pica_records = (
-    [
-      ['003@', '', '0', '1041318383'],
-      ['021A', '', 'a', encode('UTF-8',"Hello \$\N{U+00A5}!")],
+    [   [ '003@', '', '0', '1041318383' ],
+        [ '021A', '', 'a', encode( 'UTF-8', "Hello \$\N{U+00A5}!" ) ],
     ],
-    {
-      record => [
-        ['028C', '01', d => 'Emma', a => 'Goldman']
-      ]
-    }
+    { record => [ [ '028C', '01', d => 'Emma', a => 'Goldman' ] ] }
 );
 
-my ($fh, $filename) = tempfile();
+my ( $fh, $filename ) = tempfile();
 my $writer = pica_writer( 'plain', fh => $fh );
 foreach my $record (@pica_records) {
     $writer->write($record);
@@ -41,10 +36,10 @@ my $PLAIN = <<'PLAIN';
 
 PLAIN
 
-my $out = do { local (@ARGV,$/)=$filename; <> };
+my $out = do { local ( @ARGV, $/ ) = $filename; <> };
 is $out, $PLAIN, 'Plain writer';
 
-($fh, $filename) = tempfile();
+( $fh, $filename ) = tempfile();
 $writer = PICA::Writer::Plus->new( fh => $fh );
 
 foreach my $record (@pica_records) {
@@ -52,13 +47,13 @@ foreach my $record (@pica_records) {
 }
 close $fh;
 
-$out = do { local (@ARGV,$/)=$filename; <> };
+$out = do { local ( @ARGV, $/ ) = $filename; <> };
 is $out, <<'PLUS', 'Plus Writer';
 003@ 01041318383021A aHello $¥!
 028C/01 dEmmaaGoldman
 PLUS
 
-($fh, $filename) = tempfile();
+( $fh, $filename ) = tempfile();
 $writer = PICA::Writer::XML->new( fh => $fh );
 
 foreach my $record (@pica_records) {
@@ -67,7 +62,7 @@ foreach my $record (@pica_records) {
 $writer->end;
 close $fh;
 
-$out = do { local (@ARGV,$/)=$filename; <> };
+$out = do { local ( @ARGV, $/ ) = $filename; <> };
 
 my $xml = <<'XML';
 <?xml version="1.0" encoding="UTF-8"?>
@@ -96,50 +91,72 @@ foreach my $record (@pica_records) {
     bless $record, 'PICA::Data';
     $record->write( plain => \$append );
 
-    my $str = encode('UTF-8', $record->string);
-    my $r = pica_parser('plain', \$str)->next;
+    my $str = encode( 'UTF-8', $record->string );
+    my $r = pica_parser( 'plain', \$str )->next;
 
     $record = $record->{record} if reftype $record eq 'HASH';
     is_deeply $r->{record}, $record, 'record->string';
 }
 is $append, $PLAIN, 'record->write';
 
-{ 
-  package MyStringWriter;
-  sub print { $_[0]->{out} .= $_[1] } 
+{
+
+    package MyStringWriter;
+    sub print { $_[0]->{out} .= $_[1] }
 }
 
-my $string = bless { }, 'MyStringWriter';
+my $string = bless {}, 'MyStringWriter';
 
 $writer = PICA::Writer::XML->new( fh => $string, start => 0 );
 $writer->write($_) for map { bless $_, 'PICA::Data' } @pica_records;
 $writer->end;
-like $string->{out}, qr{^<record.+record>}sm, 'XML writer (to object, no start)';
+like $string->{out}, qr{^<record.+record>}sm,
+    'XML writer (to object, no start)';
 
-my (undef, $filename) = tempfile(OPEN => 0);
-pica_writer('plain', fh => $filename);
+my ( undef, $filename ) = tempfile( OPEN => 0 );
+pica_writer( 'plain', fh => $filename );
 ok -e $filename, 'write to file';
 
-eval { pica_writer('plain', fh => '') };
+eval { pica_writer( 'plain', fh => '' ) };
 ok $@, 'invalid filename';
 
-eval { pica_writer('plain', fh => {} ) };
+eval { pica_writer( 'plain', fh => {} ) };
 ok $@, 'invalid handle';
 
 # PPXML
 my $parser = pica_parser( 'PPXML' => 't/files/slim_ppxml.xml' );
 my $record;
-($fh, $filename) = tempfile();
+( $fh, $filename ) = tempfile();
 $writer = PICA::Writer::PPXML->new( fh => $fh );
-while($record = $parser->next){
+while ( $record = $parser->next ) {
     $writer->write($record);
 }
 $writer->end;
 close $fh;
 
-$out = do { local (@ARGV,$/)=$filename; <> };
-my $in = do { local (@ARGV,$/)='t/files/slim_ppxml.xml'; <> };
+$out = do { local ( @ARGV, $/ ) = $filename; <> };
+my $in = do { local ( @ARGV, $/ ) = 't/files/slim_ppxml.xml'; <> };
 
-is_xml($out, $in, 'PPXML writer');
+is_xml( $out, $in, 'PPXML writer' );
+
+note '3-digit occurrence';
+{
+    my $record = {
+        '_id'    => '12345',
+        'record' => [
+            [ '003@', '', '0', '12345' ],
+            [   '231@', '102', 'd', '10', 'j', '1966',
+                '0',    '',    'd', '11', 'j', '1970'
+            ]
+        ]
+    };
+    my ( $fh, $filename ) = tempfile();
+    my $writer = PICA::Writer::Plus->new( fh => $fh );
+    $writer->write($record);
+    close $fh;
+    my $out = do { local ( @ARGV, $/ ) = $filename; <> };
+    is $out, "003@ 012345231@/102 d10j19660d11j1970\n", '3-digit occurrence';
+}
 
 done_testing;
+

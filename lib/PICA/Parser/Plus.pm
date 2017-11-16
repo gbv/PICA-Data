@@ -31,7 +31,7 @@ sub _next_record {
 
     foreach my $field (@fields) {
         my ($tag, $occurence, $data);
-        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2}))?\s(.+)/ ) {
+        if ( $field =~ m/^(\d{3}[A-Z@])(\/(\d{2,3}))?\s(.+)/ ) {
             $tag       = $1;
             $occurence = $3 // '';
             $data      = $4;

@@ -44,6 +44,7 @@ sub write_record {
             ) . ">\n");
             for (my $i=2; $i<scalar @$field; $i+=2) {
                 my $value = $field->[$i+1];
+                # bug see https://github.com/gbv/Catmandu-PICA/issues/53
                 $value =~ s/</&lt;/g;
                 $value =~ s/&/&amp;/g;
                 # TODO: disallowed code points (?)
