@@ -356,6 +356,10 @@ L<PICA::Writer::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
 L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
+=item 
+
+L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
+
 =back
 
 =head2 pica_path( $path )
