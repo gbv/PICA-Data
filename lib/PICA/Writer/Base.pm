@@ -45,7 +45,7 @@ sub write_record {
     my $i = 0;
     my $pica_sort = sub {
         my $f = shift;
-        my $oc  = ($f->[1] eq '') ? '00' : $f->[1];
+        my $oc  = (!defined $f->[1] or $f->[1] eq '') ? '00' : $f->[1];
         $oc = ($f->[0] eq '101@') ? ++$i . $oc : $i . $oc;
         return [$oc.$f->[0], $f];
     };
