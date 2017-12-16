@@ -19,7 +19,7 @@ use Scalar::Util qw(reftype);
 
 my @pica_records = (
     [
-      ['003@', undef, '0', '1041318383'],
+      ['003@', '', '0', '1041318383'],
       ['021A', '', 'a', "Hello \$\N{U+00A5}!"],
     ],
     {
@@ -174,8 +174,6 @@ PLAIN
   is $append, $PLAIN, 'record->write';
 }
 
-
-
 note 'Exeptions';
 
 {
@@ -184,6 +182,22 @@ note 'Exeptions';
 
     eval { pica_writer('plain', fh => {} ) };
     ok $@, 'invalid handle';
+}
+
+note 'undefined occurrence';
+
+{
+    my $pica_record = [['003@', undef, '0', '1041318383']];
+    my ($fh, $filename) = tempfile();
+    my $writer = PICA::Writer::Plus->new( fh => $fh );
+    $writer->write($pica_record);
+    close $fh;
+
+    my $out = do { local (@ARGV,$/)=$filename; <> };
+    my $PLUS = <<'PLUS';
+003@ 01041318383
+PLUS
+    is $out, $PLUS, 'undef occ';
 }
 
 done_testing;
