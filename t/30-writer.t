@@ -19,7 +19,7 @@ use Scalar::Util qw(reftype);
 
 my @pica_records = (
     [
-      ['003@', '', '0', '1041318383'],
+      ['003@', undef, '0', '1041318383'],
       ['021A', '', 'a', "Hello \$\N{U+00A5}!"],
     ],
     {
