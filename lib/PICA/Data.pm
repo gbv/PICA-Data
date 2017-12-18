@@ -316,11 +316,15 @@ ignored and additional parameters are passed to the parser's constructor:
 
 =item 
 
-L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
+L<PICA::Parser::Binary> for type C<binary> (binary PICA+)
 
 =item 
 
 L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
+
+=item 
+
+L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
 =item 
 
@@ -346,7 +350,15 @@ C<pica_parser> with one of
 
 =item 
 
-L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
+L<PICA::Writer::Binary> for type C<binary> (binary PICA)
+
+=item 
+
+L<PICA::Writer::Generic> for type C<generic> (PICA with self defined data separators)
+
+=item 
+
+L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 =item 
 
@@ -354,7 +366,7 @@ L<PICA::Writer::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
 =item 
 
-L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
+L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
 =item 
 
