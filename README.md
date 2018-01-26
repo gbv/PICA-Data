@@ -14,8 +14,11 @@ PICA::Data - PICA record processing
      
       use PICA::Parser::XML;
       use PICA::Writer::Plain;
+      use PICA::Schema;
+
       $parser = PICA::Parser::XML->new( @options );
       $writer = PICA::Writer::Plain->new( @options );
+      $schema = PICA::Schema->new({ fields => { '021A' => { unique => 1 } } });
 
       # parse records
       while ( my $record = $parser->next ) {
@@ -44,6 +47,10 @@ PICA::Data - PICA record processing
           # stringify record
           my $plain = $record->string;
           my $xml = $record->string('xml');
+
+          # check 021A exists and is not repeated
+          my @errors = $schema->check($record, ignore_unknown_fields => 1);
+          ...
       }
     
       # parse single record from string
