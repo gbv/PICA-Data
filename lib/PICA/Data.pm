@@ -282,11 +282,11 @@ Austauschformat fuer Bibliotheken (MAB). In addition to PICA+ in CBS there is
 the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
 versa.
 
-Records in PICA::Data are encoded either as array of arrays, the inner
-arrays representing PICA fields, or as an object with two fields, C<_id> and
-C<record>, the latter holding the record as array of arrays, and the former
-holding the record identifier, stored in field C<003@>, subfield C<0>. For
-instance a minimal record with just one field C<003@>:
+Records in PICA::Data are encoded either as array of arrays, the inner arrays
+representing PICA fields, or as an object with two keys, C<_id> and C<record>,
+the latter holding the record as array of arrays, and the former holding the
+record identifier, stored in field C<003@>, subfield C<0>. For instance a
+minimal record with just one field (having tag C<003@> and no occurrence):
 
     {
       _id    => '12345X',
@@ -300,7 +300,7 @@ or in short form:
     [ [ '003@', undef, '0' => '12345X' ] ]
 
 PICA path expressions (see L<PICA::Path>) can be used to facilitate processing
-PICA+ records.
+PICA+ records and L<PICA::Schema> to validate PICA+ records.
 
 =head1 FUNCTIONS
 
@@ -427,7 +427,7 @@ Same as C<values> but only returns the first value.
 
 =head2 fields( $path )
 
-Returns a PICA record limited to fields specified in a L<PICA::path>
+Returns a PICA record limited to fields specified in a L<PICA::Path>
 expression.  Always returns an array reference.
 
 =head2 holdings
