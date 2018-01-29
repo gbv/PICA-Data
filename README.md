@@ -14,11 +14,8 @@ PICA::Data - PICA record processing
      
       use PICA::Parser::XML;
       use PICA::Writer::Plain;
-      use PICA::Schema;
-
       $parser = PICA::Parser::XML->new( @options );
       $writer = PICA::Writer::Plain->new( @options );
-      $schema = PICA::Schema->new({ fields => { '021A' => { unique => 1 } } });
 
       # parse records
       while ( my $record = $parser->next ) {
@@ -47,10 +44,6 @@ PICA::Data - PICA record processing
           # stringify record
           my $plain = $record->string;
           my $xml = $record->string('xml');
-
-          # check 021A exists and is not repeated
-          my @errors = $schema->check($record, ignore_unknown_fields => 1);
-          ...
       }
     
       # parse single record from string
@@ -68,11 +61,11 @@ Austauschformat fuer Bibliotheken (MAB). In addition to PICA+ in CBS there is
 the cataloging format Pica3 which can losslessly be convert to PICA+ and vice
 versa.
 
-Records in PICA::Data are encoded either as array of arrays, the inner
-arrays representing PICA fields, or as an object with two fields, `_id` and
-`record`, the latter holding the record as array of arrays, and the former
-holding the record identifier, stored in field `003@`, subfield `0`. For
-instance a minimal record with just one field `003@`:
+Records in PICA::Data are encoded either as array of arrays, the inner arrays
+representing PICA fields, or as an object with two keys, `_id` and `record`,
+the latter holding the record as array of arrays, and the former holding the
+record identifier, stored in field `003@`, subfield `0`. For instance a
+minimal record with just one field (having tag `003@` and no occurrence):
 
     {
       _id    => '12345X',
@@ -86,7 +79,7 @@ or in short form:
     [ [ '003@', undef, '0' => '12345X' ] ]
 
 PICA path expressions (see [PICA::Path](https://metacpan.org/pod/PICA::Path)) can be used to facilitate processing
-PICA+ records.
+PICA+ records and [PICA::Schema](https://metacpan.org/pod/PICA::Schema) to validate PICA+ records.
 
 # FUNCTIONS
 
@@ -98,8 +91,9 @@ get all of them):
 Create a PICA parsers object (see [PICA::Parser::Base](https://metacpan.org/pod/PICA::Parser::Base)). Case of the type is
 ignored and additional parameters are passed to the parser's constructor:
 
-- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Parser::Binary](https://metacpan.org/pod/PICA::Parser::Binary) for type `binary` (binary PICA+)
 - [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
 - [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::PPXML](https://metacpan.org/pod/PICA::Parser::PPXML) for type `ppxml` (PicaPlus-XML)
 
@@ -113,9 +107,12 @@ blessed) PICA record structure.
 Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::Base)) in the same way as
 `pica_parser` with one of
 
-- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
-- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Writer::Binary](https://metacpan.org/pod/PICA::Writer::Binary) for type `binary` (binary PICA)
+- [PICA::Writer::Generic](https://metacpan.org/pod/PICA::Writer::Generic) for type `generic` (PICA with self defined data separators)
 - [PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Writer::PPXML](https://metacpan.org/pod/PICA::Writer::PPXML) for type `ppxml` (PicaPlus-XML)
 
 ## pica\_path( $path )
 
@@ -170,7 +167,7 @@ Same as `values` but only returns the first value.
 
 ## fields( $path )
 
-Returns a PICA record limited to fields specified in a [PICA::path](https://metacpan.org/pod/PICA::path)
+Returns a PICA record limited to fields specified in a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression.  Always returns an array reference.
 
 ## holdings
