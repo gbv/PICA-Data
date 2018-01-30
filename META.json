@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : 2
    },
-   "name" : "PICA-Data-gbv",
+   "name" : "PICA-Data",
    "no_index" : {
       "directory" : [
          "eg",
