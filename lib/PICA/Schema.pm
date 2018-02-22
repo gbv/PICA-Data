@@ -42,10 +42,10 @@ sub check_field {
         }
     } 
 
-    if ($options{counter} && $spec->{unique}) {
+    if ($options{counter} && !$spec->{repeatable}) {
         my $tag_occ = join '/', grep { defined } @$field[0,1];
         if ($options{counter}{$tag_occ}++) {        
-            return _error($field, unique => 1, message => 'field is not repeatable')
+            return _error($field, repeated => 1, message => 'field is not repeatable')
         }
     }
 
@@ -58,10 +58,10 @@ sub check_field {
             my $sfspec = $spec->{subfields}{$code};
 
             if ($sfspec) {
-                if ($sfspec->{unique} && $sfcounter{$code}++) {
+                if (!$sfspec->{repeatable} && $sfcounter{$code}++) {
                     $errors{$code} = { 
                         message => 'subfield is not repeatable',
-                        unique => 1 
+                        repeated => 1 
                     };
                 }
             } elsif (!$options{ignore_unknown_subfields}) {
@@ -78,21 +78,22 @@ __END__
 
 =head1 NAME
 
-PICA::Schema - Specification of a PICA based format
+PICA::Schema - Validate PICA based formats with Avram Schemas
 
 =head1 DESCRIPTION
 
 A PICA Schema defines a set of PICA+ fields and subfields to validate
-L<PICA::Data> records. A schema is given as hash reference such as:
+L<PICA::Data> records. Schemas are given as hash reference in L<Avram Schema
+language|https://format.gbv.de/schema/avram/specification>, for instance:
 
     {
       fields => {
         '021A' => { },      # field without additional information
         '003@' => {         # field with additional constraints
-          unique => 1,
+          repeatable => 0,
           label => 'Pica-Produktionsnummer',
           subfields => {
-            0 => { unique => 1 }
+            '0' => { repeatable => 1 }
           }
         }
       }
@@ -118,8 +119,8 @@ Don't report subfields not included in the schema.
 =back
 
 Errors are given as list of hash reference with keys C<tag> and C<occurrence>
-set to tag and (optional) ocurrence of the violated field. If key C<unique> is
-set, the field was repeated although not repeatable. Otherwise, if key
+set to tag and (optional) ocurrence of the violated field. If key C<repeated>
+is set, the field was repeated although not repeatable. Otherwise, if key
 C<subfields> is set, the field was defined but contained invalid subfields.
 
 Additional error field C<message> contains a human-readable error message which
@@ -127,15 +128,20 @@ can also be derived from the rest of the error object.
 
 =head2 check_field( $field [, %options ] )
 
-Check whether a PICA field confirms to the schema. Use same options as method C<check>.
+Check whether a PICA field confirms to the schema. Use same options as method
+C<check>.
 
 =head1 LIMITATIONS
 
 The current version can only validate records with tags on level 0.
 
+Not all features of Avram have been implemented yet.
+
 =head1 SEE ALSO
 
-L<PICA::Path> (support may be added in a future version)
+L<PICA::Path>
+
+L<MARC::Schema>
 
 L<MARC::Lint>
 
