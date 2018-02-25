@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - align PICA::Schema with Avram specification
+    - add PICA::Schema::Builder
 
 0.35  2018-01-29 16:29:52 CET
     - add PICA::Schema
