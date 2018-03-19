@@ -3,7 +3,7 @@ schemas:
   021A:
     fields:
       021A:
-        required: true
+        required: 1
         subfields:
           a:
             required: 1
@@ -14,11 +14,17 @@ schemas:
   021A-repeatable:
     fields:
       021A:
-        repeatable: true
+        repeatable: 1
   021A-empty-subfields:
     fields:
       021A:
         subfields: {}
+  occurrences:
+    fields:
+      028C/01:
+        required: 1
+      222X:
+        required: 0
 
 records:
   021A: "021A $atitle"
@@ -29,6 +35,8 @@ records:
   021A-unordered-subfields: "021A $dsubtitle$atitle"
   021A-subfield: "021A $atitle$atitle"
   099X: "099X $xy"
+  occurrences: "028C/01 $dEmma$aGoldman\n222X/123 $x23"
+  occurrences-missing: "028C $dEmma$aGoldman"
 
 tests:
 
@@ -105,6 +113,19 @@ tests:
   record: 021A-unordered-subfields
   options:
     ignore_subfield_order: 1
+
+- schema: occurrences
+  record: occurrences-missing
+  result:
+  - tag: 028C
+    message: unknown field 028C
+  - tag: 028C
+    occurrence: '01'
+    message: missing field 028C/01
+    required: 1
+
+- schema: occurrences
+  record: occurrences
 
 # TODO:
 # - check fields in level 1 and level 2 (uniqueness per local copy!)

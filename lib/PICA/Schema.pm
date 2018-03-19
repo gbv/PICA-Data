@@ -177,6 +177,8 @@ language|https://format.gbv.de/schema/avram/specification>, for instance:
 See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 records.
 
+Schema information can be included in PICA XML with L<PICA::Writer::XML>.
+
 =head1 METHODS
 
 =head2 check( $record [, %options ] )
