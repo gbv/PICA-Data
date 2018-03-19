@@ -1,0 +1,89 @@
+---
+schemas:
+  021A-required:
+    fields:
+      021A:
+        required: true
+        subfields:
+          a:
+            required: 1
+          x: {}
+  021A-repeatable:
+    fields:
+      021A:
+        repeatable: true
+  021A-empty-subfields:
+    fields:
+      021A:
+        subfields: {}
+
+records:
+  021A: "021A $atitle"
+  021A-repeated: "021A $atitle\n021A $atitle"
+  021A-repeated-subfield: "021A $atitle$atitle"
+  021A-missing-subfield: "021A $xy"
+  099X: "099X $xy"
+
+tests:
+
+- schema: 021A-required
+  record: 021A
+- schema: 021A-repeatable
+  record: 021A-repeated
+
+- schema: 021A-required
+  record: 021A-repeated
+  result:
+  - message: field 021A is not repeatable
+    repeated: 1
+    tag: 021A
+
+- schema: 021A-required
+  record: 099X
+  result: 
+  - message: unknown field 099X
+    tag: 099X
+  - message: missing field 021A
+    required: 1
+    tag: 021A
+- schema: 021A-repeatable
+  record: 099X
+  options:
+    ignore_unknown_fields: 1
+
+- schema: 021A-empty-subfields
+  record: 021A
+  result:
+  - subfields:
+      a:
+        code: a
+        message: unknown subfield 021A$a
+    tag: 021A
+- schema: 021A-empty-subfields
+  record: 021A
+  options:
+    ignore_unknown_subfields: 1
+
+- schema: 021A-required
+  record: 021A-repeated-subfield
+  result:
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        message: subfield 021A$a is not repeatable
+        repeated: 1
+
+- schema: 021A-required
+  record: 021A-missing-subfield
+  result: 
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        message: 'missing subfield 021A$a'
+        required: 1
+
+# TODO:
+# - check fields in level 1 and level 2 (uniqueness per local copy!)
+
