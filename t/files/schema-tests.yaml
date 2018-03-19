@@ -1,12 +1,15 @@
 ---
 schemas:
-  021A-required:
+  021A:
     fields:
       021A:
         required: true
         subfields:
           a:
             required: 1
+            order: 1
+          d:
+            order: 2
           x: {}
   021A-repeatable:
     fields:
@@ -21,24 +24,27 @@ records:
   021A: "021A $atitle"
   021A-repeated: "021A $atitle\n021A $atitle"
   021A-repeated-subfield: "021A $atitle$atitle"
-  021A-missing-subfield: "021A $xy"
+  021A-missing-subfield: "021A $dsubtitle"
+  021A-ordered-subfields: "021A $atitle$dsubtitle"
+  021A-unordered-subfields: "021A $dsubtitle$atitle"
+  021A-subfield: "021A $atitle$atitle"
   099X: "099X $xy"
 
 tests:
 
-- schema: 021A-required
+- schema: 021A
   record: 021A
 - schema: 021A-repeatable
   record: 021A-repeated
 
-- schema: 021A-required
+- schema: 021A
   record: 021A-repeated
   result:
   - message: field 021A is not repeatable
     repeated: 1
     tag: 021A
 
-- schema: 021A-required
+- schema: 021A
   record: 099X
   result: 
   - message: unknown field 099X
@@ -64,7 +70,7 @@ tests:
   options:
     ignore_unknown_subfields: 1
 
-- schema: 021A-required
+- schema: 021A
   record: 021A-repeated-subfield
   result:
   - tag: 021A
@@ -74,15 +80,31 @@ tests:
         message: subfield 021A$a is not repeatable
         repeated: 1
 
-- schema: 021A-required
+- schema: 021A
   record: 021A-missing-subfield
   result: 
   - tag: 021A
     subfields:
       a:
         code: a
-        message: 'missing subfield 021A$a'
+        message: missing subfield 021A$a
         required: 1
+
+- schema: 021A
+  record: 021A-ordered-subfields
+- schema: 021A
+  record: 021A-unordered-subfields
+  result:
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        order: 1
+        message: wrong subfield order of 021A$a
+- schema: 021A
+  record: 021A-unordered-subfields
+  options:
+    ignore_subfield_order: 1
 
 # TODO:
 # - check fields in level 1 and level 2 (uniqueness per local copy!)

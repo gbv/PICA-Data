@@ -78,6 +78,7 @@ sub check_field {
 
     my %errors;
     if ($spec->{subfields}) {
+        my $order;
         my %sfcounter;
         my (undef, undef, @subfields) = @$field;
 
@@ -92,6 +93,16 @@ sub check_field {
                         repeated => 1,
                         message  => "subfield $id\$$code is not repeatable",
                     };
+                } elsif (!$options{ignore_subfield_order} && defined $sfspec->{order}) {
+                    if (defined $order && $order > $sfspec->{order}) {
+                        $errors{$code} = {
+                            code => $code,
+                            order => $sfspec->{order},
+                            message => "wrong subfield order of $id\$$code"
+                        }
+                    } else {
+                        $order = 1*$sfspec->{order};
+                    }
                 }
                 $sfcounter{$code}++;
             } elsif (!$options{ignore_unknown_subfields}) {
@@ -183,6 +194,10 @@ Don't report fields not included in the schema.
 
 Don't report subfields not included in the schema.
 
+=item ignore_subfield_order
+
+Don't report errors resulting on wrong subfield order.
+
 =back
 
 Errors are given as list of hash reference with keys C<tag> and C<occurrence>
@@ -209,7 +224,7 @@ field tag and optional occurrence if the tag starts with C<0>.
 
 The current version does not properly validate required field on level 1 and 2.
 
-Field types and subfield order have neither been implemented yet.
+Field types have neither been implemented yet.
 
 =head1 SEE ALSO
 
