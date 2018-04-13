@@ -50,24 +50,37 @@ sub field_identifier {
 }
 
 sub check_field {
-    my ($self, $field, %options) = @_;
+    my ($self, $field, %opts) = @_;
 
     my $id = field_identifier($field);
     my $spec = $self->{fields}{$id};
 
-    if (!$spec) {
-        if (!$options{ignore_unknown_fields}) {
+    if ($opts{allow_deprecated}) {
+        $opts{allow_deprecated_fields} = 1;
+        $opts{allow_deprecated_subfields} = 1;
+    }
+
+    if (!$spec) { # field is not defined
+        $spec = $self->{'deprecated-fields'}{$id};
+
+        if ($spec) { # field is deprectaed
+            unless ($opts{allow_deprecated_fields}) {
+                return _error($field,
+                    message => 'deprecated field '.field_identifier($field)
+                )
+            }
+        } elsif ($opts{ignore_unknown_fields}) {
+            return ()
+        } else {
             return _error($field,
                 message => 'unknown field '.field_identifier($field)
             )
-        } else {
-            return ()
         }
     }
 
-    if ($options{counter} && !$spec->{repeatable}) {
+    if ($opts{counter} && !$spec->{repeatable}) {
         my $tag_occ = join '/', grep { defined } @$field[0,1];
-        if ($options{counter}{$tag_occ}++) {
+        if ($opts{counter}{$tag_occ}++) {
             return _error($field,
                 repeated => 1,
                 message => 'field '.field_identifier($field).' is not repeatable',
@@ -75,6 +88,9 @@ sub check_field {
         }
     }
 
+    if ($opts{ignore_subfields}) {
+        return ();
+    }
 
     my %errors;
     if ($spec->{subfields}) {
@@ -83,8 +99,24 @@ sub check_field {
         my (undef, undef, @subfields) = @$field;
 
         while (@subfields) {
-            my ($code, undef) = splice @subfields, 0, 2;
+            my ($code, $value) = splice @subfields, 0, 2;
             my $sfspec = $spec->{subfields}{$code};
+
+            if (!$sfspec) { # subfield is not defined
+                $sfspec = $spec->{'deprecated-subfields'}{$code};
+                if ($sfspec) { # subfield is deprecated
+                    unless ($opts{allow_deprecated_subfields}) {
+                        return _error($field,
+                            message => "deprecated subfield $id\$$code"
+                        )
+                    }
+                } elsif (!$opts{ignore_unknown_subfields}) {
+                    $errors{$code} = {
+                        code    => $code,
+                        message => "unknown subfield $id\$$code"
+                    };
+                }
+            }
 
             if ($sfspec) {
                 if (!$sfspec->{repeatable} && $sfcounter{$code}) {
@@ -93,7 +125,7 @@ sub check_field {
                         repeated => 1,
                         message  => "subfield $id\$$code is not repeatable",
                     };
-                } elsif (!$options{ignore_subfield_order} && defined $sfspec->{order}) {
+                } elsif (!$opts{ignore_subfield_order} && defined $sfspec->{order}) {
                     if (defined $order && $order > $sfspec->{order}) {
                         $errors{$code} = {
                             code => $code,
@@ -105,11 +137,16 @@ sub check_field {
                     }
                 }
                 $sfcounter{$code}++;
-            } elsif (!$options{ignore_unknown_subfields}) {
-                $errors{$code} = {
-                    code    => $code,
-                    message => "unknown subfield $id\$$code"
-                };
+
+                # TODO: check compatible with ECMA 262 (2015) regular expression grammar
+                if ($sfspec->{pattern} and $value !~ /$sfspec->{pattern}/) {
+                    $errors{$code} = {
+                        code     => $code,
+                        repeated => 1,
+                        message  => "content of subfield $id\$$code does not match pattern". $sfspec->{pattern},
+                        value => $value,
+                    };
+                }
             }
         }
 
@@ -195,6 +232,18 @@ Don't report fields not included in the schema.
 =item ignore_unknown_subfields
 
 Don't report subfields not included in the schema.
+
+=item allow_deprecated_fields
+
+Don't report deprecated fields.
+
+=item allow_deprecated_subfields
+
+Don't report deprecated subfields,
+
+=item allow_deprecated
+
+Don't report deprecated fields and subfields.
 
 =item ignore_subfield_order
 
