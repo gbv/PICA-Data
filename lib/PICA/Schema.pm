@@ -89,6 +89,7 @@ sub check_field {
 
     my %errors;
     if ($spec->{subfields}) {
+        my $order;
         my %sfcounter;
         my (undef, undef, @subfields) = @$field;
 
@@ -119,6 +120,16 @@ sub check_field {
                         repeated => 1,
                         message  => "subfield $id\$$code is not repeatable",
                     };
+                } elsif (!$options{ignore_subfield_order} && defined $sfspec->{order}) {
+                    if (defined $order && $order > $sfspec->{order}) {
+                        $errors{$code} = {
+                            code => $code,
+                            order => $sfspec->{order},
+                            message => "wrong subfield order of $id\$$code"
+                        }
+                    } else {
+                        $order = 1*$sfspec->{order};
+                    }
                 }
                 $sfcounter{$code}++;
 
@@ -199,6 +210,8 @@ language|https://format.gbv.de/schema/avram/specification>, for instance:
 See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 records.
 
+Schema information can be included in PICA XML with L<PICA::Writer::XML>.
+
 =head1 METHODS
 
 =head2 check( $record [, %options ] )
@@ -223,6 +236,10 @@ Don't report fields marked as deprecated in the schema.
 =item ignore_deprecated_subfields
 
 Don't report subfields marked as deprecated in the schema.
+
+=item ignore_subfield_order
+
+Don't report errors resulting on wrong subfield order.
 
 =back
 
@@ -250,7 +267,7 @@ field tag and optional occurrence if the tag starts with C<0>.
 
 The current version does not properly validate required field on level 1 and 2.
 
-Field types and subfield order have neither been implemented yet.
+Field types have neither been implemented yet.
 
 =head1 SEE ALSO
 

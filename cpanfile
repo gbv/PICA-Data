@@ -22,4 +22,5 @@ on 'test', sub {
   requires 'Test::Pod' , '0';
   requires 'Test::Warn' , '0';
   requires 'Test::XML' , '0.08';
+  requires 'YAML::Tiny', '1.46';
 };

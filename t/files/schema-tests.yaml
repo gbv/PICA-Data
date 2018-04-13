@@ -1,0 +1,132 @@
+---
+schemas:
+  021A:
+    fields:
+      021A:
+        required: 1
+        subfields:
+          a:
+            required: 1
+            order: 1
+          d:
+            order: 2
+          x: {}
+  021A-repeatable:
+    fields:
+      021A:
+        repeatable: 1
+  021A-empty-subfields:
+    fields:
+      021A:
+        subfields: {}
+  occurrences:
+    fields:
+      028C/01:
+        required: 1
+      222X:
+        required: 0
+
+records:
+  021A: "021A $atitle"
+  021A-repeated: "021A $atitle\n021A $atitle"
+  021A-repeated-subfield: "021A $atitle$atitle"
+  021A-missing-subfield: "021A $dsubtitle"
+  021A-ordered-subfields: "021A $atitle$dsubtitle"
+  021A-unordered-subfields: "021A $dsubtitle$atitle"
+  021A-subfield: "021A $atitle$atitle"
+  099X: "099X $xy"
+  occurrences: "028C/01 $dEmma$aGoldman\n222X/123 $x23"
+  occurrences-missing: "028C $dEmma$aGoldman"
+
+tests:
+
+- schema: 021A
+  record: 021A
+- schema: 021A-repeatable
+  record: 021A-repeated
+
+- schema: 021A
+  record: 021A-repeated
+  result:
+  - message: field 021A is not repeatable
+    repeated: 1
+    tag: 021A
+
+- schema: 021A
+  record: 099X
+  result: 
+  - message: unknown field 099X
+    tag: 099X
+  - message: missing field 021A
+    required: 1
+    tag: 021A
+- schema: 021A-repeatable
+  record: 099X
+  options:
+    ignore_unknown_fields: 1
+
+- schema: 021A-empty-subfields
+  record: 021A
+  result:
+  - subfields:
+      a:
+        code: a
+        message: unknown subfield 021A$a
+    tag: 021A
+- schema: 021A-empty-subfields
+  record: 021A
+  options:
+    ignore_unknown_subfields: 1
+
+- schema: 021A
+  record: 021A-repeated-subfield
+  result:
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        message: subfield 021A$a is not repeatable
+        repeated: 1
+
+- schema: 021A
+  record: 021A-missing-subfield
+  result: 
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        message: missing subfield 021A$a
+        required: 1
+
+- schema: 021A
+  record: 021A-ordered-subfields
+- schema: 021A
+  record: 021A-unordered-subfields
+  result:
+  - tag: 021A
+    subfields:
+      a:
+        code: a
+        order: 1
+        message: wrong subfield order of 021A$a
+- schema: 021A
+  record: 021A-unordered-subfields
+  options:
+    ignore_subfield_order: 1
+
+- schema: occurrences
+  record: occurrences-missing
+  result:
+  - tag: 028C
+    message: unknown field 028C
+  - tag: 028C
+    occurrence: '01'
+    message: missing field 028C/01
+    required: 1
+
+- schema: occurrences
+  record: occurrences
+
+# TODO:
+# - check fields in level 1 and level 2 (uniqueness per local copy!)
+
