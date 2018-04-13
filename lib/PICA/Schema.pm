@@ -55,13 +55,21 @@ sub check_field {
     my $id = field_identifier($field);
     my $spec = $self->{fields}{$id};
 
-    if (!$spec) {
-        if (!$options{ignore_unknown_fields}) {
+    if (!$spec) { #does not exist in fields
+        $spec = $self->{'deprecated-fields'}{$id};
+        if (!$spec) {  #does not exist in deprecated-fields either
+            if (!$options{ignore_unknown_fields}) {
+                return _error($field,
+                    message => 'unknown field '.field_identifier($field)
+                )
+            } else {
+                return ()
+            }
+
+        } elsif (!$options{ignore_deprecated_fields}) { #does exist in deprecated-fields
             return _error($field,
-                message => 'unknown field '.field_identifier($field)
+                message => 'deprecated field '.field_identifier($field)
             )
-        } else {
-            return ()
         }
     }
 
@@ -75,6 +83,9 @@ sub check_field {
         }
     }
 
+    if($options{ignore_subfields}) {
+        return ();
+    }
 
     my %errors;
     if ($spec->{subfields}) {
@@ -82,9 +93,25 @@ sub check_field {
         my (undef, undef, @subfields) = @$field;
 
         while (@subfields) {
-            my ($code, undef) = splice @subfields, 0, 2;
+            my ($code, $value) = splice @subfields, 0, 2;
             my $sfspec = $spec->{subfields}{$code};
 
+            if (!$sfspec) {  #does not exist in subfields
+                $sfspec = $spec->{'deprecated-subfields'}{$code};
+                if (!$sfspec) { #does not exist in deprecated-subfields either
+                    if (!$options{ignore_unknown_subfields}) {
+                        $errors{$code} = {
+                            code    => $code,
+                            message => "unknown subfield $id\$$code"
+                        };
+                    }
+                } elsif (!$options{ignore_deprecated_subfields}) { #does exist in deprecated-subfields
+                    return _error($field,
+                        message => "deprecated subfield $id\$$code"
+                    )
+                }
+            }
+            
             if ($sfspec) {
                 if (!$sfspec->{repeatable} && $sfcounter{$code}) {
                     $errors{$code} = {
@@ -94,11 +121,17 @@ sub check_field {
                     };
                 }
                 $sfcounter{$code}++;
-            } elsif (!$options{ignore_unknown_subfields}) {
-                $errors{$code} = {
-                    code    => $code,
-                    message => "unknown subfield $id\$$code"
-                };
+
+                if ($sfspec->{pattern}) {
+                    if ($value !~ /$sfspec->{pattern}/) {
+                        $errors{$code} = {
+                            code     => $code,
+                            repeated => 1,
+                            message  => "content of subfield $id\$$code does not match pattern". $sfspec->{pattern},
+                            value => $value,
+                        };
+                    }
+                }
             }
         }
 
@@ -182,6 +215,14 @@ Don't report fields not included in the schema.
 =item ignore_unknown_subfields
 
 Don't report subfields not included in the schema.
+
+=item ignore_deprecated_fields
+
+Don't report fields marked as deprecated in the schema.
+
+=item ignore_deprecated_subfields
+
+Don't report subfields marked as deprecated in the schema.
 
 =back
 
