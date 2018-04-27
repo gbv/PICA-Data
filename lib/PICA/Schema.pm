@@ -60,6 +60,11 @@ sub check_field {
         $opts{allow_deprecated_subfields} = 1;
     }
 
+    if ($opts{ignore_unknown}) {
+        $opts{ignore_unknown_fields} = 1;
+        $opts{ignore_unknown_subfields} = 1;
+    }
+
     if (!$spec) { # field is not defined
         $spec = $self->{'deprecated-fields'}{$id};
 
@@ -212,7 +217,7 @@ language|https://format.gbv.de/schema/avram/specification>, for instance:
     }
 
 See L<PICA::Schema::Builder> to automatically construct schemas from PICA
-records.
+sample records.
 
 Schema information can be included in PICA XML with L<PICA::Writer::XML>.
 
@@ -232,6 +237,10 @@ Don't report fields not included in the schema.
 =item ignore_unknown_subfields
 
 Don't report subfields not included in the schema.
+
+=item ignore_unknown
+
+Don't report fields and subfields not included in the schema.
 
 =item allow_deprecated_fields
 

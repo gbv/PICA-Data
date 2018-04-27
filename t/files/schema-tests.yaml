@@ -1,4 +1,5 @@
 ---
+# sample schemas to reference in tests
 schemas:
   021A:
     fields:
@@ -26,6 +27,7 @@ schemas:
       222X:
         required: 0
 
+# sample records to reference in tests
 records:
   021A: "021A $atitle"
   021A-repeated: "021A $atitle\n021A $atitle"
@@ -38,10 +40,12 @@ records:
   occurrences: "028C/01 $dEmma$aGoldman\n222X/123 $x23"
   occurrences-missing: "028C $dEmma$aGoldman"
 
+# actual tests with schema, record, options, and expected result
 tests:
 
 - schema: 021A
   record: 021A
+
 - schema: 021A-repeatable
   record: 021A-repeated
 
@@ -60,10 +64,16 @@ tests:
   - message: missing field 021A
     required: 1
     tag: 021A
+
 - schema: 021A-repeatable
   record: 099X
   options:
     ignore_unknown_fields: 1
+
+- schema: 021A-repeatable
+  record: 099X
+  options:
+    ignore_unknown: 1
 
 - schema: 021A-empty-subfields
   record: 021A
@@ -73,6 +83,7 @@ tests:
         code: a
         message: unknown subfield 021A$a
     tag: 021A
+
 - schema: 021A-empty-subfields
   record: 021A
   options:
@@ -109,6 +120,7 @@ tests:
         code: a
         order: 1
         message: wrong subfield order of 021A$a
+
 - schema: 021A
   record: 021A-unordered-subfields
   options:
