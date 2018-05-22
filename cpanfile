@@ -19,7 +19,9 @@ on 'test', sub {
   requires 'IO::File' , '1.14';
   requires 'Test::Exception', '0.43';
   requires 'Test::More', '1.001003';
+  requires 'Test::Deep', '0.119';
   requires 'Test::Pod' , '0';
   requires 'Test::Warn' , '0';
   requires 'Test::XML' , '0.08';
+  requires 'YAML::Tiny', '1.46';
 };
