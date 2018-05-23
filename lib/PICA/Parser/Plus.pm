@@ -62,22 +62,10 @@ __END__
 
 PICA::Parser::Plus - Normalized PICA+ format parser
 
-=head2 DESCRIPTION
+=head1 DESCRIPTION
 
-See L<PICA::Parser::Base> for synopsis and details.
+See L<PICA::Parser::Base> for synopsis and configuration.
 
 The counterpart of this module is L<PICA::Writer::Plus>.
-
-=head2 Configuration
-
-See L<PICA::Parser::Base> for common configuration parameters.
-
-=over
- 
-=item C<strict>
-
-By default faulty fields in records are skipped with warnings. You can make them fatal by setting the I<strict> parameter to 1.
- 
-=back
 
 =cut

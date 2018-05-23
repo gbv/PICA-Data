@@ -44,7 +44,7 @@ PICA::Parser::PPXML - PicaPlus-XML Parser (format variant of the Deutsche Nation
 
 =head1 DESCRIPTION
 
-See L<PICA::Parser::Base> for synopsis and details.
+See L<PICA::Parser::Base> for synopsis and configuration.
 
 =head1 SEE ALSO
 
