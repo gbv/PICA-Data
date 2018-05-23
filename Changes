@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Extend Schema validation with positions, patterns, occurrences etc.
+    - Include Schema information in XML Writer
 
 0.36  2018-02-25 13:31:30 CET
     - Modify schema format to align with Avram
