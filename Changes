@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+0.37  2018-05-23 08:46:19 CEST
     - Extend Schema validation with positions, patterns, occurrences etc.
     - Include Schema information in XML Writer
 
