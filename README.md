@@ -2,8 +2,9 @@
 
 PICA::Data - PICA record processing
 
-[![Build Status](https://travis-ci.org/gbv/PICA-Data.png)](https://travis-ci.org/gbv/PICA-Data)
-[![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.png)](https://coveralls.io/r/gbv/PICA-Data)
+[![Unix build Status](https://travis-ci.org/gbv/PICA-Data.png)](https://travis-ci.org/gbv/PICA-Data)
+[![Windows build status](https://ci.appveyor.com/api/projects/status/5qjak74x7mjy7ne6?svg=true)](https://ci.appveyor.com/project/nichtich/pica-data)
+[![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.svg)](https://coveralls.io/r/gbv/PICA-Data)
 [![Kwalitee Score](http://cpants.cpanauthors.org/dist/PICA-Data.png)](http://cpants.cpanauthors.org/dist/PICA-Data)
 
 # SYNOPSIS
@@ -57,8 +58,8 @@ PICA::Data - PICA record processing
 
 # DESCRIPTION
 
-PICA::Data provides methods, classes, and functions to process PICA+ records
-in Perl.
+PICA::Data provides methods, classes, and functions to process
+[PICA+ records](http://format.gbv.de/pica) in Perl.
 
 PICA+ is the internal data format of the Local Library System (LBS) and the
 Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
@@ -201,7 +202,7 @@ record objects:
 
 Johann Rolschewski, `<jorol@cpan.org>`
 
-Jakob Voss `<voss@gbv.de>`
+Jakob Voß `<voss@gbv.de>`
 
 Carsten Klee `<klee@cpan.org>`
 

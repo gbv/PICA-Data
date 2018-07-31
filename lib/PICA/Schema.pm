@@ -2,7 +2,7 @@ package PICA::Schema;
 use strict;
 use warnings;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(field_identifier check_value);
