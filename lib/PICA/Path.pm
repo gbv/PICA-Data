@@ -226,7 +226,7 @@ or C<@>.  The character C<.> can be used as wildcard.
 
 =item
 
-An optional occurrence, given by two or three digits (or C<*> as wildcard) in brackets,
+An optional occurrence, given by two or three digits (or C<.> as wildcard) in brackets,
 e.g. C<[12]>, C<[0.]> or C<[102]>.
 
 =item
