@@ -56,6 +56,9 @@ PICA::Data - PICA record processing
       # parse single record from string
       my $record = pica_parser('plain', \"...")->next;
 
+      # guess parser from input string
+      my $parser = pica_guess($string)->new(\$string);
+
 # DESCRIPTION
 
 PICA::Data provides methods, classes, and functions to process
@@ -103,6 +106,11 @@ ignored and additional parameters are passed to the parser's constructor:
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
 - [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::PPXML](https://metacpan.org/pod/PICA::Parser::PPXML) for type `ppxml` (PicaPlus-XML)
+
+## pica\_guess( $data )
+
+Guess PICA serialization format from input data. Returns name of the
+corresponding parser class or `undef`.
 
 ## pica\_xml\_struct( $xml, %options )
 
@@ -192,11 +200,15 @@ where the `_id` of each record contains the EPN (subfield `203@/**0`).
 ## write( \[ $type \[, @options\] \] | $writer )
 
 Write PICA record with given [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::) or
-PICA::Writer::Plain by default. This method is a shortcut for blessed
+[PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) by default. This method is a shortcut for blessed
 record objects:
 
     pica_writer( xml => $file )->write( $record );
     $record->write( xml => $file ); # equivalent if $record is blessed 
+
+## string( \[ $type \] )
+
+Serialize PICA record in a given format (`plain` by default).
 
 # CONTRIBUTORS
 
