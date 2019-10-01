@@ -10,7 +10,7 @@ our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
 our %EXPORT_TAGS = (all => [@EXPORT_OK]); 
 
 our $ILN_PATH = PICA::Path->new('101@a');
-our $EPN_PATH = PICA::Path->new('203@/**0');
+our $EPN_PATH = PICA::Path->new('203@/..0');
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype blessed);
