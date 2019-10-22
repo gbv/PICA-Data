@@ -442,11 +442,274 @@ Returns the C<$field> on success.
 Returns a list of matching subfields (optionally trimmed by from and length)
 without inspection field and occurrence values.
 
-
 =head2 stringify( [ $short ] )
 
 Stringifies the PICA path to normalized form. Subfields are separated with
 C<$>, unless called as C<stringify(1)> or the first subfield is C<$>.
+
+=head1 Matching rules
+
+    ...
+    use PICA::Path;
+    use Test::More;
+    
+    # PICA::Data record
+    my $record = {
+        record => [
+            [ '005A', '', '0', '1234-5678' ],
+            [ '005A', '', '0', '1011-1213' ],
+            [   '009Q', '', 'u', 'http://example.org/', 'x', 'A', 'z', 'B', 'z',
+                'C'
+            ],
+            [ '021A', '', 'a', 'Title', 'd', 'Supplement' ],
+            [   '031N', '',     'j', '1600', 'k', '1700',
+                'j',    '1800', 'k', '1900', 'j', '2000'
+            ],
+            [ '045F', '01', 'a', '001' ],
+            [ '045F', '02', 'a', '002' ],
+            [ '045U', '', 'e', '003', 'e', '004' ],
+            [ '045U', '', 'e', '005' ]
+        ],
+        _id => 1234
+    };
+    
+    # create path
+    my $path = PICA::Path->new('021Aab');
+    
+    # match record
+    my $match = $path->match($record);
+    
+    # test result
+    is($match,'TitleSupplement');
+
+=head2 Match single field with no subfield repetition
+
+Field C<021A> has only unique subfield codes:
+
+    $record = {
+        record => [
+            ...
+            [ '021A', '', 'a', 'Title', 'd', 'Supplement' ],
+            ...
+        ],
+    };
+    
+    # get all subfields
+    $path = PICA::Path->new('021A');
+    $match = $path->match($record);
+    is($match, 'TitleSupplement');
+    
+    # get single subfield by code
+    $path = PICA::Path->new('021Aa');
+    $match = $path->match($record);
+    is($match, 'Title');
+    
+    # get two subfields by code
+    $path = PICA::Path->new('021Aad');
+    $match = $path->match($record);
+    is($match, 'TitleSupplement');
+    
+    $path = PICA::Path->new('021Ada');
+    $match = $path->match($record);
+    is($match, 'TitleSupplement');
+    
+    # get two subfields by code in specific order
+    $path = PICA::Path->new('021Ada');
+    $match = $path->match($record, {pluck => 1});
+    is($match, 'SupplementTitle');
+    
+    # join subfields
+    $path = PICA::Path->new('021Ada');
+    $match = $path->match($record, {pluck => 1, join => ' '});
+    is($match, 'Supplement Title');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('021Ada');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['Title', 'Supplement']);
+
+Option C<nested_arrays> creates a list for every field found:
+
+    # split fields to lists
+    $path = PICA::Path->new('021Ada');
+    $match = $path->match($record, {split => 1, nested_arrays => 1});
+    is_deeply($match, [['Title', 'Supplement']]);
+
+=head2 Match single field with subfield repetition
+
+Field C<009Q> has repeated subfields:
+
+    $record = {
+        record => [
+            ...
+            [ '009Q', '', 'u', 'http://example.org/', 'x', 'A', 'z', 'B', 'z', 'C' ]
+            ...
+        ]
+    };
+    
+    # get all subfields
+    $path = PICA::Path->new('009Q');
+    $match = $path->match($record);
+    is($match, 'http://example.orgABC');
+    
+    # get repeated subfields
+    $path = PICA::Path->new('009Qz');
+    $match = $path->match($record);
+    is($match, 'BC');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('009Q');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['http://example.org', 'A', 'B', 'C']);
+    
+    # split subfields to list
+    $path = PICA::Path->new('009Qz');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['B', 'C']);
+
+Option C<nested_arrays> creates a list for every field found:
+
+    # split fields to lists
+    $path = PICA::Path->new('009Qz');
+    $match = $path->match($record, {split => 1, nested_arrays => 1});
+    is_deeply($match, [['B', 'C']]);
+
+=head2 Match repeated Field with no subfield repetition
+
+Field C<005A> is repeated:
+
+    $record = {
+        record => [
+            [ '005A', '', '0', '1234-5678' ],
+            [ '005A', '', '0', '1011-1213' ],
+            ...
+        ]
+    };
+    
+    # get all subfields
+    $path = PICA::Path->new('009Q');
+    $match = $path->match($record);
+    is($match, '1234-56781011-1213');
+    
+    # get subfields by code
+    $path = PICA::Path->new('009Q');
+    $match = $path->match($record);
+    is($match, '1234-56781011-1213');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('005A0');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['1234-5678', '1011-1213']);
+    ```
+
+Option C<nested_arrays> creates a list for every field found:
+
+    # split fields to lists
+    $path = PICA::Path->new('005A0');
+    $match = $path->match($record, {split => 1, nested_arrays => 1});
+    is_deeply($match, [['1234-5678'], ['1011-1213']]);
+
+=head2 Match repeated field with subfield repetition
+
+Field C<045U> is repeated and has repeated subfields:
+
+    $record = {
+        record => [
+            ...
+            [ '045U', '', 'e', '003', 'e', '004' ],
+            [ '045U', '', 'e', '005' ]
+        ]
+    };
+    
+    # get all subfields
+    $path = PICA::Path->new('045U');
+    $match = $path->match($record);
+    is($match, '003004005');
+    
+    # get subfields by code
+    $path = PICA::Path->new('045Ue');
+    $match = $path->match($record);
+    is($match, '003004005');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('045Ue');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['003', '004', '005']);
+
+Option C<nested_arrays> creates a list for every field found:
+
+    # split fields to lists
+    $path = PICA::Path->new('045Ue');
+    $match = $path->match($record, {split => 1, nested_arrays => 1});
+    is_deeply($match, [['003', '004'], ['005']]);
+
+=head2 Match repeated field with occurrence
+
+Field C<045F> is repeated and has occurences:
+
+    $record = {
+        record => [
+            ...
+            [ '045F', '01', 'a', '001' ],
+            [ '045F', '02', 'a', '002' ],
+            ...
+        ]
+    };
+    
+    # get subfield from field with specific occurrence
+    $path = PICA::Path->new('045F[01]a');
+    $match = $path->match($record);
+    is($match, '001');
+    
+    # get subfield from field with wildcard for occurrence
+    $path = PICA::Path->new('045F[0.]a');
+    $match = $path->match($record);
+    is($match, '001002');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('045F[0.]a');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['001', '002']);
+
+=head2 Match the whole record with wildcards
+
+The dot (.) is a wildcard for field tags, occurrence and subfield codes.
+
+The path C<.....> means take any subfield from any field.
+
+    # get all subfields from all fields
+    $path = PICA::Path->new('.....');
+    $match = $path->match($record);
+    is($match, '1234-56781011-1213http://example.org/ABCTitleSupplement16001700180019002000001002003004005');
+    
+    # get specific subfield from all fields
+    $path = PICA::Path->new('....a');
+    $match = $path->match($record);
+    is($match, 'Title001002');
+
+Option C<split> creates a list out of subfields:
+
+    # split subfields to list
+    $path = PICA::Path->new('....a');
+    $match = $path->match($record, {split => 1});
+    is_deeply($match, ['Title', '001', '002']);
+
+Option C<nested_arrays> creates a list for every field found:
+
+    # split fields to lists
+    $path = PICA::Path->new('....');
+    $match = $path->match($record, {split => 1, nested_arrays => 1});
+    is_deeply($match, [ ['1234-5678'], ['1011-1213'], [ 'http://example.org/', 'A', 'B', 'C', ], [ 'Title', 'Supplement' ], [ 1600, 1700, 1800, 1900, 2000, ], ['001'], ['002'], [ '003', '004' ], ['005'] ]`);
 
 =head1 SEE ALSO
 
