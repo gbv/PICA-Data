@@ -352,7 +352,8 @@ or in short form:
     [ [ '003@', undef, '0' => '12345X' ] ]
 
 PICA path expressions (see L<PICA::Path>) can be used to facilitate processing
-PICA+ records and L<PICA::Schema> to validate PICA+ records.
+PICA+ records and L<PICA::Schema> can be used to validate PICA+ records with
+L<Avram Schemas|https://format.gbv.de/schema/avram/specification>.
 
 =head1 FUNCTIONS
 

@@ -1,0 +1,77 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+use PICA::Data;
+use PICA::Schema;
+use IO::File;
+use Getopt::Long;
+use Pod::Usage;
+
+my ( $from, $to, $infile, $schema, $help );
+
+GetOptions(
+    'from|f=s'   => \$from,
+    'to|t=s'     => \$to,
+    'schema|s=s' => \$schema,
+    'help|?'     => \$help
+) or pod2usage(2);
+pod2usage(1) if $help;
+
+my %types = (
+    bin    => 'Binary',
+    binary => 'Binary',
+    plain  => 'Plain',
+    plus   => 'Plus',
+    xml    => 'XML',
+    ppxml  => 'PPXML'
+);
+
+if (@ARGV) {
+    $infile = $ARGV[0];
+    $from = $1 if !$from && $infile =~ /\.([a-z]+)$/ && $types{ lc $1 };
+}
+
+pod2usage("unknown serialization type: $from") unless $types{ lc $from };
+pod2usage("unknown serialization type: $to") unless !$to || $types{ lc $to };
+
+my $fh     = defined $infile ? IO::File->new($infile) : undef;
+my $parser = "PICA::Parser::${types{$from}}"->new($fh);
+my $writer = $to ? "PICA::Writer::${types{$to}}"->new() : undef;
+
+while ( my $record = $parser->next ) {
+    $writer->write($record) if $writer;
+}
+
+$writer->end() if $writer && $writer->can('end');
+
+__END__
+
+=head1 NAME
+
+pica-validate - parse and validate PICA+ data
+
+=head1 SYNOPSIS
+
+  pica-validate [--from TYPE] [--schema FILE] [--to TYPE] [FILE]
+
+=head1 OPTIONS
+
+=head2 --from, -f
+
+PICA serialization type (plain, plus, binary, XML, ppxml). Guessed from input
+filename if not specified.
+
+=head2 --to, -t
+
+PICA serialization type to enable writing parsed PICA data.
+
+=head2 --schema, -s
+
+Avram Schema to validate against (not implemented yet)
+
+=head2 SEE ALSO
+
+See L<Catmandu::PICA> for more elaborated command line processing of PICA+ data.
+
+=cut
