@@ -90,8 +90,8 @@ or in short form:
 
     [ [ '003@', undef, '0' => '12345X' ] ]
 
-PICA path expressions (see [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)) can be used to facilitate processing
-PICA+ records and [PICA::Schema](https://metacpan.org/pod/PICA%3A%3ASchema) to validate PICA+ records.
+PICA path expressions (see [PICA::Path](https://metacpan.org/pod/PICA::Path)) can be used to facilitate processing
+PICA+ records and [PICA::Schema](https://metacpan.org/pod/PICA::Schema) to validate PICA+ records.
 
 # FUNCTIONS
 
@@ -100,14 +100,14 @@ get all of them):
 
 ## pica\_parser( $type \[, @options\] )
 
-Create a PICA parsers object (see [PICA::Parser::Base](https://metacpan.org/pod/PICA%3A%3AParser%3A%3ABase)). Case of the type is
+Create a PICA parsers object (see [PICA::Parser::Base](https://metacpan.org/pod/PICA::Parser::Base)). Case of the type is
 ignored and additional parameters are passed to the parser's constructor:
 
-- [PICA::Parser::Binary](https://metacpan.org/pod/PICA%3A%3AParser%3A%3ABinary) for type `binary` (binary PICA+)
-- [PICA::Parser::Plain](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APlain) for type `plain` or `picaplain` (human-readable PICA+)
-- [PICA::Parser::Plus](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APlus) for type `plus` or `picaplus` (normalized PICA+)
-- [PICA::Parser::XML](https://metacpan.org/pod/PICA%3A%3AParser%3A%3AXML) for type `xml` or `picaxml` (PICA-XML)
-- [PICA::Parser::PPXML](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APPXML) for type `ppxml` (PicaPlus-XML)
+- [PICA::Parser::Binary](https://metacpan.org/pod/PICA::Parser::Binary) for type `binary` (binary PICA+)
+- [PICA::Parser::Plain](https://metacpan.org/pod/PICA::Parser::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+- [PICA::Parser::Plus](https://metacpan.org/pod/PICA::Parser::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Parser::XML](https://metacpan.org/pod/PICA::Parser::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Parser::PPXML](https://metacpan.org/pod/PICA::Parser::PPXML) for type `ppxml` (PicaPlus-XML)
 
 ## pica\_guess( $data )
 
@@ -116,31 +116,31 @@ corresponding parser class or `undef`.
 
 ## pica\_xml\_struct( $xml, %options )
 
-Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML%3A%3AStruct) structure into an (optionally
+Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into an (optionally
 blessed) PICA record structure.
 
 ## pica\_writer( $type \[, @options\] )
 
-Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3ABase)) in the same way as
+Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::Base)) in the same way as
 `pica_parser` with one of
 
-- [PICA::Writer::Binary](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3ABinary) for type `binary` (binary PICA)
-- [PICA::Writer::Generic](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3AGeneric) for type `generic` (PICA with self defined data separators)
-- [PICA::Writer::Plain](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APlain) for type `plain` or `picaplain` (human-readable PICA+)
-- [PICA::Writer::Plus](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APlus) for type `plus` or `picaplus` (normalized PICA+)
-- [PICA::Writer::XML](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3AXML) for type `xml` or `picaxml` (PICA-XML)
-- [PICA::Writer::PPXML](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APPXML) for type `ppxml` (PicaPlus-XML)
+- [PICA::Writer::Binary](https://metacpan.org/pod/PICA::Writer::Binary) for type `binary` (binary PICA)
+- [PICA::Writer::Generic](https://metacpan.org/pod/PICA::Writer::Generic) for type `generic` (PICA with self defined data separators)
+- [PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) for type `plain` or `picaplain` (human-readable PICA+)
+- [PICA::Writer::Plus](https://metacpan.org/pod/PICA::Writer::Plus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
+- [PICA::Writer::PPXML](https://metacpan.org/pod/PICA::Writer::PPXML) for type `ppxml` (PicaPlus-XML)
 
 ## pica\_path( $path )
 
-Equivalent to [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)->new($path).
+Equivalent to [PICA::Path](https://metacpan.org/pod/PICA::Path)->new($path).
 
 ## pica\_match( $record, $path, %options )
 
-Equivalent to [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)->match\_record($path, %options).
+Equivalent to [PICA::Path](https://metacpan.org/pod/PICA::Path)->match\_record($path, %options).
 
 Extract the subfield values from a PICA record based on a PICA path
-expression and options (see [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)). Also available as accessor 
+expression and options (see [PICA::Path](https://metacpan.org/pod/PICA::Path)). Also available as accessor 
 `match($path, %options)`.
 
 ## pica\_value( $record, $path )
@@ -183,12 +183,12 @@ with `pica_` (see ["SYNOPSIS"](#synopsis)).
 
 ## match( $path, %options )
 
-Extract a list of subfield values from a PICA record based on a [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)
+Extract a list of subfield values from a PICA record based on a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression and options.
 
 ## values( $path )
 
-Extract a list of subfield values from a PICA record based on a [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)
+Extract a list of subfield values from a PICA record based on a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression.
 
 ## value( $path )
@@ -197,7 +197,7 @@ Same as `values` but only returns the first value.
 
 ## fields( $path )
 
-Returns a PICA record limited to fields specified in a [PICA::Path](https://metacpan.org/pod/PICA%3A%3APath)
+Returns a PICA record limited to fields specified in a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression.  Always returns an array reference.
 
 ## holdings
@@ -214,8 +214,8 @@ where the `_id` of each record contains the EPN (subfield `203@/**0`).
 
 ## write( \[ $type \[, @options\] \] | $writer )
 
-Write PICA record with given [PICA::Writer::Base](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3A) or
-[PICA::Writer::Plain](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APlain) by default. This method is a shortcut for blessed
+Write PICA record with given [PICA::Writer::Base](https://metacpan.org/pod/PICA::Writer::) or
+[PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) by default. This method is a shortcut for blessed
 record objects:
 
     pica_writer( xml => $file )->write( $record );
@@ -242,9 +242,9 @@ the same terms as Perl itself.
 
 # SEE ALSO
 
-- [PICA::Record](https://metacpan.org/pod/PICA%3A%3ARecord) (deprecated) implemented an alternative framework for
+- [PICA::Record](https://metacpan.org/pod/PICA::Record) (deprecated) implemented an alternative framework for
 processing PICA+ records.
-- Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu%3A%3APICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
+- Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
 for instance to convert PICA XML to plain PICA+:
 
         catmandu convert PICA --type xml to PICA --type plain < picadata.xml
