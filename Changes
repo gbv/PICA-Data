@@ -2,6 +2,7 @@ Revision history for PICA::Data
 
 {{$NEXT}}
     - Fix zero items/holdings bug
+    - Add pica-validate command line script
 
 1.02  2020-02-06 12:16:32 CET
     - Support parsing PICA XML with namespace prefix

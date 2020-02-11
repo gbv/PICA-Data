@@ -547,6 +547,11 @@ the same terms as Perl itself.
 
 =item
 
+L<pica-validate> command line script to parse, serialize, count, and validate
+PICA+ data.
+
+=item
+
 L<PICA::Record> (deprecated) implemented an alternative framework for
 processing PICA+ records.
 

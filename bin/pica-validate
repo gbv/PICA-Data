@@ -8,18 +8,20 @@ use IO::File;
 use Getopt::Long;
 use Pod::Usage;
 
-my ( $from, $to, $infile, $schema, $help );
-
 GetOptions(
-    'from|f=s'   => \$from,
-    'to|t=s'     => \$to,
-    'schema|s=s' => \$schema,
-    'help|?'     => \$help
+    'from|f=s'   => \( my $from ),
+    'to|t:s'     => \( my $to = 0 ),
+    'schema|s=s' => \( my $schema ),
+    'count|c'    => \( my $count ),
+    'help|?'     => \( my $help )
 ) or pod2usage(2);
-pod2usage(1) if $help;
+pod2usage( -verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION" )
+  if $help
+  or ( !@ARGV and -t );
 
 my %types = (
     bin    => 'Binary',
+    dat    => 'Binary',
     binary => 'Binary',
     plain  => 'Plain',
     plus   => 'Plus',
@@ -27,23 +29,41 @@ my %types = (
     ppxml  => 'PPXML'
 );
 
+my $fh;
 if (@ARGV) {
-    $infile = $ARGV[0];
-    $from = $1 if !$from && $infile =~ /\.([a-z]+)$/ && $types{ lc $1 };
+    $fh = IO::File->new( $ARGV[0] );
+    $from = $1 if !$from && $ARGV[0] =~ /\.([a-z]+)$/ && $types{ lc $1 };
 }
 
+$from = 'plain' unless $from;
 pod2usage("unknown serialization type: $from") unless $types{ lc $from };
-pod2usage("unknown serialization type: $to") unless !$to || $types{ lc $to };
 
-my $fh     = defined $infile ? IO::File->new($infile) : undef;
-my $parser = "PICA::Parser::${types{$from}}"->new($fh);
+$to = $from if $to eq '';
+pod2usage("unknown serialization type: $to") unless !$to or $types{ lc $to };
+
+my $parser = "PICA::Parser::${types{$from}}"->new( $fh, bless => 1 );
 my $writer = $to ? "PICA::Writer::${types{$to}}"->new() : undef;
+
+$count = {
+    records  => 0,
+    holdings => 0,
+    items    => 0,
+    fields   => 0,
+} if $count;
 
 while ( my $record = $parser->next ) {
     $writer->write($record) if $writer;
+    $count->{records}++;
+    $count->{holdings} += @{ $record->holdings };
+    $count->{items}    += @{ $record->items };
+    $count->{fields}   += @{ $record->{record} };
 }
 
 $writer->end() if $writer && $writer->can('end');
+
+if ($count) {
+    print $count->{$_} . " $_\n" for qw(records holdings items fields);
+}
 
 __END__
 
@@ -53,24 +73,38 @@ pica-validate - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-  pica-validate [--from TYPE] [--schema FILE] [--to TYPE] [FILE]
+pica-validate [--from TYPE] [--schema FILE] [--to [TYPE]] [--count] [FILE]
+
+=head1 DESCRIPTION
+
+Parse, validate and/or serialize PICA+ data from the command line, e.g.:
+
+  pica-validate pica.xml -s schema.json   # validate against Avram schema
+  pica-validate pica.dat -t xml           # convert binary to XML
+  pica-validate -c -f plain < pica.plain  # parse and count records
 
 =head1 OPTIONS
 
 =head2 --from, -f
 
-PICA serialization type (plain, plus, binary, XML, ppxml). Guessed from input
-filename if not specified.
+PICA serialization type (plain, plus, binary, XML, ppxml) with XML as default.
+Guessed from input filename unless specified. See format documentation at
+L<http://format.gbv.de/pica>
 
 =head2 --to, -t
 
 PICA serialization type to enable writing parsed PICA data.
 
+=head2 --count, -c
+
+Count number of records, holdings, items, and fields.
+
 =head2 --schema, -s
 
-Avram Schema to validate against (not implemented yet)
+L<Avram Schema|http://format.gbv.de/schema/avram/specification> to validate
+against.
 
-=head2 SEE ALSO
+=head1 SEE ALSO
 
 See L<Catmandu::PICA> for more elaborated command line processing of PICA+ data.
 
