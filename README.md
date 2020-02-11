@@ -91,7 +91,8 @@ or in short form:
     [ [ '003@', undef, '0' => '12345X' ] ]
 
 PICA path expressions (see [PICA::Path](https://metacpan.org/pod/PICA::Path)) can be used to facilitate processing
-PICA+ records and [PICA::Schema](https://metacpan.org/pod/PICA::Schema) to validate PICA+ records.
+PICA+ records and [PICA::Schema](https://metacpan.org/pod/PICA::Schema) can be used to validate PICA+ records with
+[Avram Schemas](https://format.gbv.de/schema/avram/specification).
 
 # FUNCTIONS
 
@@ -242,9 +243,9 @@ the same terms as Perl itself.
 
 # SEE ALSO
 
-- [PICA::Record](https://metacpan.org/pod/PICA::Record) (deprecated) implemented an alternative framework for
-processing PICA+ records.
-- Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for processing PICA records with the [Catmandu](https://metacpan.org/pod/Catmandu) toolkit,
-for instance to convert PICA XML to plain PICA+:
-
-        catmandu convert PICA --type xml to PICA --type plain < picadata.xml
+- [pica-validate](https://metacpan.org/pod/pica-validate) command line script to parse, serialize, count, and validate
+PICA+ data.
+- Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for more elaborated processing of PICA records with the
+[Catmandu](https://metacpan.org/pod/Catmandu) toolkit.
+- [PICA::Record](https://metacpan.org/pod/PICA::Record) implemented an alternative framework for processing PICA+
+records (**deprecated!**).
