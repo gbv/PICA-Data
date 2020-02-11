@@ -12,6 +12,7 @@ GetOptions(
     'from|f=s'   => \( my $from ),
     'to|t:s'     => \( my $to = 0 ),
     'schema|s=s' => \( my $schema ),
+    'unknown|u!' => \( my $report_unknown ),
     'count|c'    => \( my $count ),
     'help|?'     => \( my $help )
 ) or pod2usage(2);
@@ -44,6 +45,8 @@ pod2usage("unknown serialization type: $to") unless !$to or $types{ lc $to };
 my $parser = "PICA::Parser::${types{$from}}"->new( $fh, bless => 1 );
 my $writer = $to ? "PICA::Writer::${types{$to}}"->new() : undef;
 
+my %schema_options = ( ignore_unknown => !$report_unknown );
+
 $count = {
     records  => 0,
     holdings => 0,
@@ -51,8 +54,26 @@ $count = {
     fields   => 0,
 } if $count;
 
+if ($schema) {
+    use JSON::PP qw(decode_json);
+    my $fh = IO::File->new($schema);
+    $schema = PICA::Schema->new( decode_json( join "\n", <$fh> ) );
+    $count->{invalid} = 0 if $count;
+}
+
 while ( my $record = $parser->next ) {
     $writer->write($record) if $writer;
+    if ($schema) {
+        my @errors = $schema->check($record, %schema_options);
+        if (@errors) {
+            for (@errors) {
+                my $msg = defined $record->{_id}
+                    ? $record->{_id} . ": $_" : $_;
+                print "$msg\n";
+            }
+            $count->{invalid}++;
+        }
+    }
     if ($count) {
         $count->{records}++;
         $count->{holdings} += @{ $record->holdings };
@@ -64,7 +85,9 @@ while ( my $record = $parser->next ) {
 $writer->end() if $writer && $writer->can('end');
 
 if ($count) {
-    print $count->{$_} . " $_\n" for qw(records holdings items fields);
+    print $count->{$_} . " $_\n"
+      for grep { defined $count->{$_} }
+      qw(records invalid holdings items fields);
 }
 
 __END__
@@ -75,7 +98,7 @@ pica-validate - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-pica-validate [--from TYPE] [--schema FILE] [--to [TYPE]] [--count] [FILE]
+pica-validate [--from TYPE] [--schema FILE] [--to [TYPE]] {OPTIONS} [FILE]
 
 =head1 DESCRIPTION
 
@@ -105,6 +128,10 @@ Count number of records, holdings, items, and fields.
 
 L<Avram Schema|http://format.gbv.de/schema/avram/specification> to validate
 against.
+
+=head2 --unknown, -u
+
+Report unknown fields and subfields when validating (disabled by default).
 
 =head1 SEE ALSO
 
