@@ -53,10 +53,12 @@ $count = {
 
 while ( my $record = $parser->next ) {
     $writer->write($record) if $writer;
-    $count->{records}++;
-    $count->{holdings} += @{ $record->holdings };
-    $count->{items}    += @{ $record->items };
-    $count->{fields}   += @{ $record->{record} };
+    if ($count) {
+        $count->{records}++;
+        $count->{holdings} += @{ $record->holdings };
+        $count->{items}    += @{ $record->items };
+        $count->{fields}   += @{ $record->{record} };
+    }
 }
 
 $writer->end() if $writer && $writer->can('end');
