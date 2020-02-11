@@ -550,17 +550,15 @@ the same terms as Perl itself.
 L<pica-validate> command line script to parse, serialize, count, and validate
 PICA+ data.
 
-=item
-
-L<PICA::Record> (deprecated) implemented an alternative framework for
-processing PICA+ records.
-
 =item 
 
-Use L<Catmandu::PICA> for processing PICA records with the L<Catmandu> toolkit,
-for instance to convert PICA XML to plain PICA+:
+Use L<Catmandu::PICA> for more elaborated processing of PICA records with the
+L<Catmandu> toolkit.
 
-   catmandu convert PICA --type xml to PICA --type plain < picadata.xml
+=item
+
+L<PICA::Record> implemented an alternative framework for processing PICA+
+records (B<deprecated!>).
 
 =back
 
