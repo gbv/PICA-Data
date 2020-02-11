@@ -14,6 +14,7 @@ GetOptions(
     'schema|s=s' => \( my $schema ),
     'unknown|u!' => \( my $report_unknown ),
     'count|c'    => \( my $count ),
+    'path|p=s'   => \( my $path ),
     'help|?'     => \( my $help )
 ) or pod2usage(2);
 pod2usage( -verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION" )
@@ -61,7 +62,17 @@ if ($schema) {
     $schema = PICA::Schema->new( decode_json( join "\n", <$fh> ) );
 }
 
+if ($path) {
+    my $compiled = eval { PICA::Path->new($path) };
+    die "invalid pica path: $path\n" unless $compiled;
+    $path = $compiled;
+}
+
 while ( my $record = $parser->next ) {
+    if ($path) {
+        $record = $record->fields($path);
+    }
+
     $writer->write($record) if $writer;
     if ($schema) {
         my @errors = $schema->check($record, %schema_options);
@@ -108,6 +119,7 @@ Parse, validate and/or serialize PICA+ data from the command line, e.g.:
   pica-validate pica.xml -s schema.json   # validate against Avram schema
   pica-validate pica.dat -t xml           # convert binary to XML
   pica-validate -c -f plain < pica.plain  # parse and count records
+  pica-validate -p 003@ pica.xml -t       # extract field 003@
 
 =head1 OPTIONS
 
@@ -133,6 +145,10 @@ against.
 =head2 --unknown, -u
 
 Report unknown fields and subfields when validating (disabled by default).
+
+=head2 --path, -p
+
+Limit the record to fields specified by a simple PICA Path expression.
 
 =head1 SEE ALSO
 
