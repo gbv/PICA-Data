@@ -108,7 +108,8 @@ sub pica_holdings {
 
     my $blessed = blessed($record);
     $record = $record->{record} if reftype $record eq 'HASH';
-    my ( @holdings, $field_buffer, $iln );
+    my ( @holdings, $iln );
+    my $field_buffer = [];
 
     foreach my $field (@$record) {
         my $tag = substr $field->[0], 0, 1;
