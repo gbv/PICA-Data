@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.03  2020-02-11 12:47:52 CET
     - Fix zero items/holdings bug
     - Add pica-validate command line script
 
