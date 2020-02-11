@@ -54,11 +54,11 @@ $count = {
     fields   => 0,
 } if $count;
 
+my $invalid = 0;
 if ($schema) {
     use JSON::PP qw(decode_json);
     my $fh = IO::File->new($schema);
     $schema = PICA::Schema->new( decode_json( join "\n", <$fh> ) );
-    $count->{invalid} = 0 if $count;
 }
 
 while ( my $record = $parser->next ) {
@@ -71,7 +71,7 @@ while ( my $record = $parser->next ) {
                     ? $record->{_id} . ": $_" : $_;
                 print "$msg\n";
             }
-            $count->{invalid}++;
+            $invalid++;
         }
     }
     if ($count) {
@@ -85,6 +85,7 @@ while ( my $record = $parser->next ) {
 $writer->end() if $writer && $writer->can('end');
 
 if ($count) {
+    $count->{invalid} = $invalid if defined $invalid;
     print $count->{$_} . " $_\n"
       for grep { defined $count->{$_} }
       qw(records invalid holdings items fields);
