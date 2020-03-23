@@ -2,7 +2,7 @@ package PICA::Writer::PPXML;
 use strict;
 use warnings;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 use Scalar::Util qw(reftype);
 use XML::LibXML;
