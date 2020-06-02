@@ -28,7 +28,8 @@ my %types = (
     plain  => 'Plain',
     plus   => 'Plus',
     xml    => 'XML',
-    ppxml  => 'PPXML'
+    ppxml  => 'PPXML',
+    json   => 'JSON',
 );
 
 my $fh;
@@ -44,7 +45,7 @@ $to = $from if $to eq '';
 pod2usage("unknown serialization type: $to") unless !$to or $types{ lc $to };
 
 my $parser = "PICA::Parser::${types{$from}}"->new( $fh, bless => 1 );
-my $writer = $to ? "PICA::Writer::${types{$to}}"->new() : undef;
+my $writer = $to ? "PICA::Writer::${types{$to}}"->new( utf8 => 0 ) : undef;
 
 my %schema_options = ( ignore_unknown => !$report_unknown );
 

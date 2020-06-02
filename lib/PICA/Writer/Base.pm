@@ -95,6 +95,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::PPXML>
 
+=item L<PICA::Writer::JSON>
+
 =back
 
 =head1 METHODS

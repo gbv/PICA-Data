@@ -152,11 +152,13 @@ use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
 use PICA::Parser::Binary;
+use PICA::Parser::JSON;
 use PICA::Writer::XML;
 use PICA::Writer::Plus;
 use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
+use PICA::Writer::JSON;
 
 sub pica_parser {
     _pica_module( 'PICA::Parser', @_ );
@@ -180,6 +182,7 @@ sub pica_guess {
         'Plus'   => ( $pica =~ tr/\x{0A}// ),
         'Binary' => ( $pica =~ tr/\x{1D}// ),
         'XML'    => ( $pica =~ tr/<// ),
+        'JSON'   => ( $pica =~ tr/[{[]// ),
     );
     $count{$_} > $count{$format} and $format = $_ for grep { $_ } keys %count;
 
@@ -207,6 +210,9 @@ sub _pica_module {
     elsif ( $type =~ /^(pica)?ppxml$/ ) {
         "${base}::PPXML"->new(@_);
     }
+    elsif ( $type =~ /^(nd)?json$/ ) {
+        "${base}::JSON"->new(@_);
+    }
     else {
         croak "unknown PICA parser type: $type";
     }
@@ -229,6 +235,12 @@ sub string {
     $options{start} //= 0;
     pica_writer( $type => %options )->write($pica);
     return $string;
+}
+
+sub TO_JSON {
+    my $record = shift;
+    $record = $record->{record} if reftype $record eq 'HASH';
+    return [@$record];
 }
 
 sub pica_xml_struct {

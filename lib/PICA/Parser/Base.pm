@@ -98,6 +98,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Parser::PPXML>
 
+=item L<PICA::Parser::JSON>
+
 =back
 
 =head2 CONFIGURATION
