@@ -107,20 +107,20 @@ __END__
 
 =head1 NAME
 
-pica-validate - parse and validate PICA+ data
+picadata - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-pica-validate [--from TYPE] [--schema FILE] [--to [TYPE]] {OPTIONS} [FILE]
+picadata [--from TYPE] [--schema FILE] [--to [TYPE]] {OPTIONS} [FILE]
 
 =head1 DESCRIPTION
 
 Parse, validate and/or serialize PICA+ data from the command line, e.g.:
 
-  pica-validate pica.xml -s schema.json   # validate against Avram schema
-  pica-validate pica.dat -t xml           # convert binary to XML
-  pica-validate -c -f plain < pica.plain  # parse and count records
-  pica-validate -p 003@ pica.xml -t       # extract field 003@
+  picadata pica.xml -s schema.json   # validate against Avram schema
+  picadata pica.dat -t xml           # convert binary to XML
+  picadata -c -f plain < pica.plain  # parse and count records
+  picadata -p 003@ pica.xml -t       # extract field 003@
 
 =head1 OPTIONS
 
