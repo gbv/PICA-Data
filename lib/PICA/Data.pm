@@ -15,7 +15,7 @@ our $EPN_PATH = PICA::Path->new('203@/..0');
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype blessed);
-use List::Util qw(first);
+use List::Util qw(first any);
 use IO::Handle;
 use PICA::Path;
 
@@ -38,12 +38,19 @@ sub pica_values {
 }
 
 sub pica_fields {
-    my ( $record, $path ) = @_;
+    my $record = shift;
+    $record = $record->{record} if reftype $record eq 'HASH';
 
-    $path = eval { PICA::Path->new($path) } unless ref $path;
-    return [] unless defined $path;
+    my @pathes = map {
+        ref $_ ? $_ : eval { PICA::Path->new($_) }
+    } @_;
 
-    return $path->record_fields($record);
+    return [
+        grep {
+            my $cur = $_;
+            any { $_->match_field($cur) } @pathes
+        } @$record
+    ];
 }
 
 sub pica_value {
@@ -470,10 +477,9 @@ expression. The following are virtually equivalent:
     $path->record_subfields($record);
     $record->values($path); # if $record is blessed
 
-=head2 pica_fields( $record, $path )
+=head2 pica_fields( $record, $path[, $path...] )
 
-Returns a PICA record (or empty array reference) limited to fields specified in
-a PICA path expression. The following are virtually equivalent:
+Returns a PICA record (or empty array reference) limited to fields specified inione ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
@@ -508,7 +514,7 @@ expression.
 
 Same as C<values> but only returns the first value.
 
-=head2 fields( $path )
+=head2 fields( $path[, $path...] )
 
 Returns a PICA record limited to fields specified in a L<PICA::Path>
 expression.  Always returns an array reference.
