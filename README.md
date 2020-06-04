@@ -158,10 +158,9 @@ expression. The following are virtually equivalent:
     $path->record_subfields($record);
     $record->values($path); # if $record is blessed
 
-## pica\_fields( $record, $path )
+## pica\_fields( $record, $path\[, $path...\] )
 
-Returns a PICA record (or empty array reference) limited to fields specified in
-a PICA path expression. The following are virtually equivalent:
+Returns a PICA record (or empty array reference) limited to fields specified inione ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
@@ -196,7 +195,7 @@ expression.
 
 Same as `values` but only returns the first value.
 
-## fields( $path )
+## fields( $path\[, $path...\] )
 
 Returns a PICA record limited to fields specified in a [PICA::Path](https://metacpan.org/pod/PICA::Path)
 expression.  Always returns an array reference.
@@ -243,7 +242,7 @@ the same terms as Perl itself.
 
 # SEE ALSO
 
-- [pica-validate](https://metacpan.org/pod/pica-validate) command line script to parse, serialize, count, and validate
+- [picadata](https://metacpan.org/pod/picadata) command line script to parse, serialize, count, and validate
 PICA+ data.
 - Use [Catmandu::PICA](https://metacpan.org/pod/Catmandu::PICA) for more elaborated processing of PICA records with the
 [Catmandu](https://metacpan.org/pod/Catmandu) toolkit.
