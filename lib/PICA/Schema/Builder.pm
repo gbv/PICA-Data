@@ -1,7 +1,7 @@
 package PICA::Schema::Builder;
 use v5.14.1;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 use PICA::Schema qw(field_identifier);
 use Scalar::Util qw(reftype);

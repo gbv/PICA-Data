@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.08 2020-06-10T13:27:29Z
     - Require Perl >= 5.14.1
     - Fix installation of picadata script
     - Make picadata detect missing files

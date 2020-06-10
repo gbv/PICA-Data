@@ -63,8 +63,7 @@ PICA::Data - PICA record processing
 
 # DESCRIPTION
 
-PICA::Data provides methods, classes, and functions to process
-[PICA+ records](http://format.gbv.de/pica) in Perl.
+PICA::Data provides methods, classes, functions, and [picadata](https://metacpan.org/pod/a%20command%20line%0Aapplication) to process [PICA+ records](http://format.gbv.de/pica) in Perl.
 
 PICA+ is the internal data format of the Local Library System (LBS) and the
 Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
@@ -107,6 +106,7 @@ ignored and additional parameters are passed to the parser's constructor:
 - [PICA::Parser::Binary](https://metacpan.org/pod/PICA%3A%3AParser%3A%3ABinary) for type `binary` (binary PICA+)
 - [PICA::Parser::Plain](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APlain) for type `plain` or `picaplain` (human-readable PICA+)
 - [PICA::Parser::Plus](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APlus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Parser::JSON](https://metacpan.org/pod/PICA%3A%3AParser%3A%3AJSON) for type `json` (PICA JSON)
 - [PICA::Parser::XML](https://metacpan.org/pod/PICA%3A%3AParser%3A%3AXML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Parser::PPXML](https://metacpan.org/pod/PICA%3A%3AParser%3A%3APPXML) for type `ppxml` (PicaPlus-XML)
 
@@ -129,6 +129,7 @@ Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/P
 - [PICA::Writer::Generic](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3AGeneric) for type `generic` (PICA with self defined data separators)
 - [PICA::Writer::Plain](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APlain) for type `plain` or `picaplain` (human-readable PICA+)
 - [PICA::Writer::Plus](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APlus) for type `plus` or `picaplus` (normalized PICA+)
+- [PICA::Writer::JSON](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3AJSON) for type `json` (PICA JSON)
 - [PICA::Writer::XML](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3AXML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Writer::PPXML](https://metacpan.org/pod/PICA%3A%3AWriter%3A%3APPXML) for type `ppxml` (PicaPlus-XML)
 

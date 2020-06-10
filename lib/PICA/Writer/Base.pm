@@ -1,7 +1,7 @@
 package PICA::Writer::Base;
 use v5.14.1;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use Carp qw(croak);
