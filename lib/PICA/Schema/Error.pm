@@ -1,6 +1,5 @@
 package PICA::Schema::Error;
-use strict;
-use warnings;
+use v5.14.1;
 
 use overload fallback => 1, '""' => \&message;
 

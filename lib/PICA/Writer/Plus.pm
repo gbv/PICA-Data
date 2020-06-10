@@ -1,6 +1,5 @@
 package PICA::Writer::Plus;
-use strict;
-use warnings;
+use v5.14.1;
 
 our $VERSION = '1.07';
 

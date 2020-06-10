@@ -1,6 +1,6 @@
 package PICA::Path;
-use strict;
-use warnings;
+use v5.14.1;
+use bytes;
 
 our $VERSION = '1.07';
 
