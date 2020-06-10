@@ -342,8 +342,8 @@ PICA::Data - PICA record processing
 
 =head1 DESCRIPTION
 
-PICA::Data provides methods, classes, and functions to process
-L<PICA+ records|http://format.gbv.de/pica> in Perl.
+PICA::Data provides methods, classes, functions, and L<picadata|a command line
+application> to process L<PICA+ records|http://format.gbv.de/pica> in Perl.
 
 PICA+ is the internal data format of the Local Library System (LBS) and the
 Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
@@ -397,6 +397,10 @@ L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 
 L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
 
+=item
+
+L<PICA::Parser::JSON> for type C<json> (PICA JSON)
+
 =item 
 
 L<PICA::Parser::XML> for type C<xml> or C<picaxml> (PICA-XML)
@@ -439,6 +443,10 @@ L<PICA::Writer::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 =item 
 
 L<PICA::Writer::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
+
+=item
+
+L<PICA::Writer::JSON> for type C<json> (PICA JSON)
 
 =item 
 
