@@ -8,9 +8,9 @@ use charnames qw(:full);
 
 use parent 'PICA::Writer::Base';
 
-sub SUBFIELD_INDICATOR {'$' }
-sub END_OF_FIELD       { "\n" }
-sub END_OF_RECORD      { "\n" }
+sub SUBFIELD_INDICATOR {'$'}
+sub END_OF_FIELD       {"\n"}
+sub END_OF_RECORD      {"\n"}
 
 sub write_subfield {
     my ($self, $code, $value) = @_;

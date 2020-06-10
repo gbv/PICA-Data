@@ -10,28 +10,27 @@ use parent 'PICA::Writer::Base';
 
 sub SUBFIELD_INDICATOR {
     my $self = shift;
-    return exists $self->{us} 
-        ? "$self->{us}"
-        : "\N{INFORMATION SEPARATOR ONE}";
+    return
+        exists $self->{us} ? "$self->{us}" : "\N{INFORMATION SEPARATOR ONE}";
 }
 
 sub END_OF_FIELD {
     my $self = shift;
-    return exists $self->{rs}
-        ? "$self->{rs}"
-        : "\N{INFORMATION SEPARATOR TWO}";
+    return
+        exists $self->{rs} ? "$self->{rs}" : "\N{INFORMATION SEPARATOR TWO}";
 }
 
 sub END_OF_RECORD {
     my $self = shift;
-    return exists $self->{gs}
+    return
+        exists $self->{gs}
         ? "$self->{gs}"
         : "\N{INFORMATION SEPARATOR THREE}";
 }
 
 sub write_subfield {
-    my ( $self, $code, $value ) = @_;
-    $self->{fh}->print( $self->SUBFIELD_INDICATOR . $code . $value );
+    my ($self, $code, $value) = @_;
+    $self->{fh}->print($self->SUBFIELD_INDICATOR . $code . $value);
 }
 
 1;

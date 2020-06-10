@@ -9,17 +9,17 @@ use Getopt::Long;
 use Pod::Usage;
 
 GetOptions(
-    'from|f=s'   => \( my $from ),
-    'to|t:s'     => \( my $to = 0 ),
-    'schema|s=s' => \( my $schema ),
-    'unknown|u!' => \( my $report_unknown ),
-    'count|c'    => \( my $count ),
-    'path|p=s'   => \( my $path ),
-    'help|?'     => \( my $help )
+    'from|f=s'   => \(my $from),
+    'to|t:s'     => \(my $to = 0),
+    'schema|s=s' => \(my $schema),
+    'unknown|u!' => \(my $report_unknown),
+    'count|c'    => \(my $count),
+    'path|p=s'   => \(my $path),
+    'help|?'     => \(my $help)
 ) or pod2usage(2);
-pod2usage( -verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION" )
-  if $help
-  or ( !@ARGV and -t );
+pod2usage(-verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION")
+    if $help
+    or (!@ARGV and -t);
 
 my %types = (
     bin    => 'Binary',
@@ -34,42 +34,37 @@ my %types = (
 
 my $fh;
 if (@ARGV) {
-    $fh = IO::File->new( $ARGV[0] );
-    $from = $1 if !$from && $ARGV[0] =~ /\.([a-z]+)$/ && $types{ lc $1 };
+    $fh   = IO::File->new($ARGV[0]);
+    $from = $1 if !$from && $ARGV[0] =~ /\.([a-z]+)$/ && $types{lc $1};
 }
 
 $from = 'plain' unless $from;
-pod2usage("unknown serialization type: $from") unless $types{ lc $from };
+pod2usage("unknown serialization type: $from") unless $types{lc $from};
 
 $to = $from if $to eq '';
-pod2usage("unknown serialization type: $to") unless !$to or $types{ lc $to };
+pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
-my $parser = "PICA::Parser::${types{$from}}"->new( $fh, bless => 1 );
-my $writer = $to ? "PICA::Writer::${types{$to}}"->new( utf8 => 0 ) : undef;
+my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
+my $writer = $to ? "PICA::Writer::${types{$to}}"->new(utf8 => 0) : undef;
 
-my %schema_options = ( ignore_unknown => !$report_unknown );
+my %schema_options = (ignore_unknown => !$report_unknown);
 
-$count = {
-    records  => 0,
-    holdings => 0,
-    items    => 0,
-    fields   => 0,
-} if $count;
+$count = {records => 0, holdings => 0, items => 0, fields => 0,} if $count;
 
 my $invalid = 0;
 if ($schema) {
     use JSON::PP qw(decode_json);
     my $fh = IO::File->new($schema);
-    $schema = PICA::Schema->new( decode_json( join "\n", <$fh> ) );
+    $schema = PICA::Schema->new(decode_json(join "\n", <$fh>));
 }
 
 if ($path) {
-    my $compiled = eval { PICA::Path->new($path) };
+    my $compiled = eval {PICA::Path->new($path)};
     die "invalid pica path: $path\n" unless $compiled;
     $path = $compiled;
 }
 
-while ( my $record = $parser->next ) {
+while (my $record = $parser->next) {
     if ($path) {
         $record = $record->fields($path);
     }
@@ -79,8 +74,8 @@ while ( my $record = $parser->next ) {
         my @errors = $schema->check($record, %schema_options);
         if (@errors) {
             for (@errors) {
-                my $msg = defined $record->{_id}
-                    ? $record->{_id} . ": $_" : $_;
+                my $msg
+                    = defined $record->{_id} ? $record->{_id} . ": $_" : $_;
                 print "$msg\n";
             }
             $invalid++;
@@ -88,9 +83,9 @@ while ( my $record = $parser->next ) {
     }
     if ($count) {
         $count->{records}++;
-        $count->{holdings} += @{ $record->holdings };
-        $count->{items}    += @{ $record->items };
-        $count->{fields}   += @{ $record->{record} };
+        $count->{holdings} += @{$record->holdings};
+        $count->{items}    += @{$record->items};
+        $count->{fields}   += @{$record->{record}};
     }
 }
 
@@ -99,8 +94,8 @@ $writer->end() if $writer && $writer->can('end');
 if ($count) {
     $count->{invalid} = $invalid if defined $invalid;
     print $count->{$_} . " $_\n"
-      for grep { defined $count->{$_} }
-      qw(records invalid holdings items fields);
+        for grep {defined $count->{$_}}
+        qw(records invalid holdings items fields);
 }
 
 __END__

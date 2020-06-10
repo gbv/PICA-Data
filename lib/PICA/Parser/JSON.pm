@@ -12,7 +12,7 @@ use parent 'PICA::Parser::Base';
 sub _next_record {
     my ($self) = @_;
 
-    if ( my $line = $self->{reader}->getline ) {
+    if (my $line = $self->{reader}->getline) {
         return $JSON->decode($line);
     }
 }

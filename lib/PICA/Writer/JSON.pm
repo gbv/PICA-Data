@@ -11,20 +11,20 @@ use PICA::Data;
 use parent 'PICA::Writer::Base';
 
 sub write_record {
-    my ( $self, $record ) = @_;
+    my ($self, $record) = @_;
 
     my $json = $self->{json};
     unless ($json) {
         $json = JSON::PP->new(%$self);
         $json->utf8 unless exists $self->{utf8};
-        $json->$_( $self->{$_} )
-          for grep { exists $self->{$_} }
-          qw(pretty ascii latin1 utf8 indent space_before space_after canonical);
+        $json->$_($self->{$_})
+            for grep {exists $self->{$_}}
+            qw(pretty ascii latin1 utf8 indent space_before space_after canonical);
         $self->{json} = $json;
     }
 
-    print { $self->{fh} } $json->encode( PICA::Data::TO_JSON($record) );
-    print { $self->{fh} } "\n" unless $json->get_indent;
+    print {$self->{fh}} $json->encode(PICA::Data::TO_JSON($record));
+    print {$self->{fh}} "\n" unless $json->get_indent;
 }
 
 1;

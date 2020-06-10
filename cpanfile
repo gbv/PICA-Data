@@ -10,10 +10,15 @@ requires 'XML::LibXML', '2';
 requires 'XML::Writer', '0';
 requires 'JSON::PP', '0'; # core since Perl 5.14 anyway
 
-
 # don't included here because Dist::Zilla::App::Command::listdeps would include it
 # recommends 'Catmandu::PICA';
 
+on 'develop', sub {
+  requires 'Code::TidyAll', 0;
+  requires 'Perl::Tidy', 0;
+  requires 'Test::Code::TidyAll', '0.20';
+  requires 'Text::Diff', 0; # undeclared Test::Code::TidyAll plugin dependency
+};
 
 on 'test', sub {
   requires 'File::Temp' , '0.2304';
