@@ -3,7 +3,7 @@ requires 'Carp', '0';
 requires 'Exporter', '0';
 requires 'IO::File', '1.14';
 requires 'IO::Handle', '0';
-requires 'List::Util', '0';
+requires 'List::Util', '1.33';
 requires 'Scalar::Util', '0';
 requires 'XML::LibXML', '1.78';
 requires 'XML::LibXML', '2';
