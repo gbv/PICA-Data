@@ -1,3 +1,9 @@
 PICA-Data-*
 .build
 .tidyall.d
+Build
+MYMETA.json
+MYMETA.yml
+_build_params
+blib/
+cover_db/
