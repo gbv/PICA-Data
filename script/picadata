@@ -17,6 +17,8 @@ GetOptions(
     'unknown|u!' => \(my $report_unknown),
     'count|c'    => \(my $count),
     'path|p=s'   => \(my $path),
+    'C'          => \(my $color),
+    'M'          => \(my $nocolor),
     'help|?'     => \(my $help)
 ) or pod2usage(2);
 pod2usage(-verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION")
@@ -63,7 +65,16 @@ if ($build) {
 my $fh = $input eq '-' ? *STDIN
     : IO::File->new($input, "r") or die "failed to open '$input'\n";
 my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
-my $writer = $to ? "PICA::Writer::${types{$to}}"->new(utf8 => 0) : undef;
+
+my %options = (utf8 => 0);
+$options{color} = {
+    tag        => 'blue',
+    occurrence => 'magenta',
+    code       => 'magenta',
+    value      => 'yellow',
+} if !$nocolor && ($color || -t *STDOUT);
+
+my $writer = $to ? "PICA::Writer::${types{$to}}"->new(%options) : undef;
 
 my %schema_options = (ignore_unknown => !$report_unknown);
 
@@ -169,6 +180,14 @@ Report unknown fields and subfields when validating (disabled by default).
 =head2 --build, -b
 
 Build an Avram schema from given records.
+
+=head2 -C
+
+Colorize output. Only supported for PICA plain and PICA plus format.
+
+=head2 -M
+
+Monochrome (don't colorize output).
 
 =head1 SEE ALSO
 
