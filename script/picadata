@@ -3,14 +3,17 @@ use v5.14.1;
 
 use PICA::Data;
 use PICA::Schema;
+use PICA::Schema::Builder;
 use IO::File;
 use Getopt::Long;
 use Pod::Usage;
+use JSON::PP;
 
 GetOptions(
     'from|f=s'   => \(my $from),
     'to|t:s'     => \(my $to),
     'schema|s=s' => \(my $schema),
+    'build|b'    => \(my $build),
     'unknown|u!' => \(my $report_unknown),
     'count|c'    => \(my $count),
     'path|p=s'   => \(my $path),
@@ -51,6 +54,11 @@ pod2usage("unknown serialization type: $from") unless $types{lc $from};
 $to = $from unless $to;
 pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
+my $builder;
+if ($build) {
+   $builder = PICA::Schema::Builder->new;
+   $to = undef;
+}
 
 my $fh = $input eq '-' ? *STDIN
     : IO::File->new($input, "r") or die "failed to open '$input'\n";
@@ -63,7 +71,6 @@ $count = {records => 0, holdings => 0, items => 0, fields => 0,} if $count;
 
 my $invalid = 0;
 if ($schema) {
-    use JSON::PP qw(decode_json);
     my $fh = IO::File->new($schema);
     $schema = PICA::Schema->new(decode_json(join "\n", <$fh>));
 }
@@ -90,6 +97,7 @@ while (my $record = $parser->next) {
             $invalid++;
         }
     }
+    $builder->add($record) if $builder;
     if ($count) {
         $count->{records}++;
         $count->{holdings} += @{$record->holdings};
@@ -106,6 +114,9 @@ if ($count) {
         for grep {defined $count->{$_}}
         qw(records invalid holdings items fields);
 }
+
+print JSON::PP->new->indent->space_after->canonical->convert_blessed->encode($builder->schema)
+    if $builder;
 
 __END__
 
@@ -142,6 +153,10 @@ PICA serialization type to enable writing parsed PICA data.
 
 Count number of records, holdings, items, and fields.
 
+=head2 --path, -p
+
+Limit the record to fields specified by a simple PICA Path expression.
+
 =head2 --schema, -s
 
 L<Avram Schema|http://format.gbv.de/schema/avram/specification> to validate
@@ -151,9 +166,9 @@ against.
 
 Report unknown fields and subfields when validating (disabled by default).
 
-=head2 --path, -p
+=head2 --build, -b
 
-Limit the record to fields specified by a simple PICA Path expression.
+Build an Avram schema from given records.
 
 =head1 SEE ALSO
 
