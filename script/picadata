@@ -33,7 +33,14 @@ my %types = (
 
 my $input = '-';
 $from = shift @ARGV if @ARGV && !$from && $types{lc $ARGV[0]};
-
+if (!defined $path) {
+    my $pattern = '[012.][0-9.][0-9.][A-Z@.]';
+    my @pathes;
+    while (@ARGV && $ARGV[0] =~ /^$pattern(\|$pattern)*$/) {
+        push @pathes, shift @ARGV;
+    }
+    $path = join '|', @pathes;
+}
 $input = shift @ARGV if @ARGV;
 
 $from = 'plain' unless $from;
