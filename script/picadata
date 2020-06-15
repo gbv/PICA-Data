@@ -59,16 +59,15 @@ if ($schema) {
     $schema = PICA::Schema->new(decode_json(join "\n", <$fh>));
 }
 
-if ($path) {
-    my $compiled = eval {PICA::Path->new($path)};
-    die "invalid pica path: $path\n" unless $compiled;
-    $path = $compiled;
-}
+my @pathes = defined $path
+    ? map {
+        my $p = eval {PICA::Path->new($_)};
+        $p || die "invalid pica path: $_\n";
+    } split /\|/, $path
+    : ();
 
 while (my $record = $parser->next) {
-    if ($path) {
-        $record = $record->fields($path);
-    }
+    $record = $record->fields(@pathes) if @pathes;
 
     $writer->write($record) if $writer;
     if ($schema) {
