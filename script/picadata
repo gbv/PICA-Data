@@ -58,12 +58,12 @@ pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
 my $builder;
 if ($build) {
-   $builder = PICA::Schema::Builder->new;
-   $to = undef;
+    $builder = PICA::Schema::Builder->new;
+    $to      = undef;
 }
 
-my $fh = $input eq '-' ? *STDIN
-    : IO::File->new($input, "r") or die "failed to open '$input'\n";
+my $fh = $input eq '-' ? *STDIN : IO::File->new($input, "r")
+    or die "failed to open '$input'\n";
 my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
 
 my %options = (utf8 => 0);
@@ -72,7 +72,8 @@ $options{color} = {
     occurrence => 'magenta',
     code       => 'magenta',
     value      => 'yellow',
-} if !$nocolor && ($color || -t *STDOUT);
+    }
+    if !$nocolor && ($color || -t *STDOUT);
 
 my $writer = $to ? "PICA::Writer::${types{$to}}"->new(%options) : undef;
 
@@ -88,8 +89,8 @@ if ($schema) {
 
 my @pathes = defined $path
     ? map {
-        my $p = eval {PICA::Path->new($_)};
-        $p || die "invalid pica path: $_\n";
+    my $p = eval {PICA::Path->new($_)};
+    $p || die "invalid pica path: $_\n";
     } split /\|/, $path
     : ();
 
@@ -126,7 +127,8 @@ if ($count) {
         qw(records invalid holdings items fields);
 }
 
-print JSON::PP->new->indent->space_after->canonical->convert_blessed->encode($builder->schema)
+print JSON::PP->new->indent->space_after->canonical->convert_blessed->encode(
+    $builder->schema)
     if $builder;
 
 __END__
