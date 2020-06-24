@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.09 2020-06-24T08:42:49Z
     - Support syntax highlighting
     - picadata: guess serialization from filename
     - picadata: support multiple path expressions

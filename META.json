@@ -4,7 +4,7 @@
       "- Johann Rolschewski and Jakob Voss"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.1.10, CPAN::Meta::Converter version 2.141170",
+   "generated_by" : "Minilla/v3.1.7, CPAN::Meta::Converter version 2.150001",
    "license" : [
       "perl_5"
    ],
@@ -82,7 +82,7 @@
          "web" : "https://github.com/GBV/PICA-Data"
       }
    },
-   "version" : "1.08",
+   "version" : "1.09",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",
