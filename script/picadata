@@ -69,9 +69,9 @@ my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
 my %options = (utf8 => 0);
 $options{color} = {
     tag        => 'blue',
-    occurrence => 'magenta',
+    occurrence => 'blue',
     code       => 'magenta',
-    value      => 'yellow',
+    value      => 'green',
     }
     if !$nocolor && ($color || -t *STDOUT);
 
