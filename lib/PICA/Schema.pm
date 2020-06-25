@@ -1,7 +1,7 @@
 package PICA::Schema;
 use v5.14.1;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(field_identifier check_value);
