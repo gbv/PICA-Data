@@ -70,7 +70,7 @@ my %options = (utf8 => 0);
 $options{color} = {
     tag        => 'blue',
     occurrence => 'blue',
-    code       => 'magenta',
+    code       => 'red',
     value      => 'green',
     }
     if !$nocolor && ($color || -t *STDOUT);
@@ -193,6 +193,7 @@ Monochrome (don't colorize output).
 
 =head1 SEE ALSO
 
-See L<Catmandu::PICA> for more elaborated command line processing of PICA+ data.
+See L<catmandu> for a more elaborated command line tool for data processing
+(transformation, API access...), including PICA+ with L<Catmandu::PICA>.
 
 =cut
