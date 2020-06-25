@@ -64,7 +64,7 @@ sub _next_record {
                     }
                     else {
                         $tokens[-1] .= $code;
-                        $code = substr $value, 0, 1;
+                        $code  = substr $value, 0, 1;
                         $value = substr $value, 1;
                     }
                 }

@@ -12,7 +12,7 @@ use parent 'PICA::Writer::Base';
 
 sub new {
     my $self = PICA::Writer::Base::new(@_);
-    $self->{doc} = XML::LibXML::Document->new("1.0", "UTF-8");
+    $self->{doc}        = XML::LibXML::Document->new("1.0", "UTF-8");
     $self->{collection} = $self->{doc}->createElement("collection");
     $self->{doc}->addChild($self->{collection});
     $self;

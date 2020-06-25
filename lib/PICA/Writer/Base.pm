@@ -43,7 +43,7 @@ sub write_record {
     my ($self, $record) = @_;
     $record = $record->{record} if reftype $record eq 'HASH';
 
-    my $fh = $self->{fh};
+    my $fh  = $self->{fh};
     my %col = %{$self->{color} // {}};
 
     foreach my $field (@$record) {

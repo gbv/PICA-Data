@@ -30,7 +30,7 @@ sub write_record {
 
     $writer->startTag('record');
     foreach my $field (@$record) {
-        my $id = $field->[0];
+        my $id   = $field->[0];
         my @attr = (tag => $field->[0]);
         if (defined $field->[1] && $field->[1] ne '') {
             push @attr, occurrence => $field->[1];

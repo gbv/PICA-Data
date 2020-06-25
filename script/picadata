@@ -67,12 +67,8 @@ my $fh = $input eq '-' ? *STDIN : IO::File->new($input, "r")
 my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
 
 my %options = (utf8 => 0);
-$options{color} = {
-    tag        => 'blue',
-    occurrence => 'blue',
-    code       => 'red',
-    value      => 'green',
-    }
+$options{color}
+    = {tag => 'blue', occurrence => 'blue', code => 'red', value => 'green',}
     if !$nocolor && ($color || -t *STDOUT);
 
 my $writer = $to ? "PICA::Writer::${types{$to}}"->new(%options) : undef;

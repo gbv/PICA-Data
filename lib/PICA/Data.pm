@@ -56,7 +56,7 @@ sub pica_value {
     my ($record, $path) = @_;
 
     $record = $record->{record} if reftype $record eq 'HASH';
-    $path = eval {PICA::Path->new($path)} unless ref $path;
+    $path   = eval {PICA::Path->new($path)} unless ref $path;
     return unless defined $path;
 
     foreach my $field (@$record) {

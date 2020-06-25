@@ -22,7 +22,7 @@ sub _next_record {
         my @field;
 
         # get field tag number
-        my $tag = $field->getAttribute('id');
+        my $tag        = $field->getAttribute('id');
         my $occurrence = $field->getAttribute('occ') // '';
         push(@field, ($tag, $occurrence));
 
