@@ -8,6 +8,7 @@ use IO::File;
 use Getopt::Long;
 use Pod::Usage;
 use JSON::PP;
+use List::Util 'sum';
 
 GetOptions(
     'from|f=s'   => \(my $from),
@@ -39,13 +40,28 @@ my %types = (
 my $input = '-';
 $from = shift @ARGV if @ARGV && !$from && $types{lc $ARGV[0]};
 if (!defined $path) {
-    my $pattern = '[012.][0-9.][0-9.][A-Z@.]';
+    my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+)?';
     my @pathes;
     while (@ARGV && $ARGV[0] =~ /^$pattern(\|$pattern)*$/) {
         push @pathes, shift @ARGV;
     }
     $path = join '|', @pathes;
 }
+
+my @pathes;
+my $sfpath;
+if (defined $path) {
+    @pathes = map {
+        my $p = eval {PICA::Path->new($_)};
+        $p || die "invalid pica path: $_\n";
+    } split /\|/, $path;
+
+    $sfpath = sum map {length $_->subfields > 0} @pathes;
+    die
+        "path expressions must either all select fields or select subfields!\n"
+        if $sfpath && $sfpath ne @pathes;
+}
+
 $input = shift @ARGV if @ARGV;
 
 $from = $1 if !$from && $input =~ /\.([a-z]+)$/ && $types{lc $1};
@@ -55,6 +71,11 @@ pod2usage("unknown serialization type: $from") unless $types{lc $from};
 
 $to = $from unless $to;
 pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
+
+if ($sfpath) {
+    $to    = undef;
+    $count = undef;
+}
 
 my $builder;
 if ($build) {
@@ -83,14 +104,12 @@ if ($schema) {
     $schema = PICA::Schema->new(decode_json(join "\n", <$fh>));
 }
 
-my @pathes = defined $path
-    ? map {
-    my $p = eval {PICA::Path->new($_)};
-    $p || die "invalid pica path: $_\n";
-    } split /\|/, $path
-    : ();
-
 while (my $record = $parser->next) {
+    if ($sfpath) {
+        say $_ for map {@{$record->match($_, split => 1) // []}} @pathes;
+        next;
+    }
+
     $record = $record->fields(@pathes) if @pathes;
 
     $writer->write($record) if $writer;
@@ -164,7 +183,9 @@ Count number of records, holdings, items, and fields.
 
 =head2 --path, -p
 
-Limit the record to fields specified by a simple PICA Path expression.
+Limit the record to fields specified by a simple PICA Path expression. Multiple
+expressions can be separated by or C<|>. Expressions must either all reference
+fields or all reference subfields, the latter to emit subfield values.
 
 =head2 --schema, -s
 
