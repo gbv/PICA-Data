@@ -35,6 +35,7 @@ my %types = (
     xml    => 'XML',
     ppxml  => 'PPXML',
     json   => 'JSON',
+    ndjson => 'JSON',
 );
 
 my $input = '-';
