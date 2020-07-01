@@ -70,7 +70,7 @@ $from = $1 if !$from && $input =~ /\.([a-z]+)$/ && $types{lc $1};
 $from = 'plain' unless $from;
 pod2usage("unknown serialization type: $from") unless $types{lc $from};
 
-$to = $from unless $to;
+$to = $from unless $to or $count;
 pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
 if ($sfpath) {
