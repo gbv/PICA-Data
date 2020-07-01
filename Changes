@@ -1,6 +1,9 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - picadata: --count does not echo records by default
+    - picadata: detect ndjson file extension
+    - Fix PICA::Schema::Builder to properly encode true on JSON
 
 1.10 2020-06-25T21:00:31Z
     - picadata: support selecting subfield values
