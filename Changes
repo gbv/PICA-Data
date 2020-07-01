@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.11 2020-07-01T10:57:27Z
     - picadata: --count does not echo records by default
     - picadata: detect ndjson file extension
     - Fix PICA::Schema::Builder to properly encode true on JSON

@@ -1,7 +1,7 @@
 package PICA::Writer::Base;
 use v5.14.1;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use Term::ANSIColor;
