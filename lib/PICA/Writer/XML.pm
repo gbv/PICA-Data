@@ -8,6 +8,10 @@ use XML::Writer;
 
 use parent 'PICA::Writer::Base';
 
+sub namespace {
+    'info:srw/schema/5/picaXML-v1.0';
+}
+
 sub new {
     my $self = PICA::Writer::Base::new(@_);
     $self->{writer} = XML::Writer->new(
@@ -16,8 +20,7 @@ sub new {
         DATA_INDENT => 2
     );
     $self->{writer}->xmlDecl('UTF-8');
-    $self->{writer}
-        ->startTag('collection', xmlns => 'info:srw/schema/5/picaXML-v1.0');
+    $self->{writer}->startTag('collection', xmlns => $self->namespace);
     $self;
 }
 

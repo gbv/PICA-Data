@@ -159,6 +159,7 @@ use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
 use PICA::Parser::Binary;
+use PICA::Parser::PPXML;
 use PICA::Parser::JSON;
 use PICA::Writer::XML;
 use PICA::Writer::Plus;

@@ -31,6 +31,7 @@ my %types = (
     dat    => 'Binary',
     binary => 'Binary',
     plain  => 'Plain',
+    pp     => 'Plain',
     plus   => 'Plus',
     xml    => 'XML',
     ppxml  => 'PPXML',
