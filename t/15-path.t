@@ -22,10 +22,9 @@ my %pathes = (
 foreach my $path (keys %pathes) {
     my $parsed = eval {PICA::Path->new($path)};
     if ($@) {
-        is $parsed, undef, "invalid path: $path";
+        is $parsed, undef, "invalid path: $path" if $@;
     }
     else {
-        is_deeply [@$parsed], $pathes{$path}->[0], 'PICA::Path';
         is "$parsed", ($pathes{$path}->[1] // $path), 'stringify';
     }
 }

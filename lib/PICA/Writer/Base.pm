@@ -5,6 +5,7 @@ our $VERSION = '1.11';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use Term::ANSIColor;
+use Encode qw(decode);
 use Carp qw(croak);
 
 sub new {
@@ -23,7 +24,10 @@ sub new {
         }
     }
     elsif (reftype $fh eq 'SCALAR' and !blessed $fh) {
-        open(my $handle, '>>', $fh);
+        if (length $$fh) {
+            $$fh = decode("UTF-8", $$fh);
+        }
+        open(my $handle, '>>:encoding(UTF-8)', $fh);
         $fh = $handle;
     }
     elsif (!openhandle($fh) and !(blessed $fh && $fh->can('print'))) {
@@ -37,6 +41,7 @@ sub new {
 sub write {
     my $self = shift;
     $self->write_record($_) for @_;
+    $self;
 }
 
 sub write_record {
@@ -66,6 +71,11 @@ sub write_record {
         $fh->print($self->END_OF_FIELD);
     }
     $fh->print($self->END_OF_RECORD);
+}
+
+sub end {
+    my $self = shift;
+    close $self->{fh} if $self->{fh} ne \*STDOUT;
 }
 
 1;
@@ -130,6 +140,10 @@ reference with a list of fields, as described in L<PICA::Data>.
 
 Writes one record.
 
+=head2 end
+
+Finishes writing by closing the file handle (unless writing to STDOUT).
+
 =head1 OPTIONS
 
 =head2 color
@@ -145,7 +159,7 @@ L<PICA::Writer::Plus> using color names from L<Term::ANSIColor>, e.g.
       syntax => 'yellow',
     })
 
-=head1 SEEALSO
+=head1 SEE ALSO
 
 See L<Catmandu::Exporter::PICA> for usage of this module within the L<Catmandu>
 framework (recommended). 

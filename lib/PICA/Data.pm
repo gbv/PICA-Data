@@ -14,6 +14,7 @@ our $EPN_PATH = PICA::Path->new('203@/..0');
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype blessed);
+use Encode qw(decode);
 use List::Util qw(first any);
 use IO::Handle;
 use PICA::Path;
@@ -240,7 +241,7 @@ sub string {
     $options{fh} = \$string;
     $options{start} //= 0;
     pica_writer($type => %options)->write($pica);
-    return $string;
+    return decode('UTF-8', $string);
 }
 
 sub TO_JSON {

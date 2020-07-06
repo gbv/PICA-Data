@@ -15,8 +15,9 @@ sub END_OF_RECORD      {"\N{LINE FEED}"}
 sub _next_record {
     my ($self) = @_;
 
-    my $plain = undef;
-    while (my $line = $self->{reader}->getline) {
+    my $plain  = undef;
+    my $reader = $self->{reader};
+    while (my $line = <$reader>) {
         last if $line =~ /^\s*$/;
         $plain .= $line;
     }

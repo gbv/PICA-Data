@@ -88,12 +88,17 @@ my $fh = $input eq '-' ? *STDIN : IO::File->new($input, "r")
     or die "failed to open '$input'\n";
 my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
 
-my %options = (utf8 => 0);
+my %options;
 $options{color}
     = {tag => 'blue', occurrence => 'blue', code => 'red', value => 'green',}
     if !$nocolor && ($color || -t *STDOUT);
 
-my $writer = $to ? "PICA::Writer::${types{$to}}"->new(%options) : undef;
+binmode *STDOUT, ':encoding(UTF-8)';
+
+my $writer;
+if ($to) {
+    $writer = "PICA::Writer::${types{$to}}"->new(%options);
+}
 
 my %schema_options = (ignore_unknown => !$report_unknown);
 
@@ -134,7 +139,7 @@ while (my $record = $parser->next) {
     }
 }
 
-$writer->end() if $writer && $writer->can('end');
+$writer->end() if $writer;
 
 if ($count) {
     $count->{invalid} = $invalid if defined $invalid;

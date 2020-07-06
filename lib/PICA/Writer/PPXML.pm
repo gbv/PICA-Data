@@ -123,8 +123,4 @@ The counterpart of this module is L<PICA::Parser::PPXML>.
 
 See L<PICA::Writer::Base> for descrition of other methods.
 
-=head2 end
-
-Writes the document directly to a filehandle.
-
 =cut

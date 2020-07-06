@@ -41,17 +41,18 @@ foreach my $type (qw(Plain Plus XML Binary JSON)) {
             'read from handle';
     }
 
-    my $data = do {local (@ARGV, $/) = $file; <>};
+    # read file as Unicode text string
+    my $data = do {
+        open my $fh, "<:encoding(UTF-8)", $file;
+        join '', <$fh>;
+    };
 
     # read from string reference
-    $parser = eval "PICA::Parser::$type->new(\\\$data, bless => 1 )";
-    isa_ok $parser, "PICA::Parser::$type";
-    $record = $parser->next;
-    isa_ok $record, 'PICA::Data';
-    is $record->{record}->[6]->[7], '柳经纬主编;', 'Unicode';
+    $record = pica_parser($type, \$data)->next;
+    is $record->{record}[6][7], '柳经纬主编;',
+        'Unicode from string reference';
 
 }
-
 note 'PICA::Parser::PPXML';
 {
     use PICA::Parser::PPXML;

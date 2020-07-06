@@ -15,7 +15,6 @@ sub write_record {
     my $json = $self->{json};
     unless ($json) {
         $json = JSON::PP->new(%$self);
-        $json->utf8 unless exists $self->{utf8};
         $json->$_($self->{$_})
             for grep {exists $self->{$_}}
             qw(pretty ascii latin1 utf8 indent space_before space_after canonical);
