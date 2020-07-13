@@ -10,6 +10,11 @@ use Pod::Usage;
 use JSON::PP;
 use List::Util 'sum';
 
+my $number = 0;
+if (my ($i) = grep {$ARGV[$_] =~ /^-(\d+)$/} (0 .. @ARGV - 1)) {
+    $number = -(splice @ARGV, $i, 1);
+}
+
 GetOptions(
     'from|f=s'   => \(my $from),
     'to|t:s'     => \(my $to),
@@ -18,6 +23,7 @@ GetOptions(
     'unknown|u!' => \(my $report_unknown),
     'count|c'    => \(my $count),
     'path|p=s'   => \(my $path),
+    "n|number:i" => \$number,
     'C'          => \(my $color),
     'M'          => \(my $nocolor),
     'help|?'     => \(my $help)
@@ -103,7 +109,7 @@ if ($to) {
 
 my %schema_options = (ignore_unknown => !$report_unknown);
 
-$count = {records => 0, holdings => 0, items => 0, fields => 0,} if $count;
+my $stats = {records => 0, holdings => 0, items => 0, fields => 0};
 
 my $invalid = 0;
 if ($schema) {
@@ -132,20 +138,22 @@ while (my $record = $parser->next) {
         }
     }
     $builder->add($record) if $builder;
+
     if ($count) {
-        $count->{records}++;
-        $count->{holdings} += @{$record->holdings};
-        $count->{items}    += @{$record->items};
-        $count->{fields}   += @{$record->{record}};
+        $stats->{holdings} += @{$record->holdings};
+        $stats->{items}    += @{$record->items};
+        $stats->{fields}   += @{$record->{record}};
     }
+    $stats->{records}++;
+    last if $number and $stats->{records} >= $number;
 }
 
 $writer->end() if $writer;
 
 if ($count) {
-    $count->{invalid} = $invalid if defined $invalid;
-    print $count->{$_} . " $_\n"
-        for grep {defined $count->{$_}}
+    $stats->{invalid} = $invalid if defined $invalid;
+    print $stats->{$_} . " $_\n"
+        for grep {defined $stats->{$_}}
         qw(records invalid holdings items fields);
 }
 
@@ -188,11 +196,19 @@ PICA serialization type to enable writing parsed PICA data.
 
 Count number of records, holdings, items, and fields.
 
+=head2 --number, -n
+
+Stop parsing after C<n> records. Can be abbreviated as C<-1>, C<-2>...
+
 =head2 --path, -p
 
 Limit the record to fields specified by a simple PICA Path expression. Multiple
 expressions can be separated by or C<|>. Expressions must either all reference
 fields or all reference subfields, the latter to emit subfield values.
+
+=head2 --number, -n
+
+Stop ofter parsing C<n> records. Option can be abbreviated as C<-1>, C<-2>...
 
 =head2 --schema, -s
 
