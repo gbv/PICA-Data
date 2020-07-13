@@ -4,7 +4,6 @@ use v5.14.1;
 use PICA::Data;
 use PICA::Schema;
 use PICA::Schema::Builder;
-use IO::File;
 use Getopt::Long;
 use Pod::Usage;
 use JSON::PP;
@@ -91,9 +90,8 @@ if ($build) {
     $to      = undef;
 }
 
-my $fh = $input eq '-' ? *STDIN : IO::File->new($input, "r")
-    or die "failed to open '$input'\n";
-my $parser = "PICA::Parser::${types{$from}}"->new($fh, bless => 1);
+$input = *STDIN if $input eq '-';
+my $parser = "PICA::Parser::${types{$from}}"->new($input, bless => 1);
 
 my %options;
 $options{color}
