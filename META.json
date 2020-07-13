@@ -73,16 +73,16 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/gbv/PICA-Data/issues"
+         "web" : "https://github.com/GBV/PICA-Data/issues"
       },
-      "homepage" : "https://github.com/gbv/PICA-Data",
+      "homepage" : "https://github.com/GBV/PICA-Data",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/gbv/PICA-Data.git",
-         "web" : "https://github.com/gbv/PICA-Data"
+         "url" : "git://github.com/GBV/PICA-Data.git",
+         "web" : "https://github.com/GBV/PICA-Data"
       }
    },
-   "version" : "1.11",
+   "version" : "1.12",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",
