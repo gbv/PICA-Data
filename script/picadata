@@ -51,7 +51,7 @@ $from = shift @ARGV if @ARGV && !$from && $types{lc $ARGV[0]};
 if (!defined $path) {
     my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+)?';
     my @pathes;
-    while (@ARGV && $ARGV[0] =~ /^$pattern(\|$pattern)*$/) {
+    while (@ARGV && $ARGV[0] =~ /^$pattern(\s*\|\s*($pattern)?)*$/) {
         push @pathes, shift @ARGV;
     }
     $path = join '|', @pathes;
@@ -63,7 +63,7 @@ if (defined $path) {
     @pathes = map {
         my $p = eval {PICA::Path->new($_)};
         $p || die "invalid pica path: $_\n";
-    } split /\|/, $path;
+    } grep {$_ ne ""} split /\s*\|\s*/, $path;
 
     $sfpath = sum map {length $_->subfields > 0} @pathes;
     die
