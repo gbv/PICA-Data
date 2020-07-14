@@ -208,10 +208,6 @@ Limit the record to fields specified by a simple PICA Path expression. Multiple
 expressions can be separated by or C<|>. Expressions must either all reference
 fields or all reference subfields, the latter to emit subfield values.
 
-=head2 --number, -n
-
-Stop ofter parsing C<n> records. Option can be abbreviated as C<-1>, C<-2>...
-
 =head2 --schema, -s
 
 L<Avram Schema|http://format.gbv.de/schema/avram/specification> to validate
