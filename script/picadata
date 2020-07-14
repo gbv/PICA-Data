@@ -14,11 +14,13 @@ if (my ($i) = grep {$ARGV[$_] =~ /^-(\d+)$/} (0 .. @ARGV - 1)) {
     $number = -(splice @ARGV, $i, 1);
 }
 
+my $abbrev = grep {$_ eq '-B'} @ARGV;
+
 GetOptions(
     'from|f=s'   => \(my $from),
     'to|t:s'     => \(my $to),
     'schema|s=s' => \(my $schema),
-    'build|b'    => \(my $build),
+    'build|B|b'  => \(my $build),
     'unknown|u!' => \(my $report_unknown),
     'count|c'    => \(my $count),
     'path|p=s'   => \(my $path),
@@ -155,9 +157,11 @@ if ($count) {
         qw(records invalid holdings items fields);
 }
 
-print JSON::PP->new->indent->space_after->canonical->convert_blessed->encode(
-    $builder->schema)
-    if $builder;
+if ($builder) {
+    my $JSON = JSON::PP->new->indent->space_after->canonical->convert_blessed;
+    my $schema = $builder->schema;
+    print $JSON->encode($abbrev ? $schema->abbreviated : $schema);
+}
 
 __END__
 
@@ -215,11 +219,11 @@ against.
 
 =head2 --unknown, -u
 
-Report unknown fields and subfields when validating (disabled by default).
+Report unknown fields and subfields on validation (disabled by default).
 
-=head2 --build, -b
+=head2 --build, -b, -B
 
-Build an Avram schema from given records.
+Build an Avram schema from records. Option C<-B> abbreviates the schema.
 
 =head2 -C
 
