@@ -47,7 +47,6 @@ my %types = (
 );
 
 my $input = '-';
-$from = shift @ARGV if @ARGV && !$from && $types{lc $ARGV[0]};
 if (!defined $path) {
     my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+)?';
     my @pathes;
@@ -171,7 +170,7 @@ picadata - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-picadata [[--from] TYPE] [--schema FILE] [--to [TYPE]] {OPTIONS} [FILE]
+picadata [--from TYPE] [--schema FILE] [--to TYPE] {OPTIONS} [FILE]
 
 =head1 DESCRIPTION
 
