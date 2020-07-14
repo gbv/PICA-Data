@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.13 2020-07-14T13:06:18Z
     - Add method to abbreviate schemas (-B in picadata)
     - picadata: remove shorthand -f (#73)
     - picadata: allow whitespaces in path expressions (#74)
