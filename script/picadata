@@ -4,7 +4,7 @@ use v5.14.1;
 use PICA::Data;
 use PICA::Schema;
 use PICA::Schema::Builder;
-use Getopt::Long;
+use Getopt::Long qw(:config bundling);
 use Pod::Usage;
 use JSON::PP;
 use List::Util 'sum';
@@ -25,8 +25,8 @@ GetOptions(
     'count|c'    => \(my $count),
     'path|p=s'   => \(my $path),
     "n|number:i" => \$number,
-    'C'          => \(my $color),
-    'M'          => \(my $nocolor),
+    'color|C'    => \(my $color),
+    'mono|M'     => \(my $nocolor),
     'help|?'     => \(my $help)
 ) or pod2usage(2);
 pod2usage(-verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION")
@@ -220,11 +220,11 @@ Report unknown fields and subfields on validation (disabled by default).
 
 Build an Avram schema from records. Option C<-B> abbreviates the schema.
 
-=head2 -C
+=head2 --color, -C
 
 Colorize output. Only supported for PICA plain and PICA plus format.
 
-=head2 -M
+=head2 --mono, -M
 
 Monochrome (don't colorize output).
 
