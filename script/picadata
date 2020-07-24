@@ -28,8 +28,15 @@ GetOptions(
     "n|number:i" => \$number,
     'color|C'    => \(my $color),
     'mono|M'     => \(my $nocolor),
-    'help|?'     => \(my $help)
+    'help|?'     => \(my $help),
+    'version|V'  => \(my $version)
 ) or pod2usage(2);
+
+if ($version) {
+    say $PICA::Data::VERSION;
+    exit
+}
+
 pod2usage(-verbose => 99, -sections => "SYNOPSIS|OPTIONS|DESCRIPTION")
     if $help
     or (!@ARGV and -t);
@@ -208,6 +215,10 @@ Colorize output. Only supported for PICA plain and PICA plus format.
 =head2 --mono, -M
 
 Monochrome (don't colorize output).
+
+=head2 --version, -V
+
+Print version number and exit.
 
 =head1 SEE ALSO
 
