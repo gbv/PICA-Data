@@ -11,15 +11,11 @@ sub _new {
     my $class = shift;
     my (%options) = @_ % 2 ? (fh => @_) : @_;
 
-    bless(
-        {
-            bless  => !!$options{bless},
-            strict => !!$options{strict},
-            fh     => defined $options{fh} ? $options{fh} : \*STDIN
-        },
-        $class
-        ),
-        ;
+    bless {
+        bless  => !!$options{bless},
+        strict => !!$options{strict},
+        fh     => defined $options{fh} ? $options{fh} : \*STDIN
+    }, $class;
 }
 
 sub new {
