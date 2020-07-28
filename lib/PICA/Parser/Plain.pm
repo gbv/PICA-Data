@@ -85,6 +85,8 @@ sub _next_record {
 1;
 __END__
 
+=encoding UTF-8
+
 =head1 NAME
 
 PICA::Parser::Plain - Plain PICA format parser
