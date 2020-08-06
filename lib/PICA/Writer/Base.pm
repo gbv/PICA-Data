@@ -44,25 +44,29 @@ sub write {
     $self;
 }
 
+sub write_identifier {
+    my ($self, $field) = @_;
+
+    my $fh = $self->{fh};
+    my %col = %{$self->{color} // {}};
+
+    $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
+
+    if (defined $field->[1] and $field->[1] ne '') {
+        my $occ = sprintf("%02d", $field->[1]);
+        $fh->print(($col{syntax} ? colored('/', $col{syntax}) : '/')
+            . ($col{occurrence} ? colored($occ, $col{occurrence}) : $occ));
+    }
+}
+
 sub write_record {
     my ($self, $record) = @_;
     $record = $record->{record} if reftype $record eq 'HASH';
 
     my $fh = $self->{fh};
-    my %col = %{$self->{color} // {}};
 
     foreach my $field (@$record) {
-        $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
-
-        if (defined $field->[1] and $field->[1] ne '') {
-            my $occ = sprintf("%02d", $field->[1]);
-            $fh->print(
-                ($col{syntax} ? colored('/', $col{syntax}) : '/')
-                . (
-                    $col{occurrence} ? colored($occ, $col{occurrence}) : $occ
-                )
-            );
-        }
+        $self->write_identifier($field);
         $fh->print(' ');
         for (my $i = 2; $i < scalar @$field; $i += 2) {
             $self->write_subfield($field->[$i], $field->[$i + 1]);

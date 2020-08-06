@@ -52,6 +52,7 @@ my %types = (
     ppxml  => 'PPXML',
     json   => 'JSON',
     ndjson => 'JSON',
+    fields => 'Fields',
 );
 
 my $input = '-';
@@ -100,7 +101,10 @@ $color
     ? {tag => 'blue', occurrence => 'blue', code => 'red', value => 'green'}
     : undef;
 binmode *STDOUT, ':encoding(UTF-8)';
-$writer = "PICA::Writer::${types{$to}}"->new(color => $color) if $to;
+if ($to) {
+  $writer = "PICA::Writer::${types{$to}}";
+  $writer = $writer->new(color => $color, schema => $schema);
+}
 
 my %schema_options = (ignore_unknown => !$report_unknown);
 my $stats          = {records => 0, holdings => 0, items => 0, fields => 0};
@@ -114,7 +118,7 @@ while (my $record = $parser->next) {
     $record = $record->fields(@pathes) if @pathes;
 
     $writer->write($record) if $writer;
-    if ($schema) {
+    if ($schema && $to ne 'fields') {
         my @errors = $schema->check($record, %schema_options);
         if (@errors) {
             for (@errors) {
@@ -180,7 +184,8 @@ L<http://format.gbv.de/pica>
 
 =head2 --to, -t
 
-PICA serialization type to enable writing parsed PICA data.
+PICA serialization type to enable writing parsed PICA data. Use C<fields> to
+list all fields in the data (with optional schema information).
 
 =head2 --count, -c
 

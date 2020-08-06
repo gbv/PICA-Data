@@ -167,6 +167,7 @@ use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
 use PICA::Writer::JSON;
+use PICA::Writer::Fields;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_);
