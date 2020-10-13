@@ -159,7 +159,7 @@ sub match_subfields {
         }
 
         my $subfields = $self->[2];
-        $subfields =~ s{.*\[(.+)\].*}{\1}g;
+        $subfields =~ s{.*\[(.+)\].*}{$1}g;
         for my $subfield (split('', $subfields)) {
             my $value = $subfield_href->{$subfield} // [undef];
             if (defined $from) {
