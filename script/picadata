@@ -106,13 +106,13 @@ $color
     : undef;
 binmode *STDOUT, ':encoding(UTF-8)';
 if ($to) {
-  $writer = "PICA::Writer::${types{$to}}";
-  $writer = $writer->new(color => $color, schema => $schema);
+    $writer = "PICA::Writer::${types{$to}}";
+    $writer = $writer->new(color => $color, schema => $schema);
 }
 
 my %schema_options = (ignore_unknown => !$report_unknown);
-my $stats          = {records => 0, holdings => 0, items => 0, fields => 0};
-my $invalid        = 0;
+my $stats = {records => 0, holdings => 0, items => 0, fields => 0};
+my $invalid = 0;
 
 while (my $record = $parser->next) {
     if ($sfpath) {
