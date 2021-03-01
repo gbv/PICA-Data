@@ -20,8 +20,11 @@ sub check {
     my ($self, $record, %options) = @_;
 
     my @errors;
-    $record
-        = PICA::Data::clean_pica($record, error => sub {push @errors, shift});
+    $record = PICA::Data::clean_pica(
+        $record,
+        error => sub {push @errors, shift},
+        %options
+    );
     return @errors unless $record;
 
     $options{counter} = {};

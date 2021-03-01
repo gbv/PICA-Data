@@ -71,6 +71,8 @@ sub clean_pica {
             }
         }
 
+        continue if $options{ignore_subfields};
+
         while (@sf) {
             my $code  = shift @sf;
             my $value = shift @sf;
@@ -588,6 +590,10 @@ C<undef> to ignore all errors.
 
 Don't emit an error if the record has no fields.
 
+=item ignore_subfields
+
+Don't check subfields.
+
 =back
 
 =head1 ACCESSORS
@@ -628,7 +634,7 @@ where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
 
 =head2 write( [ $type [, @options] ] | $writer )
 
-Write PICA record with given L<PICA::Writer::Base|PICA::Writer::> or
+Write PICA record with given L<PICA::Writer::...|PICA::Writer::Base> or
 L<PICA::Writer::Plain> by default. This method is a shortcut for blessed
 record objects:
 
