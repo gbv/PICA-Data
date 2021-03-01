@@ -18,63 +18,71 @@ use Encode qw(decode);
 use List::Util qw(first any);
 use IO::Handle;
 use PICA::Path;
+use PICA::Error;
 
 sub clean_pica {
     my ($record, %options) = @_;
 
-    my $handler
-        = exists $options{error}
-        ? ($options{error} // sub { })
-        : sub {say STDERR shift};
+    my $ok      = 1;
+    my $handler = $options{error};
+    my $error   = exists $options{error}
+        ? sub {
+        if ($handler) {
+            $handler->(PICA::Error->new($_[1] || [], message => $_[0]));
+        }
+        $ok = 0;
+        }
+        : sub {say STDERR shift; $ok = 0};
 
     $record = $record->{record} if reftype $record eq 'HASH';
+
     if (reftype $record ne 'ARRAY') {
-        $handler->('PICA record must be array reference');
-        return
+        $error->('PICA record must be array reference');
+    }
+    elsif (!@$record && !$options{ignore_empty_records}) {
+        $error->('PICA record should not be empty');
     }
 
-    if (!@$record && !$options{ignore_empty_records}) {
-        $handler->('PICA record should not be empty');
-        return
-    }
+    return unless $ok;
 
-    my @errors;
     my @filtered;
 
     for my $field (@$record) {
         if (reftype $field ne 'ARRAY') {
-            $handler->('PICA field must be array reference');
+            $error->('PICA field must be array reference');
             return
         }
 
         my ($tag, $occ, @sf) = @$field;
 
         if ($tag !~ /^[012.][0-9.][0-9.][A-Z@.]$/) {
-            push @errors, "Malformed PICA tag: $tag";
+            $error->("Malformed PICA tag: $tag", $field);
         }
 
         if ($occ) {
             if ($occ !~ /^[0-9]{1,3}$/) {
-                push @errors, "Malformed occurrence: $occ";
+                $error->("Malformed occurrence: $occ", $field);
             }
             elsif (substr($tag, 0, 1) ne '2' && length $occ eq 3) {
-                push @errors,
-                    "Three digit occurrences only allowed on PICA level 2";
+                $error->(
+                    "Three digit occurrences only allowed on PICA level 2",
+                    $field
+                );
             }
         }
 
         while (@sf) {
             my $code  = shift @sf;
             my $value = shift @sf;
-            push @errors, "Malformed PICA subfield: $code"
+
+            $error->("Malformed PICA subfield: $code", $field)
                 if $code !~ /^[_A-Za-z0-9]$/;
-            push @errors, "PICA subfield \$$code must be non-empty string"
+            $error->("PICA subfield \$$code must be non-empty string", $field)
                 if $value !~ /^./;
         }
     }
 
-    return $record unless @errors;
-    $handler->($_) for @errors;
+    return $record if $ok;
 }
 
 sub pica_match {
@@ -573,8 +581,8 @@ syntactically valid PICA. Options include:
 
 =item error
 
-Error handler, prints to STDERR by default. Use C<undef> to ignore
-all errors.
+Error handler, prints instances of L<PICA::Error> to STDERR by default. Use
+C<undef> to ignore all errors.
 
 =item ignore_empty_records
 

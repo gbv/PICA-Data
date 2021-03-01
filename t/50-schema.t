@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use PICA::Data qw(pica_parser);
 use PICA::Schema qw(field_identifier);
-use PICA::Schema::Error;
+use PICA::Error;
 use Test::More;
 use YAML::Tiny;
 use Test::Deep;
@@ -25,7 +25,7 @@ foreach (@{$tests->{tests}}) {
 
     my @errors = $schema->check($record, %{$_->{options} || {}});
     my @expect = @{$_->{errors} || []};
-    bless $_, 'PICA::Schema::Error' for @expect;
+    bless $_, 'PICA::Error' for @expect;
     if (!cmp_deeply \@errors, \@expect, $_->{check}) {
         note explain $_ for @errors;
     }
@@ -38,6 +38,6 @@ is scalar($schema->check($record)), 67, "report errors only once";
 $record = [undef,['003@','','0','123']];
 is_deeply [ $schema->check($record) ], [bless {
       message => "PICA field must be array reference"
-    }, 'PICA::Schema::Error'], "report malformed data";
+    }, 'PICA::Error'], "report malformed data";
 
 done_testing;

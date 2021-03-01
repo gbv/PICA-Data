@@ -2,6 +2,7 @@ Revision history for PICA::Data
 
 {{$NEXT}}
     - Add clean_pica to check PICA data structure (#82)
+    - Rename PICA::Schema::Error to PICA::Error
 
 1.14 2020-07-28T08:42:47Z
     - picadata: allow to repeat --path

@@ -8,7 +8,7 @@ our @EXPORT_OK = qw(field_identifier check_value);
 
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
-use PICA::Schema::Error;
+use PICA::Error;
 use PICA::Data;
 
 sub new {
@@ -20,14 +20,8 @@ sub check {
     my ($self, $record, %options) = @_;
 
     my @errors;
-    $record = PICA::Data::clean_pica(
-        $record,
-        error => sub {
-
-            # TODO: more details by use of PICA::Schema::Error in clean_pica
-            push @errors, bless {message => shift}, 'PICA::Schema::Error';
-        }
-    );
+    $record
+        = PICA::Data::clean_pica($record, error => sub {push @errors, shift});
     return @errors unless $record;
 
     $options{counter} = {};
@@ -45,7 +39,7 @@ sub check {
         my $field = $self->{fields}{$id};
         if ($field->{required} && !$field_identifiers{$id}) {
             push @errors,
-                PICA::Schema::Error->new(
+                PICA::Error->new(
                 [substr($id, 0, 4), length $id gt 4 ? substr($id, 5) : undef],
                 required => 1
                 );
@@ -77,21 +71,21 @@ sub check_field {
 
         if ($spec) {    # field is deprectaed
             unless ($opts{allow_deprecated_fields}) {
-                return PICA::Schema::Error->new($simple, deprecated => 1);
+                return PICA::Error->new($simple, deprecated => 1);
             }
         }
         elsif ($opts{ignore_unknown_fields}) {
             return ();
         }
         else {
-            return PICA::Schema::Error->new($simple);
+            return PICA::Error->new($simple);
         }
     }
 
     if ($opts{counter} && !$spec->{repeatable}) {
         my $tag_occ = join '/', grep {defined} @$field[0, 1];
         if ($opts{counter}{$tag_occ}++) {
-            return PICA::Schema::Error->new($field, repeated => 1);
+            return PICA::Error->new($field, repeated => 1);
         }
     }
 
@@ -149,9 +143,7 @@ sub check_field {
         }
     }
 
-    return %errors
-        ? PICA::Schema::Error->new($field, subfields => \%errors)
-        : ();
+    return %errors ? PICA::Error->new($field, subfields => \%errors) : ();
 }
 
 sub check_value {
@@ -260,7 +252,7 @@ Schema information can be included in PICA XML with L<PICA::Writer::XML>.
 =head2 check( $record [, %options ] )
 
 Check whether a given L<PICA::Data> record confirms to the schema and return a
-list of L<PICA::Schema::Error>. Possible options include:
+list of L<PICA::Error>. Possible options include:
 
 =over
 
@@ -305,7 +297,7 @@ Don't check subfields at all.
 =head2 check_field( $field [, %options ] )
 
 Check whether a PICA field confirms to the schema. Use same options as method
-C<check>. Returns a L<PICA::Schema::Error> on schema violation.
+C<check>. Returns a L<PICA::Error> on schema violation.
 
 =head2 abbreviated
 
@@ -321,7 +313,7 @@ field tag and optional occurrence if the tag starts with C<0>.
 =head2 check_value( $value, $schedule [, %options ] )
 
 Check a subfield value against a subfield schedule. On malformed values returns
-a L<subfield error|PICA::Schema::Error/SUBFIELD ERRORS> without C<message> key.
+a L<subfield error|PICA::Error/SUBFIELD ERRORS> without C<message> key.
 
 =head1 LIMITATIONS
 
