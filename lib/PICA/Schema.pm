@@ -9,6 +9,7 @@ our @EXPORT_OK = qw(field_identifier check_value);
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
 use PICA::Schema::Error;
+use PICA::Data;
 
 sub new {
     my ($class, $schema) = @_;
@@ -18,10 +19,18 @@ sub new {
 sub check {
     my ($self, $record, %options) = @_;
 
-    $record = $record->{record} if reftype $record eq 'HASH';
+    my @errors;
+    $record = PICA::Data::clean_pica(
+        $record,
+        error => sub {
+
+            # TODO: more details by use of PICA::Schema::Error in clean_pica
+            push @errors, bless {message => shift}, 'PICA::Schema::Error';
+        }
+    );
+    return @errors unless $record;
 
     $options{counter} = {};
-    my @errors;
 
     my %field_identifiers;
     for my $field (@$record) {

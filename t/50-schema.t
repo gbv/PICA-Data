@@ -35,4 +35,9 @@ my $record = pica_parser('plain', fh => 't/files/bgb.example')->next;
 my $schema = PICA::Schema->new({});
 is scalar($schema->check($record)), 67, "report errors only once";
 
+$record = [undef,['003@','','0','123']];
+is_deeply [ $schema->check($record) ], [bless {
+      message => "PICA field must be array reference"
+    }, 'PICA::Schema::Error'], "report malformed data";
+
 done_testing;

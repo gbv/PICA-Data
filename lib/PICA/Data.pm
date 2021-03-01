@@ -6,7 +6,7 @@ our $VERSION = '1.14';
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_holdings pica_items
-    pica_guess);
+    pica_guess clean_pica);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -18,6 +18,64 @@ use Encode qw(decode);
 use List::Util qw(first any);
 use IO::Handle;
 use PICA::Path;
+
+sub clean_pica {
+    my ($record, %options) = @_;
+
+    my $handler
+        = exists $options{error}
+        ? ($options{error} // sub { })
+        : sub {say STDERR shift};
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+    if (reftype $record ne 'ARRAY') {
+        $handler->('PICA record must be array reference');
+        return
+    }
+
+    if (!@$record && !$options{ignore_empty_records}) {
+        $handler->('PICA record should not be empty');
+        return
+    }
+
+    my @errors;
+    my @filtered;
+
+    for my $field (@$record) {
+        if (reftype $field ne 'ARRAY') {
+            $handler->('PICA field must be array reference');
+            return
+        }
+
+        my ($tag, $occ, @sf) = @$field;
+
+        if ($tag !~ /^[012.][0-9.][0-9.][A-Z@.]$/) {
+            push @errors, "Malformed PICA tag: $tag";
+        }
+
+        if ($occ) {
+            if ($occ !~ /^[0-9]{1,3}$/) {
+                push @errors, "Malformed occurrence: $occ";
+            }
+            elsif (substr($tag, 0, 1) ne '2' && length $occ eq 3) {
+                push @errors,
+                    "Three digit occurrences only allowed on PICA level 2";
+            }
+        }
+
+        while (@sf) {
+            my $code  = shift @sf;
+            my $value = shift @sf;
+            push @errors, "Malformed PICA subfield: $code"
+                if $code !~ /^[_A-Za-z0-9]$/;
+            push @errors, "PICA subfield \$$code must be non-empty string"
+                if $value !~ /^./;
+        }
+    }
+
+    return $record unless @errors;
+    $handler->($_) for @errors;
+}
 
 sub pica_match {
     my ($record, $path, %args) = @_;
@@ -489,7 +547,8 @@ expression. The following are virtually equivalent:
 
 =head2 pica_fields( $record, $path[, $path...] )
 
-Returns a PICA record (or empty array reference) limited to fields specified inione ore more PICA path expression. The following are virtually equivalent:
+Returns a PICA record (or empty array reference) limited to fields specified in
+one ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
@@ -504,6 +563,24 @@ accessor C<holdings>.
 
 Returns a list (as array reference) of item records. Also available as
 accessor C<items>.
+
+=head2 clean_pica( $record[, %options] )
+
+Returns a given PICA record as array of arrays, unless the record isn't
+syntactically valid PICA. Options include:
+
+=over
+
+=item error
+
+Error handler, prints to STDERR by default. Use C<undef> to ignore
+all errors.
+
+=item ignore_empty_records
+
+Don't emit an error if the record has no fields.
+
+=back
 
 =head1 ACCESSORS
 

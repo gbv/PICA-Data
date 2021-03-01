@@ -3,6 +3,7 @@ use v5.14.1;
 
 our $VERSION = '1.14';
 
+use PICA::Data;
 use Scalar::Util qw(blessed openhandle reftype);
 use Term::ANSIColor;
 use Encode qw(decode);
@@ -61,7 +62,7 @@ sub write_identifier {
 
 sub write_record {
     my ($self, $record) = @_;
-    $record = $record->{record} if reftype $record eq 'HASH';
+    $record = PICA::Data::clean_pica($record) or return;
 
     my $fh = $self->{fh};
 
