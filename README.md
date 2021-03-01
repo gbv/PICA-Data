@@ -162,7 +162,8 @@ expression. The following are virtually equivalent:
 
 ## pica\_fields( $record, $path\[, $path...\] )
 
-Returns a PICA record (or empty array reference) limited to fields specified inione ore more PICA path expression. The following are virtually equivalent:
+Returns a PICA record (or empty array reference) limited to fields specified in
+one ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
@@ -177,6 +178,20 @@ accessor `holdings`.
 
 Returns a list (as array reference) of item records. Also available as
 accessor `items`.
+
+## clean\_pica( $record\[, %options\] )
+
+Returns a given PICA record as array of arrays, unless the record isn't
+syntactically valid PICA. Options include:
+
+- error
+
+    Error handler, prints instances of [PICA::Error](https://metacpan.org/pod/PICA::Error) to STDERR by default. Use
+    `undef` to ignore all errors.
+
+- ignore\_empty\_records
+
+    Don't emit an error if the record has no fields.
 
 # ACCESSORS
 

@@ -6,7 +6,7 @@ use PICA::Data 'clean_pica';
 sub check {
     my ($record, $errors, $message, %options) = @_;
     my @found;
-    my $res = clean_pica( $record, error => sub { push \@found, shift }, %options );
+    my $res = clean_pica( $record, error => sub { push \@found, $_[0] }, %options );
     is_deeply \@found, $errors, $message;
     ok @$errors ? !$res : $res;
 }
