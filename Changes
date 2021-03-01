@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.15 2021-03-01T10:56:48Z
     - Add clean_pica to check PICA data structure (#82)
     - Rename PICA::Schema::Error to PICA::Error
 
