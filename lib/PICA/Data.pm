@@ -18,74 +18,6 @@ use Encode qw(decode);
 use List::Util qw(first any);
 use IO::Handle;
 use PICA::Path;
-use PICA::Error;
-
-sub clean_pica {
-    my ($record, %options) = @_;
-
-    my $ok      = 1;
-    my $handler = $options{error};
-    my $error   = exists $options{error}
-        ? sub {
-        if ($handler) {
-            $handler->(PICA::Error->new($_[1] || [], message => $_[0]));
-        }
-        $ok = 0;
-        }
-        : sub {say STDERR shift; $ok = 0};
-
-    $record = $record->{record} if reftype $record eq 'HASH';
-
-    if (reftype $record ne 'ARRAY') {
-        $error->('PICA record must be array reference');
-    }
-    elsif (!@$record && !$options{ignore_empty_records}) {
-        $error->('PICA record should not be empty');
-    }
-
-    return unless $ok;
-
-    my @filtered;
-
-    for my $field (@$record) {
-        if (reftype $field ne 'ARRAY') {
-            $error->('PICA field must be array reference');
-            return
-        }
-
-        my ($tag, $occ, @sf) = @$field;
-
-        if ($tag !~ /^[012.][0-9.][0-9.][A-Z@.]$/) {
-            $error->("Malformed PICA tag: $tag", $field);
-        }
-
-        if ($occ) {
-            if ($occ !~ /^[0-9]{1,3}$/) {
-                $error->("Malformed occurrence: $occ", $field);
-            }
-            elsif (substr($tag, 0, 1) ne '2' && length $occ eq 3) {
-                $error->(
-                    "Three digit occurrences only allowed on PICA level 2",
-                    $field
-                );
-            }
-        }
-
-        continue if $options{ignore_subfields};
-
-        while (@sf) {
-            my $code  = shift @sf;
-            my $value = shift @sf;
-
-            $error->("Malformed PICA subfield: $code", $field)
-                if $code !~ /^[_A-Za-z0-9]$/;
-            $error->("PICA subfield \$$code must be non-empty string", $field)
-                if $value !~ /^./;
-        }
-    }
-
-    return $record if $ok;
-}
 
 sub pica_match {
     my ($record, $path, %args) = @_;
@@ -413,8 +345,8 @@ PICA::Data - PICA record processing
 
 =head1 DESCRIPTION
 
-PICA::Data provides methods, classes, functions, and L<picadata|a command line
-application> to process L<PICA+ records|http://format.gbv.de/pica> in Perl.
+PICA::Data provides methods, classes, functions, and L<a command line
+application|picadata> to process L<PICA+ records|http://format.gbv.de/pica>.
 
 PICA+ is the internal data format of the Local Library System (LBS) and the
 Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
@@ -527,6 +459,10 @@ L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
 L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
 
+=item
+
+L<PICA::Writer::Fields> for type C<fields> (summary of used fields and subfields)
+
 =back
 
 =head2 pica_path( $path )
@@ -573,28 +509,6 @@ accessor C<holdings>.
 
 Returns a list (as array reference) of item records. Also available as
 accessor C<items>.
-
-=head2 clean_pica( $record[, %options] )
-
-Returns a given PICA record as array of arrays, unless the record isn't
-syntactically valid PICA. Options include:
-
-=over
-
-=item error
-
-Error handler, prints instances of L<PICA::Error> to STDERR by default. Use
-C<undef> to ignore all errors.
-
-=item ignore_empty_records
-
-Don't emit an error if the record has no fields.
-
-=item ignore_subfields
-
-Don't check subfields.
-
-=back
 
 =head1 ACCESSORS
 

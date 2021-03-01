@@ -4,12 +4,11 @@ use v5.14.1;
 our $VERSION = '1.15';
 
 use Exporter 'import';
-our @EXPORT_OK = qw(field_identifier check_value);
+our @EXPORT_OK = qw(field_identifier check_value clean_pica);
 
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
 use PICA::Error;
-use PICA::Data;
 
 sub new {
     my ($class, $schema) = @_;
@@ -20,11 +19,8 @@ sub check {
     my ($self, $record, %options) = @_;
 
     my @errors;
-    $record = PICA::Data::clean_pica(
-        $record,
-        error => sub {push @errors, shift},
-        %options
-    );
+    $record
+        = clean_pica($record, error => sub {push @errors, shift}, %options);
     return @errors unless $record;
 
     $options{counter} = {};
@@ -212,6 +208,73 @@ sub abbreviated {
     return $abbr;
 }
 
+sub clean_pica {
+    my ($record, %options) = @_;
+
+    my $ok      = 1;
+    my $handler = $options{error};
+    my $error   = exists $options{error}
+        ? sub {
+        if ($handler) {
+            $handler->(PICA::Error->new($_[1] || [], message => $_[0]));
+        }
+        $ok = 0;
+        }
+        : sub {say STDERR shift; $ok = 0};
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+
+    if (reftype $record ne 'ARRAY') {
+        $error->('PICA record must be array reference');
+    }
+    elsif (!@$record && !$options{ignore_empty_records}) {
+        $error->('PICA record should not be empty');
+    }
+
+    return unless $ok;
+
+    my @filtered;
+
+    for my $field (@$record) {
+        if (reftype $field ne 'ARRAY') {
+            $error->('PICA field must be array reference');
+            return
+        }
+
+        my ($tag, $occ, @sf) = @$field;
+
+        if ($tag !~ /^[012.][0-9.][0-9.][A-Z@.]$/) {
+            $error->("Malformed PICA tag: $tag", $field);
+        }
+
+        if ($occ) {
+            if ($occ !~ /^[0-9]{1,3}$/) {
+                $error->("Malformed occurrence: $occ", $field);
+            }
+            elsif (substr($tag, 0, 1) ne '2' && length $occ eq 3) {
+                $error->(
+                    "Three digit occurrences only allowed on PICA level 2",
+                    $field
+                );
+            }
+        }
+
+        continue if $options{ignore_subfields};
+
+        while (@sf) {
+            my $code  = shift @sf;
+            my $value = shift @sf;
+
+            $error->("Malformed PICA subfield: $code", $field)
+                if $code !~ /^[_A-Za-z0-9]$/;
+            $error->("PICA subfield \$$code must be non-empty string", $field)
+                if $value !~ /^./;
+        }
+    }
+
+    return $record if $ok;
+}
+
 1;
 __END__
 
@@ -248,7 +311,8 @@ language|https://format.gbv.de/schema/avram/specification>, for instance:
 See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 sample records.
 
-Schema information can be included in PICA XML with L<PICA::Writer::XML>.
+Schema information can also be used for documentation of records with
+L<PICA::Writer::Fields> and L<PICA::Writer::XML>.
 
 =head1 METHODS
 
@@ -307,6 +371,31 @@ C<check>. Returns a L<PICA::Error> on schema violation.
 Return an abbreviated data structure of the schema without inferable fields such as C<tag>, C<occurrence> and C<code>.
 
 =head1 FUNCTIONS
+
+=head2 clean_pica( $record[, %options] )
+
+Syntactically check a PICA record and return it as array of arrays on success.
+Syntactic check is performed on schema validation before checking the record
+against a schema and before writing a record.
+
+Options include:
+
+=over
+
+=item error
+
+Error handler, prints instances of L<PICA::Error> to STDERR by default. Use
+C<undef> to ignore all errors.
+
+=item ignore_empty_records
+
+Don't emit an error if the record has no fields.
+
+=item ignore_subfields
+
+Don't check subfields.
+
+=back
 
 =head2 field_identifier( $field )
 

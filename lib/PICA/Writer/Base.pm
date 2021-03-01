@@ -3,8 +3,8 @@ use v5.14.1;
 
 our $VERSION = '1.15';
 
-use PICA::Data;
 use Scalar::Util qw(blessed openhandle reftype);
+use PICA::Schema qw(clean_pica);
 use Term::ANSIColor;
 use Encode qw(decode);
 use Carp qw(croak);
@@ -62,7 +62,7 @@ sub write_identifier {
 
 sub write_record {
     my ($self, $record) = @_;
-    $record = PICA::Data::clean_pica($record) or return;
+    $record = clean_pica($record) or return;
 
     my $fh = $self->{fh};
 
@@ -124,6 +124,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::JSON>
 
+=item L<PICA::Writer::Fields>
+
 =back
 
 =head1 METHODS
@@ -139,7 +141,8 @@ L<PICA::Data> also provides a functional constructor C<pica_writer>.
 =head2 write ( @records )
 
 Writes one or more records, given as hash with key 'C<record>' or as array
-reference with a list of fields, as described in L<PICA::Data>.
+reference with a list of fields, as described in L<PICA::Data>. Records
+are syntactically validated with L<PICA::Schema>'s C<clean_pica>.
 
 =head2 write_record ( $record ) 
 

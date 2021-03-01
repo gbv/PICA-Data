@@ -19,15 +19,16 @@ sub write_record {
         $occ = '' if $tag =~ /^2/;
 
         my $id = $tag;
-        $id .= sprintf("/%02d"), if defined $occ and $occ ne '';
+        $id .= sprintf("/%02d", $occ), if defined $occ and $occ ne '';
 
-        # TODO: lookup $id in schema to catch occurrence ranges
         next if $seen->{$id};
         $seen->{$id} = 1;
 
         $self->write_identifier([$tag, $occ]);
 
         if ($schema) {
+
+            # TODO: lookup $id in schema to catch occurrence ranges
             my $def = $schema->{fields}{$id};
             my $label = $def ? $def->{label} // '' : '?';
             $fh->print("\t" . $label =~ s/[\r\n]+/ /mgr);

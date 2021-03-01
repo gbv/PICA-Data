@@ -1,7 +1,7 @@
 use strict;
 use Test::More;
 
-use PICA::Data 'clean_pica';
+use PICA::Schema 'clean_pica';
 
 sub check {
     my ($record, $errors, $message, %options) = @_;
