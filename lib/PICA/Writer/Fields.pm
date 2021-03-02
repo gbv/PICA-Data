@@ -5,30 +5,26 @@ our $VERSION = '1.15';
 
 use parent 'PICA::Writer::Base';
 
+use Scalar::Util qw(reftype);
+use PICA::Schema qw(clean_pica field_identifier);
+
 sub write_record {
     my ($self, $record) = @_;
-    $record = $record->{record} if reftype $record eq 'HASH';
+    $record = clean_pica($record) or return;
 
     my $fh     = $self->{fh};
     my $seen   = $self->{seen} // ($self->{seen} = {});
     my $schema = $self->{schema};
 
     foreach my $field (@$record) {
-        my ($tag, $occ) = @$field;
-
-        $occ = '' if $tag =~ /^2/;
-
-        my $id = $tag;
-        $id .= sprintf("/%02d", $occ), if defined $occ and $occ ne '';
+        my $id = field_identifier($schema ? $schema : (), $field);
 
         next if $seen->{$id};
         $seen->{$id} = 1;
 
-        $self->write_identifier([$tag, $occ]);
+        $fh->print($id);
 
         if ($schema) {
-
-            # TODO: lookup $id in schema to catch occurrence ranges
             my $def = $schema->{fields}{$id};
             my $label = $def ? $def->{label} // '' : '?';
             $fh->print("\t" . $label =~ s/[\r\n]+/ /mgr);
