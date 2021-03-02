@@ -174,6 +174,10 @@ sub pica_parser {
 }
 
 sub pica_writer {
+    if (lc $_[0] eq 'generic') {
+        shift;
+        return PICA::Writer::Generic->new(@_);
+    }
     _pica_module('PICA::Writer', @_);
 }
 

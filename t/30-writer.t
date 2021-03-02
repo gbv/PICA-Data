@@ -52,18 +52,25 @@ PLAIN
     ok -e $filename, 'write to file';
 }
 
+sub write_result {
+    my ($type, $options, @records) = @_;
+
+    my ($fh, $filename) = tempfile();
+    my $writer = pica_writer($type, fh => $fh, %$options);
+
+    foreach my $record (@records) {
+        $writer->write($record);
+    }
+    $writer->end;
+    close $fh;
+
+    return do {local (@ARGV, $/) = $filename; <>};
+}
+
 note 'PICA::Writer::Plus';
 
 {
-    my ($fh, $filename) = tempfile();
-    my $writer = PICA::Writer::Plus->new(fh => $fh);
-
-    foreach my $record (@pica_records) {
-        $writer->write($record);
-    }
-    close $fh;
-
-    my $out = do {local (@ARGV, $/) = $filename; <>};
+    my $out = write_result('plus', {}, @pica_records);
     my $PLUS = <<'PLUS';
 003@ 01041318383021A aHello $¥!
 028C/01 dEmmaaGoldman
@@ -75,23 +82,13 @@ PLUS
 note 'PICA::Writer::XML';
 
 {
-    my ($fh, $filename) = tempfile();
     my $schema = {
         fields => {
             '003@' => {label => 'PPN', url => 'http://example.org/'},
             '028C/01' => {subfields => {d => {pica3 => ', '}}}
         }
     };
-    my $writer = PICA::Writer::XML->new(fh => $fh, schema => $schema);
-
-    foreach my $record (@pica_records) {
-        $writer->write($record);
-    }
-    $writer->end;
-    close $fh;
-
-    my $out = do {local (@ARGV, $/) = $filename; <>};
-
+    my $out = write_result('xml', { schema => $schema }, @pica_records);
     my $xml = <<'XML';
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -154,20 +151,11 @@ note 'PICA::Writer::PPXML';
 note 'PICA::Writer::Generic';
 
 {
-    my ($fh, $filename) = tempfile();
-    my $writer = PICA::Writer::Generic->new(
-        fh => $fh,
+    my $out = write_result('generic', {
         us => "#",
         rs => "%",
         gs => "\n\n"
-    );
-
-    foreach my $record (@pica_records) {
-        $writer->write($record);
-    }
-    $writer->end;
-
-    my $out = do {local (@ARGV, $/) = $filename; <>};
+    }, @pica_records);
     my $PLUS = <<'PLUS';
 003@ #01041318383%021A #aHello $¥!%
 
@@ -179,18 +167,12 @@ PLUS
 }
 
 {
-    my ($fh, $filename) = tempfile();
-    my $writer = PICA::Writer::Generic->new(fh => $fh);
-
-    foreach my $record (@pica_records) {
-        $writer->write($record);
-    }
-    $writer->end;
-
-    my $out = do {local (@ARGV, $/) = $filename; <>};
-
+    my $out = write_result('generic', {}, @pica_records);
     is $out, '003@ 01041318383021A aHello $¥!028C/01 dEmmaaGoldman',
         'Generic Writer (default)';
+
+    my $binary = write_result('binary', {}, @pica_records);
+    is $binary, $out, 'Binary Writer (default=generic)';
 }
 
 note 'PICA::Writer::JSON';

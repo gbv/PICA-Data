@@ -124,6 +124,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::JSON>
 
+=item L<PICA::Writer::Generic>
+
 =item L<PICA::Writer::Fields>
 
 =back
