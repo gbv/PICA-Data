@@ -28,7 +28,7 @@ GetOptions(
     "n|number:i" => \$number,
     'color|C'    => \(my $color),
     'mono|M'     => \(my $nocolor),
-    'help|?'     => \(my $help),
+    'help|h|?'   => \(my $help),
     'version|V'  => \(my $version)
 ) or pod2usage(2);
 
@@ -177,6 +177,9 @@ Parse, validate and/or serialize PICA+ data from the command line, e.g.:
   picadata -c -f plain < pica.plain  # parse and count records
   picadata -p 003@ pica.xml -t       # extract field 003@
   picadata pica.xml -s schema.json   # validate against Avram schema
+
+  # document fields used in a record
+  picadata -t fields pica.xml -s <(curl -s https://format.k10plus.de/avram.pl?profile=k10plus)
 
 =head1 OPTIONS
 
