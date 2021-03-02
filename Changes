@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Move clean_pica to PICA::Schema and add add option ignore_subfields
+    - Extend method/function field_identifier to occurrence ranges
 
 1.15 2021-03-01T10:56:48Z
     - Add clean_pica to check PICA data structure (#82)

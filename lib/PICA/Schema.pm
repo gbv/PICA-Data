@@ -20,26 +20,28 @@ sub check {
 
     my @errors;
     $record
-        = clean_pica($record, error => sub {push @errors, shift}, %options);
-    return @errors unless $record;
+        = clean_pica($record, error => sub {push @errors, shift}, %options)
+        or return @errors;
 
     $options{counter} = {};
 
     my %field_identifiers;
     for my $field (@$record) {
-        $field_identifiers{field_identifier($field)} = 1;
-        my $error = $self->check_field($field, %options);
+        my $id = $self->field_identifier($field);
+        $field_identifiers{$id} = 1;
+        my $error = $self->check_field($field, %options, _field_id => $id);
         if ($error and !grep {$_ eq $error} @errors) {
             push @errors, $error;
         }
     }
 
+    # check whether required fields exist
     for my $id (keys %{$self->{fields}}) {
         my $field = $self->{fields}{$id};
         if ($field->{required} && !$field_identifiers{$id}) {
             push @errors,
                 PICA::Error->new(
-                [substr($id, 0, 4), length $id gt 4 ? substr($id, 5) : undef],
+                [substr($id, 0, 4), length $id > 4 ? substr($id, 5) : undef],
                 required => 1
                 );
         }
@@ -51,7 +53,7 @@ sub check {
 sub check_field {
     my ($self, $field, %opts) = @_;
 
-    my $id   = field_identifier($field);
+    my $id = $opts{_field_id} || $self->field_identifier($field);
     my $spec = $self->{fields}{$id};
 
     if ($opts{allow_deprecated}) {
@@ -186,8 +188,22 @@ sub check_value {
 }
 
 sub field_identifier {
+    my $fields = ref $_[0] eq 'PICA::Schema' ? shift->{fields} : undef;
     my ($tag, $occ) = @{$_[0]};
-    (($occ // '') ne '' and substr($tag, 0, 1) eq '0') ? "$tag/$occ" : $tag;
+
+    $occ
+        = (substr($tag, 0, 1) ne '2' && defined $occ && $occ ne '')
+        ? sprintf("%02d", $occ)
+        : '';
+
+    if ($fields && $occ ne '' && !exists $fields->{"$tag/$occ"}) {
+        for my $id (keys %$fields) {
+            return $id
+                if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
+        }
+    }
+
+    return $occ ne '' ? "$tag/$occ" : $tag;
 }
 
 sub TO_JSON {
@@ -368,7 +384,8 @@ C<check>. Returns a L<PICA::Error> on schema violation.
 
 =head2 abbreviated
 
-Return an abbreviated data structure of the schema without inferable fields such as C<tag>, C<occurrence> and C<code>.
+Return an abbreviated data structure of the schema without inferable fields
+such as C<tag>, C<occurrence> and C<code>.
 
 =head1 FUNCTIONS
 
@@ -397,10 +414,12 @@ Don't check subfields.
 
 =back
 
-=head2 field_identifier( $field )
+=head2 field_identifier( [$schema, ] $field )
 
 Return the field identifier of a given PICA field. The identifier consists of
-field tag and optional occurrence if the tag starts with C<0>.
+field tag and optional occurrence. If this function is used as method of a
+schema, the field_identifier may contain an occurrence ranges instead of the
+plain occurrence.
 
 =head2 check_value( $value, $schedule [, %options ] )
 
