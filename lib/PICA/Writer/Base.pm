@@ -62,7 +62,7 @@ sub write_identifier {
 
 sub write_record {
     my ($self, $record) = @_;
-    $record = clean_pica($record) or return;
+    $record = clean_pica($record, allow_empty_subfields => 1) or return;
 
     my $fh = $self->{fh};
 

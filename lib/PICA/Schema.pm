@@ -284,7 +284,7 @@ sub clean_pica {
             $error->("Malformed PICA subfield: $code", $field)
                 if $code !~ /^[_A-Za-z0-9]$/;
             $error->("PICA subfield \$$code must be non-empty string", $field)
-                if $value !~ /^./;
+                if $value !~ /^./ && !$options{allow_empty_subfields};
         }
     }
 
@@ -366,6 +366,10 @@ Don't report deprecated codes.
 =item allow_deprecated
 
 Don't report deprecated fields, subfields, and codes.
+
+=item allow_empty_subfields
+
+Don't report subfields with empty string values.
 
 =item ignore_subfield_order
 
