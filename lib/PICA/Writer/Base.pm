@@ -62,20 +62,26 @@ sub write_identifier {
 
 sub write_record {
     my ($self, $record) = @_;
-    $record = clean_pica($record, allow_empty_subfields => 1) or return;
+    $record = clean_pica($record, allow_empty_subfields => 1,) or return;
 
     my $fh = $self->{fh};
 
     foreach my $field (@$record) {
+        $self->write_annotation($field);
         $self->write_identifier($field);
         $fh->print(' ');
-        for (my $i = 2; $i < scalar @$field; $i += 2) {
-            $self->write_subfield($field->[$i], $field->[$i + 1]);
+        for (my $i = 3; $i < scalar @$field; $i += 2) {
+            $self->write_subfield($field->[$i - 1], $field->[$i]);
         }
 
         $fh->print($self->END_OF_FIELD);
     }
     $fh->print($self->END_OF_RECORD);
+}
+
+sub write_annotation {
+
+    # ignore field annotation by default
 }
 
 sub end {
