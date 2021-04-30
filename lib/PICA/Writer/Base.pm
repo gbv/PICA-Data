@@ -65,18 +65,23 @@ sub write_record {
     $record = clean_pica($record, allow_empty_subfields => 1,) or return;
 
     my $fh = $self->{fh};
-
-    foreach my $field (@$record) {
-        $self->write_annotation($field);
-        $self->write_identifier($field);
-        $fh->print(' ');
-        for (my $i = 3; $i < scalar @$field; $i += 2) {
-            $self->write_subfield($field->[$i - 1], $field->[$i]);
-        }
-
-        $fh->print($self->END_OF_FIELD);
-    }
+    $self->write_field($_) for @$record;
     $fh->print($self->END_OF_RECORD);
+}
+
+sub write_field {
+    my ($self, $field) = @_;
+
+    my $fh = $self->{fh};
+
+    $self->write_annotation($field);
+    $self->write_identifier($field);
+    $fh->print(' ');
+    for (my $i = 3; $i < scalar @$field; $i += 2) {
+        $self->write_subfield($field->[$i - 1], $field->[$i]);
+    }
+
+    $fh->print($self->END_OF_FIELD);
 }
 
 sub write_annotation {
