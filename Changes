@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Support parsing field annotations (#86)
 
 1.17 2021-04-23T08:16:14Z
     - Support checking and writing field annotations (#86)
