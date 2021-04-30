@@ -1,4 +1,4 @@
-package PICA::Schema::Error;
+package PICA::Error;
 use v5.14.1;
 
 use overload fallback => 1, '""' => \&message;
@@ -14,7 +14,8 @@ sub new {
 
     # add error messages
     my $id = join '/', grep {($_ // '') ne ''} @$field[0 .. 1];
-    $error->{message} = _field_error_message($error, $id);
+    $error->{message} = _field_error_message($error, $id)
+        unless $error->{message};
 
     while (my ($code, $sf) = each %{$error->{subfields} // {}}) {
         $sf->{code} = $code;
@@ -81,12 +82,14 @@ __END__
 
 =head1 NAME
 
-PICA::Schema::Error - Information about a PICA Schema validation
+PICA::Error - Information about malformed or invalid PICA data
 
 =head1 DESCRIPTION
 
-Instances B<PICA::Schema::Error> provide information about violation of an Avram
-Schema. This package should not be used directly but by using L<PICA::Schema>.
+Instances of B<PICA::Error> provide information about malformed PICA data
+(syntax errors such as impossible field tags and subfield codes) or violation
+of an Avram Schema (more semantic errors such as wrong use of subfields). This
+package should not be used directly, see L<PICA::Schema> instead.
 
 =head1 PROPERTIES
 

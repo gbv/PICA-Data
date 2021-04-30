@@ -1,14 +1,14 @@
 package PICA::Schema;
 use v5.14.1;
 
-our $VERSION = '1.14';
+our $VERSION = '1.18';
 
 use Exporter 'import';
-our @EXPORT_OK = qw(field_identifier check_value);
+our @EXPORT_OK = qw(field_identifier check_value clean_pica);
 
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
-use PICA::Schema::Error;
+use PICA::Error;
 
 sub new {
     my ($class, $schema) = @_;
@@ -18,26 +18,30 @@ sub new {
 sub check {
     my ($self, $record, %options) = @_;
 
-    $record = $record->{record} if reftype $record eq 'HASH';
+    my @errors;
+    $record
+        = clean_pica($record, error => sub {push @errors, shift}, %options)
+        or return @errors;
 
     $options{counter} = {};
-    my @errors;
 
     my %field_identifiers;
     for my $field (@$record) {
-        $field_identifiers{field_identifier($field)} = 1;
-        my $error = $self->check_field($field, %options);
+        my $id = $self->field_identifier($field);
+        $field_identifiers{$id} = 1;
+        my $error = $self->check_field($field, %options, _field_id => $id);
         if ($error and !grep {$_ eq $error} @errors) {
             push @errors, $error;
         }
     }
 
+    # check whether required fields exist
     for my $id (keys %{$self->{fields}}) {
         my $field = $self->{fields}{$id};
         if ($field->{required} && !$field_identifiers{$id}) {
             push @errors,
-                PICA::Schema::Error->new(
-                [substr($id, 0, 4), length $id gt 4 ? substr($id, 5) : undef],
+                PICA::Error->new(
+                [substr($id, 0, 4), length $id > 4 ? substr($id, 5) : undef],
                 required => 1
                 );
         }
@@ -49,7 +53,7 @@ sub check {
 sub check_field {
     my ($self, $field, %opts) = @_;
 
-    my $id   = field_identifier($field);
+    my $id = $opts{_field_id} || $self->field_identifier($field);
     my $spec = $self->{fields}{$id};
 
     if ($opts{allow_deprecated}) {
@@ -68,23 +72,26 @@ sub check_field {
 
         if ($spec) {    # field is deprectaed
             unless ($opts{allow_deprecated_fields}) {
-                return PICA::Schema::Error->new($simple, deprecated => 1);
+                return PICA::Error->new($simple, deprecated => 1);
             }
         }
         elsif ($opts{ignore_unknown_fields}) {
             return ();
         }
         else {
-            return PICA::Schema::Error->new($simple);
+            return PICA::Error->new($simple);
         }
     }
 
     if ($opts{counter} && !$spec->{repeatable}) {
         my $tag_occ = join '/', grep {defined} @$field[0, 1];
         if ($opts{counter}{$tag_occ}++) {
-            return PICA::Schema::Error->new($field, repeated => 1);
+            return PICA::Error->new($field, repeated => 1);
         }
     }
+
+    my $failed = check_annotation($field, %opts);
+    return PICA::Error->new($failed) if $failed;
 
     if ($opts{ignore_subfields}) {
         return ();
@@ -95,6 +102,7 @@ sub check_field {
         my $order;
         my %sfcounter;
         my (undef, undef, @subfields) = @$field;
+        pop @subfields if @subfields % 2;
 
         while (@subfields) {
             my ($code, $value) = splice @subfields, 0, 2;
@@ -140,9 +148,24 @@ sub check_field {
         }
     }
 
-    return %errors
-        ? PICA::Schema::Error->new($field, subfields => \%errors)
-        : ();
+    return %errors ? PICA::Error->new($field, subfields => \%errors) : ();
+}
+
+sub check_annotation {
+    my ($field, %options) = @_;
+
+    my (undef, undef, @subfields) = @$field;
+
+    if (@subfields % 2) {
+        return "Field annotation not allowed"
+            if defined $options{annotated} && !$options{annotation};
+
+        return "Annotation must not be non-alphanumeric character"
+            if pop(@subfields) !~ /^[^A-Za-z0-9]\z/;
+    }
+    elsif ($options{annotated}) {
+        return "Missing field annotation";
+    }
 }
 
 sub check_value {
@@ -186,8 +209,22 @@ sub check_value {
 }
 
 sub field_identifier {
+    my $fields = ref $_[0] eq 'PICA::Schema' ? shift->{fields} : undef;
     my ($tag, $occ) = @{$_[0]};
-    (($occ // '') ne '' and substr($tag, 0, 1) eq '0') ? "$tag/$occ" : $tag;
+
+    $occ
+        = (substr($tag, 0, 1) ne '2' && defined $occ && $occ ne '')
+        ? sprintf("%02d", $occ)
+        : '';
+
+    if ($fields && $occ ne '' && !exists $fields->{"$tag/$occ"}) {
+        for my $id (keys %$fields) {
+            return $id
+                if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
+        }
+    }
+
+    return $occ ne '' ? "$tag/$occ" : $tag;
 }
 
 sub TO_JSON {
@@ -206,6 +243,76 @@ sub abbreviated {
         }
     }
     return $abbr;
+}
+
+sub clean_pica {
+    my ($record, %options) = @_;
+
+    my $ok      = 1;
+    my $handler = $options{error};
+    my $error   = exists $options{error}
+        ? sub {
+        if ($handler) {
+            $handler->(PICA::Error->new($_[1] || [], message => $_[0]));
+        }
+        $ok = 0;
+        }
+        : sub {say STDERR shift; $ok = 0};
+
+    $record = $record->{record} if reftype $record eq 'HASH';
+
+    if (reftype $record ne 'ARRAY') {
+        $error->('PICA record must be array reference');
+    }
+    elsif (!@$record && !$options{ignore_empty_records}) {
+        $error->('PICA record should not be empty');
+    }
+
+    return unless $ok;
+
+    my @filtered;
+
+    for my $field (@$record) {
+        if (reftype $field ne 'ARRAY') {
+            $error->('PICA field must be array reference');
+            return
+        }
+
+        my ($tag, $occ, @sf) = @$field;
+
+        if ($tag !~ /^[012.][0-9.][0-9.][A-Z@.]$/) {
+            $error->("Malformed PICA tag: $tag", $field);
+        }
+
+        if ($occ) {
+            if ($occ !~ /^[0-9]{1,3}$/) {
+                $error->("Malformed occurrence: $occ", $field);
+            }
+            elsif (substr($tag, 0, 1) ne '2' && length $occ eq 3) {
+                $error->(
+                    "Three digit occurrences only allowed on PICA level 2",
+                    $field
+                );
+            }
+        }
+
+        my $msg = check_annotation($field, %options);
+        $error->($msg, $field) if $msg;
+
+        next if $options{ignore_subfields};
+
+        pop @sf if @sf % 2;
+        while (@sf) {
+            my ($code, $value) = splice @sf, 0, 2;
+
+            $error->("Malformed PICA subfield: $code", $field)
+                if $code !~ /^[_A-Za-z0-9]$/;
+            $error->("PICA subfield \$$code must be non-empty string", $field)
+                if $value !~ /^./ && !$options{allow_empty_subfields};
+        }
+    }
+
+    return $record if $ok;
 }
 
 1;
@@ -244,14 +351,15 @@ language|https://format.gbv.de/schema/avram/specification>, for instance:
 See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 sample records.
 
-Schema information can be included in PICA XML with L<PICA::Writer::XML>.
+Schema information can also be used for documentation of records with
+L<PICA::Writer::Fields> and L<PICA::Writer::XML>.
 
 =head1 METHODS
 
 =head2 check( $record [, %options ] )
 
 Check whether a given L<PICA::Data> record confirms to the schema and return a
-list of L<PICA::Schema::Error>. Possible options include:
+list of L<PICA::Error>. Possible options include:
 
 =over
 
@@ -283,6 +391,10 @@ Don't report deprecated codes.
 
 Don't report deprecated fields, subfields, and codes.
 
+=item allow_empty_subfields
+
+Don't report subfields with empty string values.
+
 =item ignore_subfield_order
 
 Don't report errors resulting on wrong subfield order.
@@ -291,28 +403,61 @@ Don't report errors resulting on wrong subfield order.
 
 Don't check subfields at all.
 
+=item annotated
+
+Require or forbid annotated fields if set to true or false.
+Otherwise just check whether given annotation is a valid character.
+
 =back
 
 =head2 check_field( $field [, %options ] )
 
 Check whether a PICA field confirms to the schema. Use same options as method
-C<check>. Returns a L<PICA::Schema::Error> on schema violation.
+C<check>. Returns a L<PICA::Error> on schema violation.
 
 =head2 abbreviated
 
-Return an abbreviated data structure of the schema without inferable fields such as C<tag>, C<occurrence> and C<code>.
+Return an abbreviated data structure of the schema without inferable fields
+such as C<tag>, C<occurrence> and C<code>.
 
 =head1 FUNCTIONS
 
-=head2 field_identifier( $field )
+=head2 clean_pica( $record[, %options] )
+
+Syntactically check a PICA record and return it as array of arrays on success.
+Syntactic check is performed on schema validation before checking the record
+against a schema and before writing a record.
+
+Options include:
+
+=over
+
+=item error
+
+Error handler, prints instances of L<PICA::Error> to STDERR by default. Use
+C<undef> to ignore all errors.
+
+=item ignore_empty_records
+
+Don't emit an error if the record has no fields.
+
+=item ignore_subfields
+
+Don't check subfields.
+
+=back
+
+=head2 field_identifier( [$schema, ] $field )
 
 Return the field identifier of a given PICA field. The identifier consists of
-field tag and optional occurrence if the tag starts with C<0>.
+field tag and optional occurrence. If this function is used as method of a
+schema, the field_identifier may contain an occurrence ranges instead of the
+plain occurrence.
 
 =head2 check_value( $value, $schedule [, %options ] )
 
 Check a subfield value against a subfield schedule. On malformed values returns
-a L<subfield error|PICA::Schema::Error/SUBFIELD ERRORS> without C<message> key.
+a L<subfield error|PICA::Error/SUBFIELD ERRORS> without C<message> key.
 
 =head1 LIMITATIONS
 

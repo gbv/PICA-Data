@@ -82,7 +82,7 @@
          "web" : "https://github.com/GBV/PICA-Data"
       }
    },
-   "version" : "1.14",
+   "version" : "1.18",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",

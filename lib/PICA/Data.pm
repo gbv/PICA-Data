@@ -1,12 +1,12 @@
 package PICA::Data;
 use v5.14.1;
 
-our $VERSION = '1.14';
+our $VERSION = '1.18';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_holdings pica_items
-    pica_guess);
+    pica_guess clean_pica pica_string);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -148,12 +148,23 @@ sub pica_holdings {
     return \@holdings;
 }
 
+sub pica_string {
+    my ($pica, $type, %options) = @_;
+    my $string = "";
+    $type ||= 'plain';
+    $options{fh} = \$string;
+    $options{start} //= 0;
+    pica_writer($type => %options)->write($pica);
+    return decode('UTF-8', $string);
+}
+
 *fields   = *pica_fields;
 *holdings = *pica_holdings;
 *items    = *pica_items;
 *match    = *pica_match;
 *value    = *pica_value;
 *values   = *pica_values;
+*string   = *pica_string;
 
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
@@ -167,12 +178,17 @@ use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
 use PICA::Writer::JSON;
+use PICA::Writer::Fields;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_);
 }
 
 sub pica_writer {
+    if (lc $_[0] eq 'generic') {
+        shift;
+        return PICA::Writer::Generic->new(@_);
+    }
     _pica_module('PICA::Writer', @_);
 }
 
@@ -233,16 +249,6 @@ sub write {
         $writer = pica_writer(@_ ? @_ : 'plain');
     }
     $writer->write($pica);
-}
-
-sub string {
-    my ($pica, $type, %options) = @_;
-    my $string = "";
-    $type ||= 'plain';
-    $options{fh} = \$string;
-    $options{start} //= 0;
-    pica_writer($type => %options)->write($pica);
-    return decode('UTF-8', $string);
 }
 
 sub TO_JSON {
@@ -344,8 +350,8 @@ PICA::Data - PICA record processing
 
 =head1 DESCRIPTION
 
-PICA::Data provides methods, classes, functions, and L<picadata|a command line
-application> to process L<PICA+ records|http://format.gbv.de/pica> in Perl.
+PICA::Data provides methods, classes, functions, and L<a command line
+application|picadata> to process L<PICA+ records|http://format.gbv.de/pica>.
 
 PICA+ is the internal data format of the Local Library System (LBS) and the
 Central Library System (CBS) of OCLC, formerly PICA. Similar library formats
@@ -458,7 +464,15 @@ L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
 L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
 
+=item
+
+L<PICA::Writer::Fields> for type C<fields> (summary of used fields and subfields)
+
 =back
+
+=head2 pica_string( $record [, $type [, @options] ] )
+
+Stringify a record with given writer (C<plain> as default) and options.
 
 =head2 pica_path( $path )
 
@@ -488,7 +502,8 @@ expression. The following are virtually equivalent:
 
 =head2 pica_fields( $record, $path[, $path...] )
 
-Returns a PICA record (or empty array reference) limited to fields specified inione ore more PICA path expression. The following are virtually equivalent:
+Returns a PICA record (or empty array reference) limited to fields specified in
+one ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
@@ -542,7 +557,7 @@ where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
 
 =head2 write( [ $type [, @options] ] | $writer )
 
-Write PICA record with given L<PICA::Writer::Base|PICA::Writer::> or
+Write PICA record with given L<PICA::Writer::...|PICA::Writer::Base> or
 L<PICA::Writer::Plain> by default. This method is a shortcut for blessed
 record objects:
 
@@ -551,7 +566,8 @@ record objects:
 
 =head2 string( [ $type ] )
 
-Serialize PICA record in a given format (C<plain> by default).
+Serialize PICA record in a given format (C<plain> by default). This method can
+also be used as function C<pica_string>.
 
 =head1 CONTRIBUTORS
 

@@ -1,9 +1,10 @@
 package PICA::Writer::Base;
 use v5.14.1;
 
-our $VERSION = '1.14';
+our $VERSION = '1.18';
 
 use Scalar::Util qw(blessed openhandle reftype);
+use PICA::Schema qw(clean_pica);
 use Term::ANSIColor;
 use Encode qw(decode);
 use Carp qw(croak);
@@ -44,33 +45,48 @@ sub write {
     $self;
 }
 
-sub write_record {
-    my ($self, $record) = @_;
-    $record = $record->{record} if reftype $record eq 'HASH';
+sub write_identifier {
+    my ($self, $field) = @_;
 
     my $fh = $self->{fh};
     my %col = %{$self->{color} // {}};
 
-    foreach my $field (@$record) {
-        $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
+    $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
 
-        if (defined $field->[1] and $field->[1] ne '') {
-            my $occ = sprintf("%02d", $field->[1]);
-            $fh->print(
-                ($col{syntax} ? colored('/', $col{syntax}) : '/')
-                . (
-                    $col{occurrence} ? colored($occ, $col{occurrence}) : $occ
-                )
-            );
-        }
-        $fh->print(' ');
-        for (my $i = 2; $i < scalar @$field; $i += 2) {
-            $self->write_subfield($field->[$i], $field->[$i + 1]);
-        }
-
-        $fh->print($self->END_OF_FIELD);
+    if (defined $field->[1] and $field->[1] ne '') {
+        my $occ = sprintf("%02d", $field->[1]);
+        $fh->print(($col{syntax} ? colored('/', $col{syntax}) : '/')
+            . ($col{occurrence} ? colored($occ, $col{occurrence}) : $occ));
     }
+}
+
+sub write_record {
+    my ($self, $record) = @_;
+    $record = clean_pica($record, allow_empty_subfields => 1,) or return;
+
+    my $fh = $self->{fh};
+    $self->write_field($_) for @$record;
     $fh->print($self->END_OF_RECORD);
+}
+
+sub write_field {
+    my ($self, $field) = @_;
+
+    my $fh = $self->{fh};
+
+    $self->write_annotation($field);
+    $self->write_identifier($field);
+    $fh->print(' ');
+    for (my $i = 3; $i < scalar @$field; $i += 2) {
+        $self->write_subfield($field->[$i - 1], $field->[$i]);
+    }
+
+    $fh->print($self->END_OF_FIELD);
+}
+
+sub write_annotation {
+
+    # ignore field annotation by default
 }
 
 sub end {
@@ -119,6 +135,10 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::JSON>
 
+=item L<PICA::Writer::Generic>
+
+=item L<PICA::Writer::Fields>
+
 =back
 
 =head1 METHODS
@@ -134,7 +154,8 @@ L<PICA::Data> also provides a functional constructor C<pica_writer>.
 =head2 write ( @records )
 
 Writes one or more records, given as hash with key 'C<record>' or as array
-reference with a list of fields, as described in L<PICA::Data>.
+reference with a list of fields, as described in L<PICA::Data>. Records
+are syntactically validated with L<PICA::Schema>'s C<clean_pica>.
 
 =head2 write_record ( $record ) 
 
