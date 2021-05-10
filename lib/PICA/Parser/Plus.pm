@@ -30,11 +30,11 @@ sub _next_record {
     }
 
     foreach my $field (@fields) {
-        my ($tag, $occurence, $data);
+        my ($tag, $occ, $data);
         if ($field =~ m/^(\d{3}[A-Z@])(\/(\d{2,3}))?\s(.+)/) {
-            $tag       = $1;
-            $occurence = $3 // '';
-            $data      = $4;
+            $tag  = $1;
+            $occ  = $3;
+            $data = $4;
         }
         else {
             if ($self->{strict}) {
@@ -49,7 +49,7 @@ sub _next_record {
 
         my @subfields = map {substr($_, 0, 1), substr($_, 1)}
             split($self->SUBFIELD_INDICATOR, substr($data, 1));
-        push @record, [$tag, $occurence, @subfields];
+        push @record, [$tag, $occ > 0 ? $occ : '', @subfields];
     }
 
     return \@record;

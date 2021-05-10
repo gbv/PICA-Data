@@ -213,11 +213,13 @@ sub field_identifier {
     my ($tag, $occ) = @{$_[0]};
 
     $occ
-        = (substr($tag, 0, 1) ne '2' && defined $occ && $occ ne '')
+        = (substr($tag, 0, 1) ne '2' && $occ > 0)
         ? sprintf("%02d", $occ)
         : '';
 
-    if ($fields && $occ ne '' && !exists $fields->{"$tag/$occ"}) {
+    if ($fields && !exists $fields->{"$tag/$occ"}) {
+
+        # TODO: we could create an index to speed up this slows lookup
         for my $id (keys %$fields) {
             return $id
                 if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;

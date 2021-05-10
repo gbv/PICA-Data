@@ -34,7 +34,7 @@ sub add {
         # field has not been inspected yet
         if (!$fields->{$id}) {
             $fields->{$id} = {counter => 0, tag => $tag, subfields => {},};
-            $fields->{$id}{occurrence} = $occ if length $id gt 4;
+            $fields->{$id}{occurrence} = $occ if $occ > 0 && length $id gt 4;
             $fields->{$id}{required} = \1 unless $self->{counter};
         }
         else {

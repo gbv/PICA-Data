@@ -53,7 +53,7 @@ sub write_identifier {
 
     $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
 
-    if (defined $field->[1] and $field->[1] ne '') {
+    if ($field->[1] > 0) {
         my $occ = sprintf("%02d", $field->[1]);
         $fh->print(($col{syntax} ? colored('/', $col{syntax}) : '/')
             . ($col{occurrence} ? colored($occ, $col{occurrence}) : $occ));

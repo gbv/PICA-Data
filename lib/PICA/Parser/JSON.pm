@@ -13,6 +13,8 @@ sub _next_record {
 
     if (my $line = $self->{reader}->getline) {
         return $JSON->decode($line);
+
+        # TODO: cleanup occurrence and annotation
     }
 }
 

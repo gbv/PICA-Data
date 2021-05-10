@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Treat occurrence zero equal to none (#88)
 
 1.18 2021-04-30T10:54:49Z
     - Support parsing field annotations (#86)
