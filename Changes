@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.20 2021-05-12T15:27:58Z
     - Implement record sorting (#59)
     - Refactor PPXML writer (#84)
 
