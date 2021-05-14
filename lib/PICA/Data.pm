@@ -6,7 +6,7 @@ our $VERSION = '1.20';
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
-    pica_sort pica_guess clean_pica pica_string);
+    pica_annotation pica_sort pica_guess clean_pica pica_string);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -198,6 +198,28 @@ sub pica_string {
     $options{start} //= 0;
     pica_writer($type => %options)->write($pica);
     return decode('UTF-8', $string);
+}
+
+sub pica_annotation {
+    my $field = shift;
+
+    my $len = scalar @$field;
+    if (@_) {
+        if (@$field % 2) {
+            if (defined $_[0]) {
+                $field->[$len - 1] = $_[0];
+            }
+            else {
+                pop @$field;
+            }
+        }
+        elsif (defined $_[0]) {
+            push @$field, $_[0];
+        }
+    }
+    else {
+        return $len % 2 ? $field->[$len - 1] : undef;
+    }
 }
 
 *fields   = *pica_fields;
@@ -573,6 +595,10 @@ available as C<_id> Also available as accessor C<items>.
 Returns a copy of the record with sorted fields (first level 1 fields, then
 level 2 fields not belonging to a level 1, then level 1, each followed by level
 2 sorted by EPN). Also available as accessor C<sort>. 
+
+=head2 pica_annotation( $field [, $annotation ] )
+
+Get or set a PICA field annotation. Use C<undef> to remove annotation.
 
 =head1 ACCESSORS
 
