@@ -132,8 +132,10 @@ while (my $record = $parser->next) {
         say $_ for map {@{$record->match($_, split => 1) // []}} @pathes;
     }
 
-    $record = $record->fields(@pathes) if @pathes;
     $record = $record->sort if $order;
+    $record = { record => $record->fields(@pathes) } if @pathes;
+
+    next unless @{$record->{record}}; # ignore empty records
 
     $writer->write($record) if $writer;
     if ($schema && $to ne 'fields') {
