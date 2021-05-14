@@ -106,7 +106,10 @@ pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
 $build = PICA::Schema::Builder->new if $build;
 
-$input = *STDIN if $input eq '-';
+if ($input eq '-') {
+    $input = *STDIN;
+    binmode *STDIN, ':encoding(UTF-8)'; 
+}
 my $parser = "PICA::Parser::${types{$from}}"->new($input, bless => 1);
 
 my $writer;
