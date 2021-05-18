@@ -181,6 +181,8 @@ if ($build) {
     print $JSON->encode($abbrev ? $schema->abbreviated : $schema);
 }
 
+exit 1 if $invalid;
+
 __END__
 
 =head1 NAME

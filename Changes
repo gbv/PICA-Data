@@ -4,10 +4,11 @@ Revision history for PICA::Data
     - Add function pica_annotation
     - Add accessor ->id and function pica_id
     - Rename option annotated to annotate
+    - Support using field annotations for schema checking (#89)
     - picadata: add option -a/-A/-annotated (#94)
     - picadata: ignore empty records
     - picadata: Expect UTF-8 on STDIN (#92)
-    - Support using field annotations for schema checking (#89)
+    - picadata: exit code on validation errors (#95)
 
 1.20 2021-05-12T15:27:58Z
     - Implement record sorting (#59)
