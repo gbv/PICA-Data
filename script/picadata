@@ -16,23 +16,27 @@ if (my ($i) = grep {$ARGV[$_] =~ /^-(\d+)$/} (0 .. @ARGV - 1)) {
 }
 
 my $abbrev = grep {$_ eq '-B'} @ARGV;
+my $noAnnotate = grep {$_ eq '-A'} @ARGV;
 my @pathes;
 
 GetOptions(
-    'from|f=s'   => \(my $from),
-    'to|t:s'     => \(my $to),
-    'schema|s=s' => \(my $schema),
-    'build|B|b'  => \(my $build),
-    'unknown|u!' => \(my $report_unknown),
-    'count|c'    => \(my $count),
-    'order|o'    => \(my $order),
-    'path|p=s'   => \@pathes,
-    "n|number:i" => \$number,
-    'color|C'    => \(my $color),
-    'mono|M'     => \(my $nocolor),
-    'help|h|?'   => \(my $help),
-    'version|V'  => \(my $version)
+    'from|f=s'    => \(my $from),
+    'to|t:s'      => \(my $to),
+    'schema|s=s'  => \(my $schema),
+    'annotate|A|a' => \(my $annotate),
+    'build|B|b'   => \(my $build),
+    'unknown|u!'  => \(my $report_unknown),
+    'count|c'     => \(my $count),
+    'order|o'     => \(my $order),
+    'path|p=s'    => \@pathes,
+    "n|number:i"  => \$number,
+    'color|C'     => \(my $color),
+    'mono|M'      => \(my $nocolor),
+    'help|h|?'    => \(my $help),
+    'version|V'   => \(my $version)
 ) or pod2usage(2);
+
+$annotate = 0 if $noAnnotate;
 
 if ($version) {
     say $PICA::Data::VERSION;
@@ -120,7 +124,7 @@ $color
 binmode *STDOUT, ':encoding(UTF-8)';
 if ($to) {
     $writer = "PICA::Writer::${types{$to}}";
-    $writer = $writer->new(color => $color, schema => $schema);
+    $writer = $writer->new(color => $color, schema => $schema, annotated => $annotate);
 }
 
 my %schema_options = (ignore_unknown => !$report_unknown);
@@ -217,6 +221,10 @@ Stop parsing after C<n> records. Can be abbreviated as C<-1>, C<-2>...
 =head2 --order, -o
 
 Sort record fields by field identifier or by occurrence for level 2.
+
+=head2 --annotate, -a, -A
+
+Enforce annotated PICA as output format or prevent with C<-A>.
 
 =head2 --count, -c
 
