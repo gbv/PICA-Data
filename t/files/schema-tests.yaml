@@ -123,7 +123,7 @@ tests:
   schema: 021A-empty-subfields
   record: 021A
   errors:
-  - message: invalid subfield 021A$a
+  - message: unknown subfield 021A$a
     tag: 021A
     subfields:
       a:

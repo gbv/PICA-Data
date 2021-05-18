@@ -7,6 +7,7 @@ Revision history for PICA::Data
     - picadata: add option -a/-A/-annotated (#94)
     - picadata: ignore empty records
     - picadata: Expect UTF-8 on STDIN (#92)
+    - Support using field annotations for schema checking (#89)
 
 1.20 2021-05-12T15:27:58Z
     - Implement record sorting (#59)

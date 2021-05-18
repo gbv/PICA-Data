@@ -33,6 +33,13 @@ sub check {
         if ($error) {
             push @errors, $error unless grep {$_ eq $error} @errors;
         }
+        if ($options{annotate}) {
+            my $annotation = ' ';
+            if ($error) {
+                $annotation = $error->{message} =~ /^unknown/ ? '?' : '!';
+            }
+            PICA::Data::pica_annotation($field, $annotation);
+        }
     }
 
     # check whether required fields exist

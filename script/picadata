@@ -105,7 +105,7 @@ if ($schema) {
     $schema = PICA::Schema->new(decode_json($json));
 }
 
-$to = $from unless ($to or $count or $schema or $build or $sfpath);
+$to = $from unless ($to or $count or ($schema && !$annotate) or $build or $sfpath);
 pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
 $build = PICA::Schema::Builder->new if $build;
@@ -124,10 +124,10 @@ $color
 binmode *STDOUT, ':encoding(UTF-8)';
 if ($to) {
     $writer = "PICA::Writer::${types{$to}}";
-    $writer = $writer->new(color => $color, schema => $schema, annotated => $annotate);
+    $writer = $writer->new(color => $color, schema => $schema, annotate => $annotate);
 }
 
-my %schema_options = (ignore_unknown => !$report_unknown);
+my %schema_options = (ignore_unknown => !$report_unknown, annotate => $annotate);
 my $stats = {records => 0, holdings => 0, items => 0, fields => 0};
 my $invalid = 0;
 
@@ -141,18 +141,20 @@ while (my $record = $parser->next) {
 
     next unless @{$record->{record}}; # ignore empty records
 
-    $writer->write($record) if $writer;
     if ($schema && $to ne 'fields') {
         my @errors = $schema->check($record, %schema_options);
         if (@errors) {
-            for (@errors) {
-                my $msg
-                    = defined $record->{_id} ? $record->{_id} . ": $_" : $_;
-                print "$msg\n";
+            unless ($annotate) {
+                for (@errors) {
+                    my $msg
+                        = defined $record->{_id} ? $record->{_id} . ": $_" : $_;
+                    print "$msg\n";
+                }
             }
             $invalid++;
         }
     }
+    $writer->write($record) if $writer;
     $build->add($record) if $build;
 
     if ($count) {
@@ -224,7 +226,8 @@ Sort record fields by field identifier or by occurrence for level 2.
 
 =head2 --annotate, -a, -A
 
-Enforce annotated PICA as output format or prevent with C<-A>.
+Enforce annotated PICA as output format or prevent with C<-A>. Combined with
+C<--schema> this will set annotations C<!> and C<?> to mark validation errors.
 
 =head2 --count, -c
 
