@@ -131,11 +131,11 @@ my $annotated = "";
         is $annotated, $parser->next->string, 'support annotation by default';
         is $plain, $parser->next->string, 'mixed with plain';
         
-        $parser = pica_parser(plain => \"$annotated$plain", bless => 1, annotated => 1);
+        $parser = pica_parser(plain => \"$annotated$plain", bless => 1, annotate => 1);
         is $annotated, $parser->next->string, 'annotation = 1';
         dies_ok{ $parser->next } 'require annotation';
 
-        $parser = pica_parser(plain => \"$plain$annotated", bless => 1, annotated => 0, strict => 1);         
+        $parser = pica_parser(plain => \"$plain$annotated", bless => 1, annotate => 0, strict => 1);         
         ok $parser->next;
         dies_ok { $parser->next } 'forbid annotation';
     }

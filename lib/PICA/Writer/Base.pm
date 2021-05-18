@@ -180,6 +180,12 @@ L<PICA::Writer::Plus> using color names from L<Term::ANSIColor>, e.g.
       syntax => 'yellow',
     })
 
+=item annotate
+
+Writer L<PICA::Writer::Plain> includes optional field annotations. Set this
+option to true to enforce field annotations (set to an empty space if missing)
+or to false to ignore them.
+
 =head1 SEE ALSO
 
 See L<Catmandu::Exporter::PICA> for usage of this module within the L<Catmandu>

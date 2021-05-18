@@ -34,9 +34,9 @@ sub write_annotation {
 
     if (@$field % 2) {
         $self->{fh}->print($field->[$#$field] . " ")
-            unless defined $self->{annotated} && !$self->{annotated};
+            unless defined $self->{annotate} && !$self->{annotate};
     }
-    elsif ($self->{annotated}) {
+    elsif ($self->{annotate}) {
         $self->{fh}->print("  ");
     }
 }
@@ -53,8 +53,5 @@ PICA::Writer::Plain - Plain PICA+ format serializer
 See L<PICA::Writer::Base> for synopsis and details.
 
 The counterpart of this module is L<PICA::Parser::Plain>.
-
-This writer also supports annotated PICA by default. Use option C<annotated> to
-ensure or ignore field annotations.
 
 =cut

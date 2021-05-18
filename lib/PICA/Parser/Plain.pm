@@ -29,11 +29,11 @@ sub _next_record {
     for my $field (@fields) {
         my ($annotation, $tag, $occ, $data);
 
-        unless (defined $self->{annotated} && !$self->{annotated}) {
+        unless (defined $self->{annotate} && !$self->{annotate}) {
             if ($field =~ s/^([^a-z0-9]) (.+)/\2/) {
                 $annotation = $1;
             }
-            elsif ($self->{annotated}) {
+            elsif ($self->{annotate}) {
                 croak "ERROR: expected field annotation at field \"$field\"";
             }
         }

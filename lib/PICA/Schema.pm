@@ -30,8 +30,8 @@ sub check {
         my $id = $self->field_identifier($field);
         $field_identifiers{$id} = 1;
         my $error = $self->check_field($field, %options, _field_id => $id);
-        if ($error and !grep {$_ eq $error} @errors) {
-            push @errors, $error;
+        if ($error) {
+            push @errors, $error unless grep {$_ eq $error} @errors;
         }
     }
 
@@ -158,12 +158,13 @@ sub check_annotation {
 
     if (@subfields % 2) {
         return "Field annotation not allowed"
-            if defined $options{annotated} && !$options{annotation};
+            if defined $options{check_annotation}
+            && !$options{check_annotation};
 
         return "Annotation must not be non-alphanumeric character"
             if pop(@subfields) !~ /^[^A-Za-z0-9]\z/;
     }
-    elsif ($options{annotated}) {
+    elsif ($options{check_annotation}) {
         return "Missing field annotation";
     }
 }
@@ -405,7 +406,7 @@ Don't report errors resulting on wrong subfield order.
 
 Don't check subfields at all.
 
-=item annotated
+=item check_annotation
 
 Require or forbid annotated fields if set to true or false.
 Otherwise just check whether given annotation is a valid character.
