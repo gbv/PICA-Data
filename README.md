@@ -32,7 +32,7 @@ PICA::Data - PICA record processing
           ...
 
           # object accessors (if parser option 'bless' enabled)
-          my $ppn      = $record->{_id};
+          my $ppn      = $record->id;
           my $ppn      = $record->value('003@0');
           my $ddc      = $record->match('045Ue', split => 1, nested_array => 1);
           my $holdings = $record->holdings;
@@ -195,6 +195,10 @@ Returns a copy of the record with sorted fields (first level 1 fields, then
 level 2 fields not belonging to a level 1, then level 1, each followed by level
 2 sorted by EPN). Also available as accessor `sort`. 
 
+## pica\_annotation( $field \[, $annotation \] )
+
+Get or set a PICA field annotation. Use `undef` to remove annotation.
+
 # ACCESSORS
 
 All accessors of `PICA::Data` are also available as ["FUNCTIONS"](#functions), prefixed
@@ -222,12 +226,16 @@ expression.  Always returns an array reference.
 ## holdings
 
 Returns a list (as array reference) of local holding records (level 1 and 2),
-where the `_id` of each record contains the ILN (subfield `101@a`).
+where the id of each record contains the ILN (subfield `101@a`).
 
 ## items
 
 Returns a list (as array reference) of item records (level 1),
-where the `_id` of each record contains the EPN (subfield `203@/**0`).
+where the id of each record contains the EPN (subfield `203@/**0`).
+
+## id
+
+Returns the record id, if given.
 
 # METHODS
 
