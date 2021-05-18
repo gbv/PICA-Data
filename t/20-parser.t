@@ -1,13 +1,14 @@
 use strict;
 use warnings;
 use utf8;
-use PICA::Data qw(pica_parser pica_writer pica_value);
+use PICA::Data qw(pica_parser pica_writer pica_value pica_id);
 use Test::Exception;
 use Test::More;
 use Test::Warn;
 
 my $first = pica_parser(plain => 't/files/pica.plain')->next;
-ok $first->{_id} eq '12345', 'record _id';
+is $first->{_id}, '12345', 'record _id';
+is pica_id($first), '12345', 'pica_id';
 ok $first->{record}->[0][0] eq '002@', 'tag from first field';
 is_deeply $first->{record}->[1], ['003@', '', 0 => '12345'], 'second field';
 is_deeply $first->{record}->[4], ['012X', '', 0 => '0', x => '', y => ''],
@@ -29,7 +30,7 @@ foreach my $type (qw(Plain Plus JSON Binary XML PPXML)) {
 
     is_deeply $record, $first;
 
-    ok $parser->next()->{_id} eq '67890', 'next record';
+    ok $parser->next()->{_id} eq '67890', 'next record';    
     ok !$parser->next, 'parsed all records';
 
     foreach my $mode ('<', '<:utf8') {

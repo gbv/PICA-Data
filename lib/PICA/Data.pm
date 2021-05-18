@@ -6,7 +6,7 @@ our $VERSION = '1.20';
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
-    pica_annotation pica_sort pica_guess clean_pica pica_string);
+    pica_annotation pica_sort pica_guess clean_pica pica_string pica_id);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -200,6 +200,10 @@ sub pica_string {
     return decode('UTF-8', $string);
 }
 
+sub pica_id {
+    return $_[0]->{_id} if reftype $_[0] eq 'HASH';
+}
+
 sub pica_annotation {
     my $field = shift;
 
@@ -231,6 +235,7 @@ sub pica_annotation {
 *value    = *pica_value;
 *values   = *pica_values;
 *string   = *pica_string;
+*id       = *pica_id;
 
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
@@ -385,7 +390,7 @@ PICA::Data - PICA record processing
         ...
 
         # object accessors (if parser option 'bless' enabled)
-        my $ppn      = $record->{_id};
+        my $ppn      = $record->id;
         my $ppn      = $record->value('003@0');
         my $ddc      = $record->match('045Ue', split => 1, nested_array => 1);
         my $holdings = $record->holdings;
@@ -627,12 +632,16 @@ expression.  Always returns an array reference.
 =head2 holdings
 
 Returns a list (as array reference) of local holding records (level 1 and 2),
-where the C<_id> of each record contains the ILN (subfield C<101@a>).
+where the id of each record contains the ILN (subfield C<101@a>).
 
 =head2 items
 
 Returns a list (as array reference) of item records (level 1),
-where the C<_id> of each record contains the EPN (subfield C<203@/**0>).
+where the id of each record contains the EPN (subfield C<203@/**0>).
+
+=head2 id
+
+Returns the record id, if given.
 
 =head1 METHODS
 
