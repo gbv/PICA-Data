@@ -32,7 +32,7 @@ PICA::Data - PICA record processing
           ...
 
           # object accessors (if parser option 'bless' enabled)
-          my $ppn      = $record->{_id};
+          my $ppn      = $record->id;
           my $ppn      = $record->value('003@0');
           my $ddc      = $record->match('045Ue', split => 1, nested_array => 1);
           my $holdings = $record->holdings;
@@ -174,15 +174,30 @@ one ore more PICA path expression. The following are virtually equivalent:
     $path->record_fields($record);
     $record->fields($path); # if $record is blessed
 
+## pica\_title( $record )
+
+Returns the record limited to level 0 fields ("title record") in sorted order.
+
 ## pica\_holdings( $record )
 
-Returns a list (as array reference) of local holding records. Also available as
-accessor `holdings`.
+Returns a list (as array reference) of local holding records, sorted by ILN.
+Level2 fields are included in sorted order. The ILN (if given) is available as
+`_id`. Also available as accessor `holdings`.
 
 ## pica\_items( $record )
 
-Returns a list (as array reference) of item records. Also available as
-accessor `items`.
+Returns a list (as array reference) of item records. The EPN (if given) is
+available as `_id` Also available as accessor `items`.
+
+## pica\_sort( $record )
+
+Returns a copy of the record with sorted fields (first level 1 fields, then
+level 2 fields not belonging to a level 1, then level 1, each followed by level
+2 sorted by EPN). Also available as accessor `sort`. 
+
+## pica\_annotation( $field \[, $annotation \] )
+
+Get or set a PICA field annotation. Use `undef` to remove annotation.
 
 # ACCESSORS
 
@@ -211,12 +226,16 @@ expression.  Always returns an array reference.
 ## holdings
 
 Returns a list (as array reference) of local holding records (level 1 and 2),
-where the `_id` of each record contains the ILN (subfield `101@a`).
+where the id of each record contains the ILN (subfield `101@a`).
 
 ## items
 
 Returns a list (as array reference) of item records (level 1),
-where the `_id` of each record contains the EPN (subfield `203@/**0`).
+where the id of each record contains the EPN (subfield `203@/**0`).
+
+## id
+
+Returns the record id, if given.
 
 # METHODS
 

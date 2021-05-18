@@ -1,7 +1,7 @@
 package PICA::Schema;
 use v5.14.1;
 
-our $VERSION = '1.18';
+our $VERSION = '1.21';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(field_identifier check_value clean_pica);
@@ -30,8 +30,15 @@ sub check {
         my $id = $self->field_identifier($field);
         $field_identifiers{$id} = 1;
         my $error = $self->check_field($field, %options, _field_id => $id);
-        if ($error and !grep {$_ eq $error} @errors) {
-            push @errors, $error;
+        if ($error) {
+            push @errors, $error unless grep {$_ eq $error} @errors;
+        }
+        if ($options{annotate}) {
+            my $annotation = ' ';
+            if ($error) {
+                $annotation = $error->{message} =~ /^unknown/ ? '?' : '!';
+            }
+            PICA::Data::pica_annotation($field, $annotation);
         }
     }
 
@@ -158,12 +165,13 @@ sub check_annotation {
 
     if (@subfields % 2) {
         return "Field annotation not allowed"
-            if defined $options{annotated} && !$options{annotation};
+            if defined $options{check_annotation}
+            && !$options{check_annotation};
 
         return "Annotation must not be non-alphanumeric character"
             if pop(@subfields) !~ /^[^A-Za-z0-9]\z/;
     }
-    elsif ($options{annotated}) {
+    elsif ($options{check_annotation}) {
         return "Missing field annotation";
     }
 }
@@ -213,11 +221,13 @@ sub field_identifier {
     my ($tag, $occ) = @{$_[0]};
 
     $occ
-        = (substr($tag, 0, 1) ne '2' && defined $occ && $occ ne '')
+        = (substr($tag, 0, 1) ne '2' && $occ > 0)
         ? sprintf("%02d", $occ)
         : '';
 
-    if ($fields && $occ ne '' && !exists $fields->{"$tag/$occ"}) {
+    if ($fields && !exists $fields->{"$tag/$occ"}) {
+
+        # TODO: we could create an index to speed up this slows lookup
         for my $id (keys %$fields) {
             return $id
                 if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
@@ -403,7 +413,7 @@ Don't report errors resulting on wrong subfield order.
 
 Don't check subfields at all.
 
-=item annotated
+=item check_annotation
 
 Require or forbid annotated fields if set to true or false.
 Otherwise just check whether given annotation is a valid character.

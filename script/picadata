@@ -6,6 +6,7 @@ use PICA::Schema;
 use PICA::Schema::Builder;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
+use HTTP::Tiny;
 use JSON::PP;
 use List::Util 'sum';
 
@@ -15,22 +16,27 @@ if (my ($i) = grep {$ARGV[$_] =~ /^-(\d+)$/} (0 .. @ARGV - 1)) {
 }
 
 my $abbrev = grep {$_ eq '-B'} @ARGV;
+my $noAnnotate = grep {$_ eq '-A'} @ARGV;
 my @pathes;
 
 GetOptions(
-    'from|f=s'   => \(my $from),
-    'to|t:s'     => \(my $to),
-    'schema|s=s' => \(my $schema),
-    'build|B|b'  => \(my $build),
-    'unknown|u!' => \(my $report_unknown),
-    'count|c'    => \(my $count),
-    'path|p=s'   => \@pathes,
-    "n|number:i" => \$number,
-    'color|C'    => \(my $color),
-    'mono|M'     => \(my $nocolor),
-    'help|h|?'   => \(my $help),
-    'version|V'  => \(my $version)
+    'from|f=s'    => \(my $from),
+    'to|t:s'      => \(my $to),
+    'schema|s=s'  => \(my $schema),
+    'annotate|A|a' => \(my $annotate),
+    'build|B|b'   => \(my $build),
+    'unknown|u!'  => \(my $report_unknown),
+    'count|c'     => \(my $count),
+    'order|o'     => \(my $order),
+    'path|p=s'    => \@pathes,
+    "n|number:i"  => \$number,
+    'color|C'     => \(my $color),
+    'mono|M'      => \(my $nocolor),
+    'help|h|?'    => \(my $help),
+    'version|V'   => \(my $version)
 ) or pod2usage(2);
+
+$annotate = 0 if $noAnnotate;
 
 if ($version) {
     say $PICA::Data::VERSION;
@@ -87,16 +93,27 @@ $from = 'plain' unless $from;
 pod2usage("unknown serialization type: $from") unless $types{lc $from};
 
 if ($schema) {
-    my $fh = IO::File->new($schema);
-    $schema = PICA::Schema->new(decode_json(join "\n", <$fh>));
+    my $json;
+    if ($schema =~ qr{^https?://}) {
+        my $res = HTTP::Tiny->new->get($schema);
+        die "HTTP request failed: $schema\n" unless $res->{success};
+        $json = $res->{content};
+    } else {
+        my $fh = IO::File->new($schema);
+        $json = join "\n", <$fh>;
+    }
+    $schema = PICA::Schema->new(decode_json($json));
 }
 
-$to = $from unless ($to or $count or $schema or $build or $sfpath);
+$to = $from unless ($to or $count or ($schema && !$annotate) or $build or $sfpath);
 pod2usage("unknown serialization type: $to") unless !$to or $types{lc $to};
 
 $build = PICA::Schema::Builder->new if $build;
 
-$input = *STDIN if $input eq '-';
+if ($input eq '-') {
+    $input = *STDIN;
+    binmode *STDIN, ':encoding(UTF-8)'; 
+}
 my $parser = "PICA::Parser::${types{$from}}"->new($input, bless => 1);
 
 my $writer;
@@ -107,10 +124,10 @@ $color
 binmode *STDOUT, ':encoding(UTF-8)';
 if ($to) {
     $writer = "PICA::Writer::${types{$to}}";
-    $writer = $writer->new(color => $color, schema => $schema);
+    $writer = $writer->new(color => $color, schema => $schema, annotate => $annotate);
 }
 
-my %schema_options = (ignore_unknown => !$report_unknown);
+my %schema_options = (ignore_unknown => !$report_unknown, annotate => $annotate);
 my $stats = {records => 0, holdings => 0, items => 0, fields => 0};
 my $invalid = 0;
 
@@ -119,20 +136,25 @@ while (my $record = $parser->next) {
         say $_ for map {@{$record->match($_, split => 1) // []}} @pathes;
     }
 
-    $record = $record->fields(@pathes) if @pathes;
+    $record = $record->sort if $order;
+    $record = { record => $record->fields(@pathes) } if @pathes;
 
-    $writer->write($record) if $writer;
+    next unless @{$record->{record}}; # ignore empty records
+
     if ($schema && $to ne 'fields') {
         my @errors = $schema->check($record, %schema_options);
         if (@errors) {
-            for (@errors) {
-                my $msg
-                    = defined $record->{_id} ? $record->{_id} . ": $_" : $_;
-                print "$msg\n";
+            unless ($annotate) {
+                for (@errors) {
+                    my $msg
+                        = defined $record->{_id} ? $record->{_id} . ": $_" : $_;
+                    print "$msg\n";
+                }
             }
             $invalid++;
         }
     }
+    $writer->write($record) if $writer;
     $build->add($record) if $build;
 
     if ($count) {
@@ -159,6 +181,8 @@ if ($build) {
     print $JSON->encode($abbrev ? $schema->abbreviated : $schema);
 }
 
+exit 1 if $invalid;
+
 __END__
 
 =head1 NAME
@@ -179,7 +203,7 @@ Parse, validate and/or serialize PICA+ data from the command line, e.g.:
   picadata pica.xml -s schema.json   # validate against Avram schema
 
   # document fields used in a record
-  picadata -t fields pica.xml -s <(curl -s https://format.k10plus.de/avram.pl?profile=k10plus)
+  picadata -t fields pica.xml -s https://format.k10plus.de/avram.pl?profile=k10plus
 
 =head1 OPTIONS
 
@@ -194,13 +218,22 @@ L<http://format.gbv.de/pica>
 PICA serialization type to enable writing parsed PICA data. Use C<fields> to
 list all fields in the data (with optional schema information).
 
-=head2 --count, -c
-
-Count number of records, holdings, items, and fields.
-
 =head2 --number, -n
 
 Stop parsing after C<n> records. Can be abbreviated as C<-1>, C<-2>...
+
+=head2 --order, -o
+
+Sort record fields by field identifier or by occurrence for level 2.
+
+=head2 --annotate, -a, -A
+
+Enforce annotated PICA as output format or prevent with C<-A>. Combined with
+C<--schema> this will set annotations C<!> and C<?> to mark validation errors.
+
+=head2 --count, -c
+
+Count number of records, holdings, items, and fields.
 
 =head2 --path, -p
 
@@ -210,7 +243,7 @@ expressions can be separated by C<|> or by repeating the option.
 =head2 --schema, -s
 
 L<Avram Schema|http://format.gbv.de/schema/avram/specification> to validate
-against.
+against. Can be a file or an URL.
 
 =head2 --unknown, -u
 

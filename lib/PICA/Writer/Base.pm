@@ -1,7 +1,7 @@
 package PICA::Writer::Base;
 use v5.14.1;
 
-our $VERSION = '1.18';
+our $VERSION = '1.21';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use PICA::Schema qw(clean_pica);
@@ -53,7 +53,7 @@ sub write_identifier {
 
     $fh->print($col{tag} ? colored($field->[0], $col{tag}) : $field->[0]);
 
-    if (defined $field->[1] and $field->[1] ne '') {
+    if ($field->[1] > 0) {
         my $occ = sprintf("%02d", $field->[1]);
         $fh->print(($col{syntax} ? colored('/', $col{syntax}) : '/')
             . ($col{occurrence} ? colored($occ, $col{occurrence}) : $occ));
@@ -179,6 +179,12 @@ L<PICA::Writer::Plus> using color names from L<Term::ANSIColor>, e.g.
       value => 'white',
       syntax => 'yellow',
     })
+
+=head2 annotate
+
+Writer L<PICA::Writer::Plain> includes optional field annotations. Set this
+option to true to enforce field annotations (set to an empty space if missing)
+or to false to ignore them.
 
 =head1 SEE ALSO
 
