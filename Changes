@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add PICA::Writer::Subfields
 
 1.21 2021-05-18T09:23:25Z
     - Add function pica_annotation

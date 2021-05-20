@@ -139,6 +139,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Writer::Fields>
 
+=item L<PICA::Writer::Subfields>
+
 =back
 
 =head1 METHODS

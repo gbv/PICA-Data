@@ -362,7 +362,7 @@ See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 sample records.
 
 Schema information can also be used for documentation of records with
-L<PICA::Writer::Fields> and L<PICA::Writer::XML>.
+L<PICA::Writer::Fields>, L<PICA::Writer::Subfields> and L<PICA::Writer::XML>.
 
 =head1 METHODS
 
