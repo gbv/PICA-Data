@@ -115,6 +115,13 @@ note 'error handling';
 is pica_parser(plain => \'012A/00 $xy', bless => 1)->next->string, 
   "012A \$xy\n\n", 'occurrence zero';
 
+{
+    for my $blank ("\n","SET:...","Eingabe:","Warnung:") {
+        my $parser = pica_parser(plain => "012A \$xy\n$blank\n012A \$xy");
+        ok $parser->next && $parser->next, "Join empty lines";
+    }
+}
+
 note '3-digit occurrence';
 {
     my $data   = '00045     003@ 012345231@/102 d10j19660d11j1970';

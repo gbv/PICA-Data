@@ -1,7 +1,7 @@
 package PICA::Writer::Fields;
 use v5.14.1;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 use parent 'PICA::Writer::Base';
 
@@ -46,5 +46,8 @@ PICA::Writer::Fields - Summarize fields used in PICA+ records
 This writer shows information about fields used in PICA+ records. Every field
 is only shown once. A L<PICA::Schema> can be provided with argument C<schema>
 to shown field labels, if included in the schema.
+
+See L<PICA::Writer::Subfields> for corresponding writer for subfield
+information.
 
 =cut

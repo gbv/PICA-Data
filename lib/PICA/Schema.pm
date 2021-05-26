@@ -1,7 +1,7 @@
 package PICA::Schema;
 use v5.14.1;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(field_identifier check_value clean_pica);
@@ -362,7 +362,7 @@ See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 sample records.
 
 Schema information can also be used for documentation of records with
-L<PICA::Writer::Fields> and L<PICA::Writer::XML>.
+L<PICA::Writer::Fields>, L<PICA::Writer::Subfields> and L<PICA::Writer::XML>.
 
 =head1 METHODS
 

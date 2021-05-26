@@ -133,7 +133,8 @@ Create a PICA writer object (see [PICA::Writer::Base](https://metacpan.org/pod/P
 - [PICA::Writer::JSON](https://metacpan.org/pod/PICA::Writer::JSON) for type `json` (PICA JSON)
 - [PICA::Writer::XML](https://metacpan.org/pod/PICA::Writer::XML) for type `xml` or `picaxml` (PICA-XML)
 - [PICA::Writer::PPXML](https://metacpan.org/pod/PICA::Writer::PPXML) for type `ppxml` (PicaPlus-XML)
-- [PICA::Writer::Fields](https://metacpan.org/pod/PICA::Writer::Fields) for type `fields` (summary of used fields and subfields)
+- [PICA::Writer::Fields](https://metacpan.org/pod/PICA::Writer::Fields) for type `fields` (summary of used fields)
+- [PICA::Writer::Subfields](https://metacpan.org/pod/PICA::Writer::Subfields) for type `subfields` (summary of used subfields)
 
 ## pica\_string( $record \[, $type \[, @options\] \] )
 

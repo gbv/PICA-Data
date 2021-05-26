@@ -63,6 +63,9 @@ my %types = (
     json   => 'JSON',
     ndjson => 'JSON',
     fields => 'Fields',
+    f      => 'Fields',
+    subfields => 'Subfields',
+    sf     => 'Subfields',
 );
 
 my $input = '-';
@@ -215,8 +218,8 @@ L<http://format.gbv.de/pica>
 
 =head2 --to, -t
 
-PICA serialization type to enable writing parsed PICA data. Use C<fields> to
-list all fields in the data (with optional schema information).
+PICA serialization type to enable writing parsed PICA data. Use C<f>/C<fields>
+or C<sf>/C<subfields> to list all distinct (sub)fields.
 
 =head2 --number, -n
 
