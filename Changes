@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.22 2021-05-26T12:54:35Z
     - Add PICA::Writer::Subfields
     - Support parsing WinIBW download format (#34)
 

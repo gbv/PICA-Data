@@ -1,7 +1,7 @@
 package PICA::Writer::Subfields;
 use v5.14.1;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 use parent 'PICA::Writer::Base';
 
