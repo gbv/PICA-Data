@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Move picadata implementation into module App::picadata
 
 1.22 2021-05-26T12:54:35Z
     - Add PICA::Writer::Subfields
