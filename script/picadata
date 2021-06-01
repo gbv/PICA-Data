@@ -2,7 +2,7 @@
 use v5.14.1;
 use App::picadata;
 
-exit App::picadata->new(@ARGV)->run;
+App::picadata->new(@ARGV)->run;
 
 __END__
 
@@ -12,19 +12,37 @@ picadata - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-picadata [--from TYPE] [--schema FILE] [--to TYPE] {OPTIONS} [FILE]
+picadata [<command>] {path} {options} [FILE]
 
 =head1 DESCRIPTION
 
-Parse, validate and/or serialize PICA+ data from the command line, e.g.:
+Convert, analyze and validate PICA+ data from the command line.
 
-  picadata pica.dat -t xml           # convert binary to XML
-  picadata -c -f plain < pica.plain  # parse and count records
-  picadata -p 003@ pica.xml -t       # extract field 003@
-  picadata pica.xml -s schema.json   # validate against Avram schema
+=head1 COMMANDS
 
-  # document fields used in a record
-  picadata -t fields pica.xml -s https://format.k10plus.de/avram.pl?profile=k10plus
+=head2 convert
+
+Convert between PICA+ serialization formats. This is the default command.
+
+=head2 count
+
+Count number of records, holdings, items, and fields.
+
+=head2 fields/subfields/sf
+
+List distinct fields or subfields in the data (add schema for documenation).
+
+=head2 explain
+
+List distinct fields and subfields in the data (add schema for documentation).
+
+=head2 validate
+
+Validate data against an Avram schema (option C<--schema>).
+
+=head2 build
+
+Build an Avram schema from input data. Add option C<-B> to abbreviate.
 
 =head1 OPTIONS
 
@@ -32,12 +50,11 @@ Parse, validate and/or serialize PICA+ data from the command line, e.g.:
 
 PICA serialization type (plain, plus, binary, XML, ppxml) with XML as default.
 Guessed from input filename unless specified. See format documentation at
-L<http://format.gbv.de/pica>
+L<http://format.gbv.de/pica>.
 
 =head2 --to, -t
 
-PICA serialization type to enable writing parsed PICA data. Use C<f>/C<fields>
-or C<sf>/C<subfields> to list all distinct (sub)fields.
+PICA serialization type to enable writing parsed PICA data.
 
 =head2 --number, -n
 
@@ -45,16 +62,12 @@ Stop parsing after C<n> records. Can be abbreviated as C<-1>, C<-2>...
 
 =head2 --order, -o
 
-Sort record fields by field identifier or by occurrence for level 2.
+Sort record fields by field identifier, or by occurrence at level 2.
 
 =head2 --annotate, -a, -A
 
 Enforce annotated PICA as output format or prevent with C<-A>. Combined with
 C<--schema> this will set annotations C<!> and C<?> to mark validation errors.
-
-=head2 --count, -c
-
-Count number of records, holdings, items, and fields.
 
 =head2 --path, -p
 
@@ -70,9 +83,9 @@ against. Can be a file or an URL.
 
 Report unknown fields and subfields on validation (disabled by default).
 
-=head2 --build, -b, -B
+=head2 --abbrev, -B
 
-Build an Avram schema from records. Option C<-B> abbreviates the schema.
+Abbreviate the Avram schema (with command <build>).
 
 =head2 --color, -C
 
@@ -85,6 +98,16 @@ Monochrome (don't colorize output).
 =head2 --version, -V
 
 Print version number and exit.
+
+=head1 EXAMPLES
+
+  picadata pica.dat -t xml                    # convert binary to XML
+  picadata count -f plain < pica.plain        # parse and count records
+  picadata 003@ pica.xml                      # extract field 003@
+  picadata validate pica.xml -s schema.json   # validate against Avram schema
+
+  # document fields used in a record
+  picadata fields pica.xml -s https://format.k10plus.de/avram.pl?profile=k10plus
 
 =head1 SEE ALSO
 
