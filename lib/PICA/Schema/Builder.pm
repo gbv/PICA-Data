@@ -43,6 +43,7 @@ sub add {
 
         my $subfields = $fields->{$id}{subfields};
         my %subfield_codes;
+        pop @content if @content % 2;    # remove annotation
         while (@content) {
             my ($code, $value) = splice(@content, 0, 2);
 

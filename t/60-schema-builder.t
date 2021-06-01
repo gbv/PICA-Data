@@ -42,7 +42,7 @@ is_deeply $builder->schema->{fields}, $fields;
 $builder->add(
     [
         # omit 003@
-        ['028B', '01', 'x', 1],              # new field with occurrence
+        ['028B', '01', 'x', 1, ' '],         # new annotated field with occurrence
         ['144Z', '',   'y', 0],              # omit 114Z$x
     ]
 );
