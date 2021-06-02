@@ -8,7 +8,7 @@ use Scalar::Util qw(reftype);
 
 sub new {
     my $class = shift;
-    bless {fields => {}, counter => 0}, $class;
+    bless {fields => {}, total => 0}, $class;
 }
 
 sub add {
@@ -33,12 +33,9 @@ sub add {
 
         # field has not been inspected yet
         if (!$fields->{$id}) {
-            $fields->{$id} = {counter => 0, tag => $tag, subfields => {},};
+            $fields->{$id} = {total => 0, tag => $tag, subfields => {},};
             $fields->{$id}{occurrence} = $occ if $occ > 0 && length $id gt 4;
-            $fields->{$id}{required} = \1 unless $self->{counter};
-        }
-        else {
-            $fields->{$id}{counter}++;
+            $fields->{$id}{required} = \1 unless $self->{total};
         }
 
         my $subfields = $fields->{$id}{subfields};
@@ -58,7 +55,7 @@ sub add {
             if (!$subfields->{$code}) {
                 $subfields->{$code} = {code => $code};
                 $subfields->{$code}{required} = \1
-                    unless $fields->{$id}{counter};
+                    unless $fields->{$id}{total};
             }
         }
 
@@ -66,6 +63,8 @@ sub add {
         for (grep {!$subfield_codes{$_}} keys %$subfields) {
             delete $subfields->{$_}{required};
         }
+
+        $fields->{$id}{total}++;
     }
 
     # fields not given in this record are not required
@@ -73,22 +72,12 @@ sub add {
         delete $fields->{$_}{required};
     }
 
-    $self->{counter}++;
+    $self->{total}++;
 }
 
 sub schema {
     my ($self) = @_;
-    PICA::Schema->new(
-        {
-            fields => {
-                map {
-                    my %field = %{$self->{fields}{$_}};
-                    delete $field{counter};
-                    $_ => \%field;
-                } keys %{$self->{fields}}
-            }
-        }
-    );
+    PICA::Schema->new({%$self});
 }
 
 1;

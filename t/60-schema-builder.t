@@ -11,7 +11,8 @@ my $fields = {
     '003@' => {
         tag       => '003@',
         required  => \1,
-        subfields => {'0' => {code => '0', required => \1}}
+        subfields => {'0' => {code => '0', required => \1}},
+        total     => 1
     }
 };
 is_deeply $builder->schema->{fields}, $fields;
@@ -24,8 +25,9 @@ $builder->add(
 );
 
 $fields->{'003@'}{subfields}{0}{repeatable} = \1;
+$fields->{'003@'}{total}++;
 $fields->{'144Z'}
-    = {tag => '144Z', subfields => {x => {code => 'x', required => \1}}};
+    = {tag => '144Z', subfields => {x => {code => 'x', required => \1}}, total => 1};
 
 is_deeply $builder->schema->{fields}, $fields;
 
@@ -35,6 +37,7 @@ $builder->add(
     ]
 );
 
+$fields->{'003@'}{total}++;
 $fields->{'003@'}{subfields}{x} = {code => 'x'};
 
 is_deeply $builder->schema->{fields}, $fields;
@@ -50,10 +53,12 @@ $builder->add(
 delete $fields->{'003@'}{required};
 delete $fields->{'144Z'}{subfields}{x}{required};
 $fields->{'144Z'}{subfields}{y} = {code => 'y'};
+$fields->{'144Z'}{total}++;
 $fields->{'028B/01'} = {
     tag        => '028B',
     occurrence => '01',
-    subfields  => {x => {code => 'x', required => \1}}
+    subfields  => {x => {code => 'x', required => \1}},
+    total      => 1,
 };
 
 is_deeply $builder->schema->{fields}, $fields;
