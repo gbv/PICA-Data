@@ -5,10 +5,13 @@ our $VERSION = '1.22';
 
 use PICA::Schema qw(field_identifier);
 use Scalar::Util qw(reftype);
+use Storable qw(dclone);
+
+use parent 'PICA::Schema';
 
 sub new {
     my $class = shift;
-    bless {fields => {}, total => 0}, $class;
+    bless {fields => {}, total => 0, @_}, $class;
 }
 
 sub add {
@@ -76,8 +79,12 @@ sub add {
 }
 
 sub schema {
-    my ($self) = @_;
-    PICA::Schema->new({%$self});
+    my $schema = dclone($_[0]->TO_JSON);
+    my $fields = $schema->{fields};
+
+    delete $fields->{$_} for grep {!$fields->{$_}{total}} keys %$fields;
+
+    return PICA::Schema->new($schema);
 }
 
 1;
@@ -89,7 +96,7 @@ PICA::Schema::Builder - Create Avram Schema from examples
 
 =head1 SYNOPSIS
 
-  my $builder = PICA::Schema::Builder->new;
+  my $builder = PICA::Schema::Builder->new( title => 'My Schema' );
 
   while (my $record = get_some_pica_record()) {
       $builder->add($record);
@@ -106,6 +113,13 @@ which fields occurr in all records (C<required>), whether a field has been
 repeated in a record (C<repeatable>), and the same information for subfields
 (C<subfields>). Subfield order is not taken into account.
 
+This class is a subclass of L<PICA::Schema>.
+
+=head1 CONSTRUCTOR
+
+The builder can be initialized with information of an existing builder or
+schema, in particular C<fields> and C<total>.
+
 =head1 METHODS
 
 =head2 add( $record )
@@ -114,7 +128,8 @@ Analyse an additional PICA record.
 
 =head2 schema
 
-Return a L<PICA::Schema> that all analyzed records conform to.
+Return a L<PICA::Schema> that all analyzed records conform to. This methods
+creates a deep copy and removes all fields with C<total> zero.
 
 =head1 SEE ALSO
 

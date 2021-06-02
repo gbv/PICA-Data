@@ -245,10 +245,12 @@ sub TO_JSON {
 sub abbreviated {
     my ($self) = @_;
     my $abbr = dclone($self->TO_JSON);
-    for (values %{$abbr->{fields} // {}}) {
-        delete $_->{tag};
-        delete $_->{occurrence};
-        for (values %{$_->{subfields} // {}}) {
+    delete $abbr->{total};
+    for my $field (values %{$abbr->{fields} // {}}) {
+        delete $field->{tag};
+        delete $field->{occurrence};
+        delete $field->{total};
+        for my $sf (values %{$field->{subfields} // {}}) {
             delete $_->{code};
         }
     }
@@ -362,7 +364,7 @@ See L<PICA::Schema::Builder> to automatically construct schemas from PICA
 sample records.
 
 Schema information can also be used for documentation of records with
-L<PICA::Writer::Fields>, L<PICA::Writer::Subfields> and L<PICA::Writer::XML>.
+L<PICA::Writer::XML>.
 
 =head1 METHODS
 
@@ -427,8 +429,8 @@ C<check>. Returns a L<PICA::Error> on schema violation.
 
 =head2 abbreviated
 
-Return an abbreviated data structure of the schema without inferable fields
-such as C<tag>, C<occurrence> and C<code>.
+Return an abbreviated data structure of the schema without inferable and
+calculated fields such as C<tag>, C<occurrence>, C<code>, and C<total>.
 
 =head1 FUNCTIONS
 

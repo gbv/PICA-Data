@@ -249,8 +249,6 @@ use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
 use PICA::Writer::JSON;
-use PICA::Writer::Fields;
-use PICA::Writer::Subfields;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_);
@@ -535,14 +533,6 @@ L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 =item 
 
 L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
-
-=item
-
-L<PICA::Writer::Fields> for type C<fields> (summary of used fields)
-
-=item
-
-L<PICA::Writer::Subfields> for type C<subfields> (summary of used subfields)
 
 =back
 

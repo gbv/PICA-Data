@@ -14,24 +14,20 @@ use List::Util qw(any all);
 use Text::Abbrev;
 
 my %TYPES = (
-    bin       => 'Binary',
-    dat       => 'Binary',
-    binary    => 'Binary',
-    extpp     => 'Binary',
-    ext       => 'Binary',
-    plain     => 'Plain',
-    pp        => 'Plain',
-    plus      => 'Plus',
-    norm      => 'Plus',
-    normpp    => 'Plus',
-    xml       => 'XML',
-    ppxml     => 'PPXML',
-    json      => 'JSON',
-    ndjson    => 'JSON',
-    fields    => 'Fields',
-    f         => 'Fields',
-    subfields => 'Subfields',
-    sf        => 'Subfields',
+    bin    => 'Binary',
+    dat    => 'Binary',
+    binary => 'Binary',
+    extpp  => 'Binary',
+    ext    => 'Binary',
+    plain  => 'Plain',
+    pp     => 'Plain',
+    plus   => 'Plus',
+    norm   => 'Plus',
+    normpp => 'Plus',
+    xml    => 'XML',
+    ppxml  => 'PPXML',
+    json   => 'JSON',
+    ndjson => 'JSON',
 );
 
 my %COLORS
@@ -48,7 +44,6 @@ sub new {
         $number = -(splice @argv, $i, 1);
     }
 
-    my $abbrev     = grep {$_ eq '-B'} @argv;
     my $noAnnotate = grep {$_ eq '-A'} @argv;
 
     my @path;
@@ -60,46 +55,30 @@ sub new {
         build   => sub {$command = 'build'},
         count   => sub {$command = 'count'},     # for backwards compatibility
         path    => \@path,
-        schema  => sub {
-            my $schema = $_[1];
-            my $json;
-            if ($schema =~ qr{^https?://}) {
-                require HTTP::Tiny;
-                my $res = HTTP::Tiny->new->get($schema);
-                die "HTTP request failed: $schema\n" unless $res->{success};
-                $json = $res->{content};
-            }
-            else {
-                open(my $fh, "<", $schema)
-                    or die "Failed to open schema file: $schema\n";
-                $json = join "\n", <$fh>;
-            }
-            return PICA::Schema->new(decode_json($json));
-        },
     };
 
     my %cmd = abbrev
         qw(convert count fields subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
-        $command = $argv[0] eq 'sf' ? 'subfields' : $cmd{shift @argv};
+        $command = $cmd{shift @argv};
+        $command =~ s/^sf$/subfields/;
     }
     $opt->{error} = "$command not implemented yet"
-        if $command =~ /fields|subfields|explain|diff|patch/;
+        if $command =~ /diff|patch|explain/;
 
     GetOptionsFromArray(
-        \@argv,       $opt,           'from|f=s',  'to|t:s',
-        'schema|s=s', 'annotate|A|a', 'build|B|b', 'unknown|u!',
-        'count|c',    'order|o',      'path|p=s',  "number|n:i",
-        'color|C',    'mono|M',       'help|h|?',  'version|V',
+        \@argv,       $opt,           'from|f=s', 'to|t:s',
+        'schema|s=s', 'annotate|A|a', 'abbrev|B', 'build|b',
+        'unknown|u!', 'count|c',      'order|o',  'path|p=s',
+        "number|n:i", 'color|C',      'mono|M',   'help|h|?',
+        'version|V',
     ) or pod2usage(2);
 
     $opt->{number}   = $number;
     $opt->{annotate} = 0 if $noAnnotate;
-    $opt->{abbrev}   = $abbrev if $abbrev;
     $opt->{color}    = !$opt->{mono} && ($opt->{color} || $interactive);
 
     delete $opt->{$_} for qw(count build help version);
-    delete $opt->{schema} if reftype $opt->{schema} eq 'CODE';
 
     my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+)?';
     while (@argv && $argv[0] =~ /^$pattern(\s*\|\s*($pattern)?)*$/) {
@@ -123,8 +102,35 @@ sub new {
 
     $opt->{order} = 1 if $command =~ /(diff|patch)/;
 
-    $opt->{command} = $command
-        || ($opt->{schema} && !$opt->{annotate} ? 'validate' : 'convert');
+    if (my $schema = $opt->{schema}) {
+        my $json;
+        if ($schema =~ qr{^https?://}) {
+            require HTTP::Tiny;
+            my $res = HTTP::Tiny->new->get($schema);
+            die "HTTP request failed: $schema\n" unless $res->{success};
+            $json = $res->{content};
+        }
+        else {
+            open(my $fh, "<", $schema)
+                or die "Failed to open schema file: $schema\n";
+            $json = join "\n", <$fh>;
+        }
+        $opt->{schema} = PICA::Schema->new(decode_json($json));
+    }
+
+    unless ($command) {
+        if ($opt->{schema} && !$opt->{annotate}) {
+            $command = 'validate';
+        }
+        elsif ($opt->{abbrev}) {
+            $command = 'build';
+        }
+    }
+    $opt->{command} = $command || 'convert';
+
+    $opt->{error} = "validation requires an Avram Schema (option -s/--schema)"
+        if $opt->{command} eq 'validate' && !$opt->{schema};
+
     $opt->{input} = @argv ? \@argv : ['-'];
 
     $opt->{from}
@@ -185,13 +191,12 @@ sub run {
 
     my $builder
         = $command =~ /(build|fields|subfields|explain)/
-        ? PICA::Schema::Builder->new
+        ? PICA::Schema::Builder->new(%{$self->{schema} || {}})
         : undef;
 
     # additional options
     my $number  = $self->{number};
     my @pathes  = @{$self->{path} || []};
-    my $schema  = $self->{schema};
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
     my $invalid = 0;
 
@@ -207,7 +212,7 @@ sub run {
 
         # TODO: also validate on other commands?
         if ($command eq 'validate') {
-            my @errors = $schema->check(
+            my @errors = $self->{schema}->check(
                 $record,
                 ignore_unknown => !$self->{unknown},
                 annotate       => $self->{annotate}
@@ -243,6 +248,20 @@ sub run {
         say $stats->{$_} . " $_"
             for grep {$stats->{$_}} qw(records invalid holdings items fields);
     }
+    elsif ($command =~ /(sub)?fields/) {
+        my $fields = $builder->schema->{fields};
+        for my $id (sort keys %$fields) {
+            if ($command eq 'fields') {
+                document($id, $self->{abbrev} ? 0 : $fields->{$id});
+            }
+            else {
+                my $sfs = $fields->{$id}->{subfields} || {};
+                for (keys %$sfs) {
+                    document("$id\$$_", $self->{abbrev} ? 0 : $sfs->{$_});
+                }
+            }
+        }
+    }
     elsif ($command eq 'build') {
         my $schema = $builder->schema;
         print JSON::PP->new->indent->space_after->canonical->convert_blessed
@@ -250,6 +269,23 @@ sub run {
     }
 
     exit !!$invalid;
+}
+
+sub document {
+    my ($doc, $def) = @_;
+    if ($def) {
+        my $status = ' ';
+        if ($def->{required}) {
+            $status = $def->{repeatable} ? '+' : '.';
+        }
+        else {
+            $status = $def->{repeatable} ? '*' : 'o';
+        }
+        $doc .= "\t$status\t" . $def->{label} // '';
+        $doc =~ s/[\r\n]+/ /mg;
+    }
+    say $doc;
+
 }
 
 =head1 NAME

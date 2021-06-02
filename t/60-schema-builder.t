@@ -3,7 +3,9 @@ use warnings;
 use PICA::Schema::Builder;
 use Test::More;
 
-my $builder = PICA::Schema::Builder->new;
+my $builder = PICA::Schema::Builder->new( title => 'my schema' );
+is $builder->{title}, 'my schema', 'constructor';
+is_deeply $builder->schema, $builder;
 
 $builder->add([['003@', undef, '0', '1234']]);
 
@@ -15,7 +17,7 @@ my $fields = {
         total     => 1
     }
 };
-is_deeply $builder->schema->{fields}, $fields;
+is_deeply $builder->{fields}, $fields;
 
 $builder->add(
     [
@@ -29,7 +31,7 @@ $fields->{'003@'}{total}++;
 $fields->{'144Z'}
     = {tag => '144Z', subfields => {x => {code => 'x', required => \1}}, total => 1};
 
-is_deeply $builder->schema->{fields}, $fields;
+is_deeply $builder->{fields}, $fields;
 
 $builder->add(
     [
@@ -40,7 +42,7 @@ $builder->add(
 $fields->{'003@'}{total}++;
 $fields->{'003@'}{subfields}{x} = {code => 'x'};
 
-is_deeply $builder->schema->{fields}, $fields;
+is_deeply $builder->{fields}, $fields;
 
 $builder->add(
     [
@@ -61,6 +63,10 @@ $fields->{'028B/01'} = {
     total      => 1,
 };
 
-is_deeply $builder->schema->{fields}, $fields;
+is_deeply $builder->{fields}, $fields;
+
+$builder->{fields}{'144Z'}{total} = 0;
+delete $fields->{'144Z'};
+is_deeply $builder->schema->{fields}, $fields, '->schema removes fields with total=0';
 
 done_testing;

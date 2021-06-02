@@ -30,19 +30,17 @@ Count number of records, holdings, items, and fields.
 
 =head2 fields/subfields/sf
 
-List distinct fields or subfields in the data (add schema for documenation).
-
-=head2 explain
-
-List distinct fields and subfields in the data (add schema for documentation).
+List distinct fields or subfields in the data. Provide an Avram schema 
+(C<-s/--schema>) to include documenation.
 
 =head2 validate
 
-Validate data against an Avram schema (option C<--schema>).
+Validate data against an Avram schema (C<-s/--schema>).
 
 =head2 build
 
-Build an Avram schema from input data. Add option C<-B> to abbreviate.
+Build an Avram schema from input data, optionally based on an existing schema
+(C<-s/--schema>).  Add option C<-B/--abbrev> to abbreviate.
 
 =head1 OPTIONS
 
@@ -62,7 +60,7 @@ Stop parsing after C<n> records. Can be abbreviated as C<-1>, C<-2>...
 
 =head2 --order, -o
 
-Sort record fields by field identifier, or by occurrence at level 2.
+Sort record fields by field identifier and by occurrence at level 2.
 
 =head2 --annotate, -a, -A
 
