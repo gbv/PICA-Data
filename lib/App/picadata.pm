@@ -1,6 +1,8 @@
 package App::picadata;
 use v5.14.1;
 
+our $VERSION = '1.23';
+
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
 use Pod::Usage;
 use PICA::Data qw(pica_parser pica_writer);
@@ -354,6 +356,13 @@ App::picadata - Implementation of picadata command line application.
 =head1 DESCRIPTION
 
 This package implements the L<picadata> command line application.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2020- Jakob Voss
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
 
