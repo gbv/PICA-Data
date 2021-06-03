@@ -4,6 +4,7 @@ Revision history for PICA::Data
     - Move picadata implementation into module App::picadata
     - Rewrite picadata to use commands (#101)
     - Add picadata command 'explain' (#99)
+    - picadata: read schema from environment variable PICA_SCHEMA if needed
     - Remove PICA::Writer::[Sub]fields
 
 1.22 2021-05-26T12:54:35Z

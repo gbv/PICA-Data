@@ -104,22 +104,6 @@ sub new {
 
     $opt->{order} = 1 if $command =~ /(diff|patch)/;
 
-    if (my $schema = $opt->{schema}) {
-        my $json;
-        if ($schema =~ qr{^https?://}) {
-            require HTTP::Tiny;
-            my $res = HTTP::Tiny->new->get($schema);
-            die "HTTP request failed: $schema\n" unless $res->{success};
-            $json = $res->{content};
-        }
-        else {
-            open(my $fh, "<", $schema)
-                or die "Failed to open schema file: $schema\n";
-            $json = join "\n", <$fh>;
-        }
-        $opt->{schema} = PICA::Schema->new(decode_json($json));
-    }
-
     unless ($command) {
         if ($opt->{schema} && !$opt->{annotate}) {
             $command = 'validate';
@@ -130,8 +114,17 @@ sub new {
     }
     $opt->{command} = $command || 'convert';
 
-    $opt->{error} = $opt->{command} . " requires an Avram Schema"
-        if $opt->{command} =~ /validate|explain/ && !$opt->{schema};
+    if ($opt->{command} =~ /validate|explain/ && !$opt->{schema}) {
+        if ($ENV{PICA_SCHEMA}) {
+            $opt->{schema} = $ENV{PICA_SCHEMA};
+        }
+        else {
+            $opt->{error} = $opt->{command}
+                . " requires an Avram Schema (via option -s or environment variable PICA_SCHEMA)";
+        }
+    }
+
+    $opt->{schema} = load_schema($opt->{schema}) if $opt->{schema};
 
     $opt->{input} = @argv ? \@argv : ['-'];
 
@@ -149,6 +142,23 @@ sub new {
     }
 
     bless $opt, $class;
+}
+
+sub load_schema {
+    my ($schema) = @_;
+    my $json;
+    if ($schema =~ qr{^https?://}) {
+        require HTTP::Tiny;
+        my $res = HTTP::Tiny->new->get($schema);
+        die "HTTP request failed: $schema\n" unless $res->{success};
+        $json = $res->{content};
+    }
+    else {
+        open(my $fh, "<", $schema)
+            or die "Failed to open schema file: $schema\n";
+        $json = join "\n", <$fh>;
+    }
+    return PICA::Schema->new(decode_json($json));
 }
 
 sub run {
