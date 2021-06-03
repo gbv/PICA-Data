@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.23 2021-06-03T10:19:24Z
     - Move picadata implementation into module App::picadata
     - Rewrite picadata to use commands (#101)
     - Add picadata command 'explain' (#99)
