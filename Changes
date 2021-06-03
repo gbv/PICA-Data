@@ -3,6 +3,7 @@ Revision history for PICA::Data
 {{$NEXT}}
     - Move picadata implementation into module App::picadata
     - Rewrite picadata to use commands (#101)
+    - Add picadata command 'explain' (#99)
     - Remove PICA::Writer::[Sub]fields
 
 1.22 2021-05-26T12:54:35Z

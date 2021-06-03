@@ -4,7 +4,7 @@ use v5.14.1;
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
 use Pod::Usage;
 use PICA::Data qw(pica_parser pica_writer);
-use PICA::Schema;
+use PICA::Schema qw(field_identifier);
 use PICA::Schema::Builder;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
@@ -64,7 +64,7 @@ sub new {
         $command =~ s/^sf$/subfields/;
     }
     $opt->{error} = "$command not implemented yet"
-        if $command =~ /diff|patch|explain/;
+        if $command =~ /diff|patch/;
 
     GetOptionsFromArray(
         \@argv,       $opt,           'from|f=s', 'to|t:s',
@@ -91,12 +91,14 @@ sub new {
             $p || die "invalid PICA Path: $_\n";
         } grep {$_ ne ""} map {split /\s*\|\s*/, $_} @path;
 
-        if (all {$_->subfields ne ""} @path) {
-            $command = 'select';
-        }
-        elsif (any {$_->subfields ne ""} @path) {
-            $opt->{error}
-                = "PICA Path must either all select fields or all select subfields!";
+        if ($command ne 'explain') {
+            if (all {$_->subfields ne ""} @path) {
+                $command = 'select' unless $command;
+            }
+            elsif (any {$_->subfields ne ""} @path) {
+                $opt->{error}
+                    = "PICA Path must either all select fields or all select subfields!";
+            }
         }
     }
 
@@ -128,8 +130,8 @@ sub new {
     }
     $opt->{command} = $command || 'convert';
 
-    $opt->{error} = "validation requires an Avram Schema (option -s/--schema)"
-        if $opt->{command} eq 'validate' && !$opt->{schema};
+    $opt->{error} = $opt->{command} . " requires an Avram Schema"
+        if $opt->{command} =~ /validate|explain/ && !$opt->{schema};
 
     $opt->{input} = @argv ? \@argv : ['-'];
 
@@ -152,6 +154,8 @@ sub new {
 sub run {
     my ($self) = @_;
     my $command = $self->{command};
+    my @pathes = @{$self->{path} || []};
+    my $schema = $self->{schema};
 
     # commands that don't parse any input data
     if ($self->{error}) {
@@ -166,6 +170,15 @@ sub run {
     elsif ($command eq 'version') {
         say $PICA::Data::VERSION;
         exit
+    }
+    elsif ($command eq 'explain') {
+        explain($schema, $_) for @pathes;
+        unless (@pathes) {
+            while (<STDIN>) {
+                explain($schema, $2) if $_ =~ /^([^0-9a-z]\s+)?([^ ]+)/;
+            }
+        }
+        exit;
     }
 
     # initialize parser, writer, and schema builder
@@ -184,19 +197,18 @@ sub run {
         $writer = pica_writer(
             $self->{to},
             color => ($self->{color} ? \%COLORS : undef),
-            schema   => $self->{schema},
+            schema   => $schema,
             annotate => $self->{annotate},
         );
     }
 
     my $builder
         = $command =~ /(build|fields|subfields|explain)/
-        ? PICA::Schema::Builder->new(%{$self->{schema} || {}})
+        ? PICA::Schema::Builder->new($schema ? %$schema : ())
         : undef;
 
     # additional options
     my $number  = $self->{number};
-    my @pathes  = @{$self->{path} || []};
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
     my $invalid = 0;
 
@@ -212,7 +224,7 @@ sub run {
 
         # TODO: also validate on other commands?
         if ($command eq 'validate') {
-            my @errors = $self->{schema}->check(
+            my @errors = $schema->check(
                 $record,
                 ignore_unknown => !$self->{unknown},
                 annotate       => $self->{annotate}
@@ -241,8 +253,6 @@ sub run {
 
     $writer->end() if $writer;
 
-    # TODO: commands fields subfields, explain
-
     if ($command eq 'count') {
         $stats->{invalid} = $invalid;
         say $stats->{$_} . " $_"
@@ -263,7 +273,7 @@ sub run {
         }
     }
     elsif ($command eq 'build') {
-        my $schema = $builder->schema;
+        $schema = $builder->schema;
         print JSON::PP->new->indent->space_after->canonical->convert_blessed
             ->encode($self->{abbrev} ? $schema->abbreviated : $schema);
     }
@@ -271,8 +281,43 @@ sub run {
     exit !!$invalid;
 }
 
+sub explain {
+    my ($schema, $path) = @_;
+
+    if (my $expr = eval {PICA::Path->new($path)}) {
+        $path = $expr;
+    }
+    else {
+        warn "invalid PICA Path: $path\n";
+        return
+    }
+
+    if ($path->stringify =~ /[.]/) {
+        warn "Fields with wildcards cannot be explained yet!\n";
+        return
+    }
+
+    my $tag = $path->fields;
+
+    # Take positions as occurrences to allow PICA Plain syntax
+    my $occ = $path->occurrences // $path->positions;
+    my ($someocc) = grep {$_ > 0} split '-', $occ;
+    my $id = field_identifier($schema, [$tag, $someocc]);
+
+    my $def = $schema->{fields}{$id};
+    if (defined $path->subfields && $def) {
+        my $sfdef = $def->{subfields} || {};
+        for (split '', $path->subfields) {
+            document("$id\$$_", $sfdef->{$_}, 1);
+        }
+    }
+    else {
+        document($id, $def, 1);
+    }
+}
+
 sub document {
-    my ($doc, $def) = @_;
+    my ($id, $def, $warn) = @_;
     if ($def) {
         my $status = ' ';
         if ($def->{required}) {
@@ -281,11 +326,15 @@ sub document {
         else {
             $status = $def->{repeatable} ? '*' : 'o';
         }
-        $doc .= "\t$status\t" . $def->{label} // '';
-        $doc =~ s/[\r\n]+/ /mg;
+        my $doc = "$id\t$status\t" . $def->{label} // '';
+        say $doc =~ s/[\r\n]+/ /mgr;
     }
-    say $doc;
-
+    elsif ($warn) {
+        warn "$id unknown\n";
+    }
+    else {
+        say $id;
+    }
 }
 
 =head1 NAME

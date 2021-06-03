@@ -33,6 +33,10 @@ Count number of records, holdings, items, and fields.
 List distinct fields or subfields in the data. Provide an Avram schema 
 (C<-s/--schema>) to include documenation.
 
+=head2 explain
+
+Lookup (sub)fields in an Avram schema given by option or from stdin.
+
 =head2 validate
 
 Validate data against an Avram schema (C<-s/--schema>).

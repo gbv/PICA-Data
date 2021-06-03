@@ -227,11 +227,13 @@ sub field_identifier {
 
     if ($fields && !exists $fields->{"$tag/$occ"}) {
 
-        # TODO: we could create an index to speed up this slows lookup
+        # TODO: we could create an index to speed up this slow lookup
         for my $id (keys %$fields) {
             return $id
                 if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
         }
+
+        # TODO: support x fields with field counter
     }
 
     return $occ ne '' ? "$tag/$occ" : $tag;
