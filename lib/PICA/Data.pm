@@ -1,12 +1,12 @@
 package PICA::Data;
 use v5.14.1;
 
-our $VERSION = '1.22';
+our $VERSION = '1.24';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
-    pica_annotation pica_sort pica_guess clean_pica pica_string pica_id);
+    pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -42,6 +42,8 @@ sub pica_values {
 sub pica_fields {
     my $record = shift;
     $record = $record->{record} if reftype $record eq 'HASH';
+
+    return $record unless @_;
 
     my @pathes = map {
         ref $_ ? $_ : eval {PICA::Path->new($_)}
@@ -190,6 +192,23 @@ sub pica_holdings {
     return \@holdings;
 }
 
+sub pica_split {
+    my $record = shift;
+
+    my @records = pica_title($record);
+    for my $hold (@{pica_holdings($record)}) {
+        my $items = pica_items($hold);
+
+        # limit holding record to level1 fields
+        $hold->{record}
+            = [grep {substr($_->[0], 0, 1) eq 1} @{$hold->{record}}];
+        push @records, $hold;
+        push @records, @$items;
+    }
+
+    return grep {@{pica_fields($_)} > 0} @records;
+}
+
 sub pica_string {
     my ($pica, $type, %options) = @_;
     my $string = "";
@@ -231,6 +250,7 @@ sub pica_annotation {
 *holdings = *pica_holdings;
 *items    = *pica_items;
 *sort     = *pica_sort;
+*split    = *pica_split;
 *match    = *pica_match;
 *value    = *pica_value;
 *values   = *pica_values;
@@ -249,8 +269,6 @@ use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
 use PICA::Writer::JSON;
-use PICA::Writer::Fields;
-use PICA::Writer::Subfields;
 
 sub pica_parser {
     _pica_module('PICA::Parser', @_);
@@ -536,14 +554,6 @@ L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
 L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
 
-=item
-
-L<PICA::Writer::Fields> for type C<fields> (summary of used fields)
-
-=item
-
-L<PICA::Writer::Subfields> for type C<subfields> (summary of used subfields)
-
 =back
 
 =head2 pica_string( $record [, $type [, @options] ] )
@@ -576,7 +586,7 @@ expression. The following are virtually equivalent:
     $path->record_subfields($record);
     $record->values($path); # if $record is blessed
 
-=head2 pica_fields( $record, $path[, $path...] )
+=head2 pica_fields( $record[, $path...] )
 
 Returns a PICA record (or empty array reference) limited to fields specified in
 one ore more PICA path expression. The following are virtually equivalent:
@@ -599,6 +609,10 @@ C<_id>. Also available as accessor C<holdings>.
 
 Returns a list (as array reference) of item records. The EPN (if given) is
 available as C<_id> Also available as accessor C<items>.
+
+=head2 pica_split( $record)
+
+Returns the record splitted into multiple records for each level.
 
 =head2 pica_sort( $record )
 
@@ -629,7 +643,7 @@ expression.
 
 Same as C<values> but only returns the first value.
 
-=head2 fields( $path[, $path...] )
+=head2 fields( [$path...] )
 
 Returns a PICA record limited to fields specified in a L<PICA::Path>
 expression.  Always returns an array reference.

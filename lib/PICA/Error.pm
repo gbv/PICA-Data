@@ -5,15 +5,14 @@ use overload fallback => 1, '""' => \&message;
 
 sub new {
     my $class = shift;
-    my $field = shift;
+    my ($tag, $occ) = @{shift(@_)};
 
-    my $error = {
-        tag => $field->[0],
-        (($field->[1] // '' ne '') ? (occurrence => $field->[1]) : ()), @_
-    };
+    my $error = {tag => $tag, @_};
+    $occ = 0 if substr($tag, 0, 1) eq 2;
+    $error->{occurrence} = $occ if $occ;
 
     # add error messages
-    my $id = join '/', grep {($_ // '') ne ''} @$field[0 .. 1];
+    my $id = join '/', grep {$_} $tag, $occ;
 
     while (my ($code, $sf) = each %{$error->{subfields} // {}}) {
         $sf->{code} = $code;
@@ -73,7 +72,7 @@ sub _field_error_message {
             . " subfield"
             . (length keys %sf > 1 ? "s" : "")
             . " $id\$"
-            . join '', keys %sf;
+            . join '', sort keys %sf;
     }
     elsif ($error->{deprecated}) {
         "deprecated field $id";

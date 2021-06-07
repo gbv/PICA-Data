@@ -248,38 +248,6 @@ PLUS
     is $out, $PLUS, 'undef occ';
 }
 
-note 'PICA::Writer::Fields';
-{
-    my $schema = PICA::Schema->new({
-        fields => {
-            '001A/01' => { label => 'Foo' },
-            '066X/03-09' => { label => 'Bar' },
-        }
-    });
-    my ($fh, $filename) = tempfile();
-    my $writer = PICA::Writer::Fields->new(fh => $fh, schema => $schema);
-    $writer->write([['001A', '01', 'x', 'y'], ['123X','','a','b']]);
-    $writer->write([['001A', '01', 'x', 'y'], ['066X','05','a','b']]);
-    $writer->end;
-
-    my $out = do {local (@ARGV, $/) = $filename; <>};
-    my $FIELDS = <<"FIELDS";
-001A/01\tFoo
-123X\t?
-066X/03-09\tBar
-FIELDS
-    is $out, $FIELDS;
-}
-
-{
-    my ($fh, $filename) = tempfile();
-    my $writer = PICA::Writer::Fields->new(fh => $fh);
-    $writer->write([['001A', '01', 'x', 'y'], ['123A','','a','b']]);
-    $writer->end;
-
-    is do {local (@ARGV, $/) = $filename; <>}, "001A/01\n123A\n";
-}
-
 {
     my %tests = (
         "  123A \$xy\n\n" => [["123A",undef,"x","y"," "]],

@@ -1,7 +1,7 @@
 package PICA::Writer::Base;
 use v5.14.1;
 
-our $VERSION = '1.22';
+our $VERSION = '1.24';
 
 use Scalar::Util qw(blessed openhandle reftype);
 use PICA::Schema qw(clean_pica);
@@ -136,10 +136,6 @@ Use one of the following subclasses instead:
 =item L<PICA::Writer::JSON>
 
 =item L<PICA::Writer::Generic>
-
-=item L<PICA::Writer::Fields>
-
-=item L<PICA::Writer::Subfields>
 
 =back
 
