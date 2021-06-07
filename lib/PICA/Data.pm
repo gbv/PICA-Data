@@ -6,7 +6,8 @@ our $VERSION = '1.24';
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
-    pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id);
+    pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id
+    pica_diff pica_patch);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -245,6 +246,49 @@ sub pica_annotation {
     }
 }
 
+sub pica_diff {
+    my $a = pica_fields(pica_sort(shift));
+    my $b = pica_fields(pica_sort(shift));
+
+    my (@diff, $i, $j);
+
+    my $changed = sub {
+        my @field = @{$_[0]};
+        pica_annotation(\@field, $_[1]);
+        push @diff, \@field;
+    };
+
+    while ($i < @$a && $j < @$b) {
+        my $fa = join "\t", @{$a->[$i]};
+        my $fb = join "\t", @{$b->[$j]};
+
+        if ($fa lt $fb) {
+            $changed->($a->[$i++], '-');
+        }
+        elsif ($fa gt $fb) {
+            $changed->($b->[$j++], '+');
+        }
+        else {
+            $i++;
+            $j++;
+        }
+    }
+    while ($i < @$a) {
+        $changed->($a->[$i++], '-');
+    }
+    while ($j < @$b) {
+        $changed->($b->[$j++], '+');
+    }
+
+    bless {record => \@diff}, 'PICA::Data';
+}
+
+sub pica_patch {
+    my ($record, $diff) = @_;
+
+    ...
+}
+
 *fields   = *pica_fields;
 *title    = *pica_title;
 *holdings = *pica_holdings;
@@ -256,6 +300,8 @@ sub pica_annotation {
 *values   = *pica_values;
 *string   = *pica_string;
 *id       = *pica_id;
+*diff     = *pica_diff;
+*patch    = *pica_patch;
 
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
