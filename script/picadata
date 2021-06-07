@@ -24,6 +24,10 @@ Convert, analyze and validate PICA+ data from the command line.
 
 Convert between PICA+ serialization formats (the default command).
 
+=head2 split
+
+Split records into multiple records for each level. Implies C<-o>.
+
 =head2 count
 
 Count number of records, holdings, items, and fields.

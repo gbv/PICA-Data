@@ -38,7 +38,7 @@ my %COLORS
 sub new {
     my ($class, @argv) = @_;
 
-    my $interactive = -t *STDOUT;
+    my $interactive = -t *STDOUT;                           ## no critic
     my $command = (!@argv && $interactive) ? 'help' : '';
 
     my $number = 0;
@@ -60,7 +60,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert count fields subfields sf explain validate build diff patch help version);
+        qw(convert count split fields subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -104,7 +104,7 @@ sub new {
         }
     }
 
-    $opt->{order} = 1 if $command =~ /(diff|patch)/;
+    $opt->{order} = 1 if $command =~ /(diff|patch|split)/;
 
     unless ($command) {
         if ($opt->{schema} && !$opt->{annotate}) {
@@ -137,7 +137,7 @@ sub new {
         or $opt->{error} = "unknown serialization type: " . $opt->{from};
 
     $opt->{to} = $opt->{from}
-        if !$opt->{to} and $opt->{command} =~ /(convert|diff|patch)/;
+        if !$opt->{to} and $opt->{command} =~ /(convert|split|diff|patch)/;
     if ($opt->{to}) {
         $opt->{to} = $TYPES{lc $opt->{to}}
             or $opt->{error} = "unknown serialization type: " . $opt->{to};
@@ -200,10 +200,12 @@ sub run {
         $input = *STDIN;
         binmode $input, ':encoding(UTF-8)';
     }
+    else {
+        die "File not found: {$input->[0]}\n" unless -e $input->[0];
+    }
 
     binmode *STDOUT, ':encoding(UTF-8)';
 
-    my $parser = pica_parser($self->{from}, $input->[0], bless => 1);
     my $writer;
     if ($self->{to}) {
         $writer = pica_writer(
@@ -219,12 +221,16 @@ sub run {
         ? PICA::Schema::Builder->new($schema ? %$schema : ())
         : undef;
 
+    my $parser = pica_parser($self->{from}, $input->[0], bless => 1);
+
     # additional options
     my $number  = $self->{number};
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
     my $invalid = 0;
 
-    while (my $record = $parser->next) {
+    my $process = sub {
+        my $record = shift;
+
         if ($command eq 'select') {
             say $_ for map {@{$record->match($_, split => 1) // []}} @pathes;
         }
@@ -261,6 +267,15 @@ sub run {
         $stats->{records}++;
 
         last if $number and $stats->{records} >= $number;
+    };
+
+    while (my $record = $parser->next) {
+        if ($command eq 'split') {
+            $process->($_) for $record->split;
+        }
+        else {
+            $process->($record);
+        }
     }
 
     $writer->end() if $writer;

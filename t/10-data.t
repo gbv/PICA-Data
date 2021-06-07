@@ -28,11 +28,12 @@ foreach (keys %map) {
 is_deeply [$record->value('1...b')], ['9330'], '->value';
 is_deeply [$record->value('234X')], [], '->value (empty)';
 
-is_deeply $record->fields('010@'), [['010@', '', 'a' => 'chi']], '->field';
+is_deeply $record->fields('010@'), [['010@', '', 'a' => 'chi']], '->fields';
+is @{$record->fields}, 18, '->fields';
 
 is_deeply $record->fields('003@', '010@'),
     [['003@', '', '0' => '12345'], ['010@', '', 'a' => 'chi']],
-    '->field(...)';
+    '->fields(...)';
 
 is $record->id, '12345', '->id';
 
