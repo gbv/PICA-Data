@@ -4,6 +4,7 @@ Revision history for PICA::Data
     - Add method to split record
     - Make path optional in pica_fields
     - picadata: allow to parse multiple files
+    - picadata: load schema from PICA_SCHEMA for more commands
 
 1.23 2021-06-03T10:19:24Z
     - Move picadata implementation into module App::picadata

@@ -113,16 +113,18 @@ sub new {
         elsif ($opt->{abbrev}) {
             $command = 'build';
         }
+        else {
+            $command = 'convert';
+        }
     }
-    $opt->{command} = $command || 'convert';
 
-    if ($opt->{command} =~ /validate|explain/ && !$opt->{schema}) {
+    if ($command =~ /validate|explain|fields|subfields/ && !$opt->{schema}) {
         if ($ENV{PICA_SCHEMA}) {
             $opt->{schema} = $ENV{PICA_SCHEMA};
         }
-        else {
-            $opt->{error} = $opt->{command}
-                . " requires an Avram Schema (via option -s or environment variable PICA_SCHEMA)";
+        elsif ($command =~ /validate|explain/) {
+            $opt->{error}
+                = "$command requires an Avram Schema (via option -s or environment variable PICA_SCHEMA)";
         }
     }
 
@@ -137,11 +139,13 @@ sub new {
         or $opt->{error} = "unknown serialization type: " . $opt->{from};
 
     $opt->{to} = $opt->{from}
-        if !$opt->{to} and $opt->{command} =~ /(convert|split|diff|patch)/;
+        if !$opt->{to} and $command =~ /(convert|split|diff|patch)/;
     if ($opt->{to}) {
         $opt->{to} = $TYPES{lc $opt->{to}}
             or $opt->{error} = "unknown serialization type: " . $opt->{to};
     }
+
+    $opt->{command} = $command;
 
     bless $opt, $class;
 }
