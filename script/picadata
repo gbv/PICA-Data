@@ -12,7 +12,7 @@ picadata - parse and validate PICA+ data
 
 =head1 SYNOPSIS
 
-picadata [<command>] {path} {options} [FILE]
+picadata [<command>] {path} {options} {files}
 
 =head1 DESCRIPTION
 
@@ -55,8 +55,8 @@ Build an Avram schema from input data, optionally based on an existing schema
 
 =head2 --from, -f
 
-PICA serialization type (plain, plus, binary, XML, ppxml) with XML as default.
-Guessed from input filename unless specified. See format documentation at
+PICA serialization type (plain, plus, binary, XML, ppxml) with Plain as default.
+Guessed from first input filename unless specified. See format documentation at
 L<http://format.gbv.de/pica>.
 
 =head2 --to, -t

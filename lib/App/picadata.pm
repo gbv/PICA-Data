@@ -193,19 +193,7 @@ sub run {
         exit;
     }
 
-    # initialize parser, writer, and schema builder
-    my $input = $self->{input};
-
-    if ($input->[0] eq '-') {
-        $input = *STDIN;
-        binmode $input, ':encoding(UTF-8)';
-    }
-    else {
-        die "File not found: {$input->[0]}\n" unless -e $input->[0];
-    }
-
-    binmode *STDOUT, ':encoding(UTF-8)';
-
+    # initialize writer and schema builder
     my $writer;
     if ($self->{to}) {
         $writer = pica_writer(
@@ -215,13 +203,12 @@ sub run {
             annotate => $self->{annotate},
         );
     }
+    binmode *STDOUT, ':encoding(UTF-8)';
 
     my $builder
         = $command =~ /(build|fields|subfields|explain)/
         ? PICA::Schema::Builder->new($schema ? %$schema : ())
         : undef;
-
-    my $parser = pica_parser($self->{from}, $input->[0], bless => 1);
 
     # additional options
     my $number  = $self->{number};
@@ -269,12 +256,24 @@ sub run {
         last if $number and $stats->{records} >= $number;
     };
 
-    while (my $record = $parser->next) {
-        if ($command eq 'split') {
-            $process->($_) for $record->split;
+    foreach my $in (@{$self->{input}}) {
+        if ($in eq '-') {
+            $in = *STDIN;
+            binmode $in, ':encoding(UTF-8)';
         }
         else {
-            $process->($record);
+            die "File not found: $in\n" unless -e $in;
+        }
+
+        my $parser = pica_parser($self->{from}, $in, bless => 1);
+
+        while (my $record = $parser->next) {
+            if ($command eq 'split') {
+                $process->($_) for $record->split;
+            }
+            else {
+                $process->($record);
+            }
         }
     }
 
