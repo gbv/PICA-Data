@@ -23,6 +23,17 @@ sub check {
         = clean_pica($record, error => sub {push @errors, shift}, %options)
         or return @errors;
 
+    my @errors = map {$self->check_record($_->{record}, %options)}
+        PICA::Data::pica_split($record);
+
+    my %seen;
+    return grep {not $seen{"$_"}++} @errors;
+}
+
+sub check_record {
+    my ($self, $record, %options) = @_;
+
+    my @errors;
     $options{counter} = {};
 
     my %field_identifiers;
@@ -42,8 +53,10 @@ sub check {
         }
     }
 
-    # check whether required fields exist
+    # check whether required fields exist for this record level
+    my $level = substr $record->[0][0], 0, 1;
     for my $id (keys %{$self->{fields}}) {
+        next if $level ne substr $id, 0, 1;
         my $field = $self->{fields}{$id};
         if ($field->{required} && !$field_identifiers{$id}) {
             push @errors,
@@ -91,8 +104,7 @@ sub check_field {
     }
 
     if ($opts{counter} && !$spec->{repeatable}) {
-        my $tag_occ = join '/', grep {defined} @$field[0, 1];
-        if ($opts{counter}{$tag_occ}++) {
+        if ($opts{counter}{$id}++) {
             return PICA::Error->new($field, repeated => 1);
         }
     }
@@ -475,9 +487,7 @@ a L<subfield error|PICA::Error/SUBFIELD ERRORS> without C<message> key.
 
 =head1 LIMITATIONS
 
-The current version does not properly validate required field on level 1 and 2.
-
-Field types have neither been implemented yet.
+Fields types and deprecated (sub)fields in Avram Schemas are not fully supported yet.
 
 =head1 SEE ALSO
 

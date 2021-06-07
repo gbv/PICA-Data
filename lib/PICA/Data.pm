@@ -195,10 +195,18 @@ sub pica_holdings {
 sub pica_split {
     my $record = shift;
 
-    my $holdings = pica_holdings($record);
+    my @records = pica_title($record);
+    for my $hold (@{pica_holdings($record)}) {
+        my $items = pica_items($hold);
 
-    return grep {@{pica_fields($_)} > 0} pica_title($record), @$holdings,
-        map {@{pica_items($_)}} @$holdings;
+        # limit holding record to level1 fields
+        $hold->{record}
+            = [grep {substr($_->[0], 0, 1) eq 1} @{$hold->{record}}];
+        push @records, $hold;
+        push @records, @$items;
+    }
+
+    return grep {@{pica_fields($_)} > 0} @records;
 }
 
 sub pica_string {
