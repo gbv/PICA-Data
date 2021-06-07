@@ -670,6 +670,16 @@ level 2 fields not belonging to a level 1, then level 1, each followed by level
 
 Get or set a PICA field annotation. Use C<undef> to remove annotation.
 
+=head2 pica_diff( $before, $after )
+
+Return the difference between two records as annotated record. Also available
+as method C<diff>.
+
+=head2 pica_patch( $record, $diff )
+
+Modify a record by application of a difference given as annotated PICA. Also
+available as method C<patch>.
+
 =head1 ACCESSORS
 
 All accessors of C<PICA::Data> are also available as L</FUNCTIONS>, prefixed
@@ -723,6 +733,18 @@ record objects:
 
 Serialize PICA record in a given format (C<plain> by default). This method can
 also be used as function C<pica_string>.
+
+=head2 diff( $record )
+
+Calculate the difference of the record to another record.
+
+=head2 patch( $diff )
+
+Modify the record by application of an annotated PICA record. Annotations C<+>
+and C<-> denote fields to be added or removed. Fields with blank annotations
+are check to exist in the original record.
+
+The records should not contains multiple records of level 1 and/or level 2.
 
 =head1 CONTRIBUTORS
 
