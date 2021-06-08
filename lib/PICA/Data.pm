@@ -246,49 +246,6 @@ sub pica_annotation {
     }
 }
 
-sub pica_diff {
-    my $a = pica_fields(pica_sort(shift));
-    my $b = pica_fields(pica_sort(shift));
-
-    my (@diff, $i, $j);
-
-    my $changed = sub {
-        my @field = @{$_[0]};
-        pica_annotation(\@field, $_[1]);
-        push @diff, \@field;
-    };
-
-    while ($i < @$a && $j < @$b) {
-        my $fa = join "\t", @{$a->[$i]};
-        my $fb = join "\t", @{$b->[$j]};
-
-        if ($fa lt $fb) {
-            $changed->($a->[$i++], '-');
-        }
-        elsif ($fa gt $fb) {
-            $changed->($b->[$j++], '+');
-        }
-        else {
-            $i++;
-            $j++;
-        }
-    }
-    while ($i < @$a) {
-        $changed->($a->[$i++], '-');
-    }
-    while ($j < @$b) {
-        $changed->($b->[$j++], '+');
-    }
-
-    bless {record => \@diff}, 'PICA::Data';
-}
-
-sub pica_patch {
-    my ($record, $diff) = @_;
-
-    ...
-}
-
 *fields   = *pica_fields;
 *title    = *pica_title;
 *holdings = *pica_holdings;
@@ -300,9 +257,10 @@ sub pica_patch {
 *values   = *pica_values;
 *string   = *pica_string;
 *id       = *pica_id;
-*diff     = *pica_diff;
-*patch    = *pica_patch;
+*diff     = *pica_diff = *PICA::Patch::pica_diff;
+*patch    = *pica_patch = *PICA::Patch::pica_patch;
 
+use PICA::Patch;
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
@@ -677,8 +635,8 @@ as method C<diff>.
 
 =head2 pica_patch( $record, $diff )
 
-Modify a record by application of a difference given as annotated PICA. Also
-available as method C<patch>.
+Return a new record by application of a difference given as annotated PICA.
+Also available as method C<patch>.
 
 =head1 ACCESSORS
 
@@ -740,9 +698,9 @@ Calculate the difference of the record to another record.
 
 =head2 patch( $diff )
 
-Modify the record by application of an annotated PICA record. Annotations C<+>
-and C<-> denote fields to be added or removed. Fields with blank annotations
-are check to exist in the original record.
+Calculate a new record by application of an annotated PICA record. Annotations
+C<+> and C<-> denote fields to be added or removed. Fields with blank
+annotations are check to exist in the original record.
 
 The records should not contains multiple records of level 1 and/or level 2.
 
