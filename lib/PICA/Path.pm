@@ -13,10 +13,10 @@ sub new {
     my ($class, $path) = @_;
 
     confess "invalid pica path" if $path !~ /
-        ([012.][0-9.][0-9.][A-Z@.]) # tag
-        (\[([0-9.]{2,3})\])?        # occurrence
-        (\$?([_A-Za-z0-9]+))?       # subfields
-        (\/(\d+)?(-(\d+)?)?)?       # position
+        ([012.][0-9.][0-9.][A-Z@.])         # tag
+        (\[([0-9.]{2,3}|[0-9]+-[0-9]+)\])?  # occurrence
+        (\$?([_A-Za-z0-9]+))?               # subfields
+        (\/(\d+)?(-(\d+)?)?)?               # position
     /x;
 
     my $field      = $1;
@@ -56,7 +56,21 @@ sub new {
     $field = qr{$field};
 
     if (defined $occurrence) {
-        $occurrence = qr{$occurrence};
+        if ($occurrence =~ /-/) {
+            my ($from, $to) = map {1 * $_} split '-', $occurrence;
+            if ($from eq $to) {
+                $occurrence = qr{$from};
+            }
+            elsif ($from < $to) {
+                $occurrence = [$from, $to];
+            }
+            else {
+                confess "invalid pica path";
+            }
+        }
+        else {
+            $occurrence = qr{$occurrence};
+        }
     }
 
     $subfield = qr{$subfield};
@@ -66,8 +80,6 @@ sub new {
 
 sub match_record {
     my ($self, $record, %args) = @_;
-
-    # my $subfield_regex = $self->[2];
 
     my %default_args = (
         force_array   => 0,
@@ -131,13 +143,18 @@ sub match_record {
 sub match_field {
     my ($self, $field) = @_;
 
-    if ($field->[0] =~ $self->[0]
-        && (!$self->[1] || ($field->[1] > 0 && $field->[1] =~ $self->[1])))
-    {
-        return $field;
+    return if $field->[0] !~ $self->[0];
+    if (my $spec = $self->[1]) {
+        my $occ = $field->[1];
+        if (ref $spec eq 'ARRAY') {
+            return if $occ < $spec->[0] or $occ > $spec->[1];
+        }
+        else {
+            return unless ($spec > 0 && $occ =~ $spec);
+        }
     }
 
-    return;
+    return $field;
 }
 
 sub match_subfields {
@@ -247,7 +264,9 @@ sub fields {
 }
 
 sub occurrences {
-    return unescape($_[0]->[1]);
+    my $occ = $_[0]->[1];
+    return join "-", @$occ if ref $occ eq 'ARRAY';    # range
+    return unescape($_[0]->[1]);                      # pattern
 }
 
 sub subfields {
@@ -316,7 +335,8 @@ regular expression to match field tags against
 
 =item
 
-regular expression to match occurrences against, or undefined
+regular expression to match occurrences against, or range of occurrences
+values given as array reference (from-to), or undefined
 
 =item
 

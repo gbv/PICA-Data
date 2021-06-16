@@ -17,6 +17,10 @@ my %pathes = (
     '..../10-10' => [[qr{....}, undef, SF, 10, 1]     => '..../10'],
     '..../1-'    => [[qr{....}, undef, SF, 1,  undef] => '..../1-'],
     '..../0-' => [[qr{....}, undef, SF] => '....'],
+    '003X[0-01]' => [[qr{003X}, [0,1], SF] => '003X[0-1]'],
+    '003X[2-02]' => [[qr{003X}, qr{2}, SF] => '003X[2]'],
+    '003X[7-13]' => [[qr{003X}, qr{2}, SF] => '003X[7-13]'],
+    '003X[13-7]' => undef,
 );
 
 foreach my $path (keys %pathes) {
@@ -39,6 +43,12 @@ my %matches
 while (my ($path, $values) = each %matches) {
     is_deeply [PICA::Path->new($path)->match_subfields($field)], $values;
 }
+
+ok(PICA::Path->new('....[0-3]')->match_field(['000X','0']), 'occurrence range');
+ok(!PICA::Path->new('....[0-3]')->match_field(['000X','4']), 'occurrence range');
+ok(PICA::Path->new('....[7-13]')->match_field(['000X','13']), 'occurrence range');
+ok(!PICA::Path->new('....[7-13]')->match_field(['000X','14']), 'occurrence range');
+ok(!PICA::Path->new('....[7-13]')->match_field(['000X','6']), 'occurrence range');
 
 # Accessors
 my $path = PICA::Path->new('123A[0.]/1-3');

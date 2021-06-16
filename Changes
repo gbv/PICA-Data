@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Implement occurrence ranges (#96) 
 
 1.24 2021-06-07T08:51:52Z
     - Add method to split record
