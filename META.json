@@ -1,7 +1,7 @@
 {
-   "abstract" : "Implementation of picadata command line application.",
+   "abstract" : "PICA record processing",
    "author" : [
-      "- Jakob Voss"
+      "- Johann Rolschewski and Jakob Voss"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Minilla/v3.1.7, CPAN::Meta::Converter version 2.150001",
@@ -83,11 +83,10 @@
          "web" : "https://github.com/GBV/PICA-Data"
       }
    },
-   "version" : "1.24",
+   "version" : "1.25",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",
-      "Johann Rolschewski <johann@rolschewski.de>",
       "Johann Rolschewski <jorol@cpan.org>"
    ],
    "x_static_install" : 1

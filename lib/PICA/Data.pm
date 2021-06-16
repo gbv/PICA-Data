@@ -1,12 +1,13 @@
 package PICA::Data;
 use v5.14.1;
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
-    pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id);
+    pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id
+    pica_diff pica_patch);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -256,7 +257,10 @@ sub pica_annotation {
 *values   = *pica_values;
 *string   = *pica_string;
 *id       = *pica_id;
+*diff     = *pica_diff = *PICA::Patch::pica_diff;
+*patch    = *pica_patch = *PICA::Patch::pica_patch;
 
+use PICA::Patch;
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
@@ -375,7 +379,7 @@ PICA::Data - PICA record processing
 
 =begin markdown 
 
-[![Unix build Status](https://travis-ci.org/gbv/PICA-Data.png)](https://travis-ci.org/gbv/PICA-Data)
+[![Unix build Status](https://travis-ci.com/gbv/PICA-Data.png)](https://travis-ci.com/gbv/PICA-Data)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/5qjak74x7mjy7ne6?svg=true)](https://ci.appveyor.com/project/nichtich/pica-data)
 [![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.svg)](https://coveralls.io/r/gbv/PICA-Data)
 [![Kwalitee Score](http://cpants.cpanauthors.org/dist/PICA-Data.png)](http://cpants.cpanauthors.org/dist/PICA-Data)
@@ -624,6 +628,16 @@ level 2 fields not belonging to a level 1, then level 1, each followed by level
 
 Get or set a PICA field annotation. Use C<undef> to remove annotation.
 
+=head2 pica_diff( $before, $after )
+
+Return the difference between two records as annotated record. Also available
+as method C<diff>.
+
+=head2 pica_patch( $record, $diff )
+
+Return a new record by application of a difference given as annotated PICA.
+Also available as method C<patch>.
+
 =head1 ACCESSORS
 
 All accessors of C<PICA::Data> are also available as L</FUNCTIONS>, prefixed
@@ -677,6 +691,18 @@ record objects:
 
 Serialize PICA record in a given format (C<plain> by default). This method can
 also be used as function C<pica_string>.
+
+=head2 diff( $record )
+
+Calculate the difference of the record to another record.
+
+=head2 patch( $diff )
+
+Calculate a new record by application of an annotated PICA record. Annotations
+C<+> and C<-> denote fields to be added or removed. Fields with blank
+annotations are check to exist in the original record.
+
+The records should not contains multiple records of level 1 and/or level 2.
 
 =head1 CONTRIBUTORS
 
