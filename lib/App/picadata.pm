@@ -82,14 +82,14 @@ sub new {
 
     delete $opt->{$_} for qw(count build help version);
 
-    my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+)?';
+    my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+|/[0-9.-]+)?';
     while (@argv && $argv[0] =~ /^$pattern(\s*\|\s*($pattern)?)*$/) {
         push @path, shift @argv;
     }
 
     if (@path) {
         @path = map {
-            my $p = eval {PICA::Path->new($_)};
+            my $p = parse_path($_);
             $p || die "invalid PICA Path: $_\n";
         } grep {$_ ne ""} map {split /\s*\|\s*/, $_} @path;
 
@@ -311,28 +311,30 @@ sub run {
     exit !!$invalid;
 }
 
+sub parse_path {
+    my $path = eval {PICA::Path->new($_[0], position_as_occurrence => 1)};
+    if ($path) {
+    }
+    return $path;
+}
+
 sub explain {
-    my ($schema, $path) = @_;
+    my $schema = $_[0];
+    my $path   = parse_path($_[1]);
 
-    if (my $expr = eval {PICA::Path->new($path)}) {
-        $path = $expr;
+    if (!$path) {
+        warn "invalid PICA Path: $_[1]\n";
+        return;
     }
-    else {
-        warn "invalid PICA Path: $path\n";
-        return
-    }
-
-    if ($path->stringify =~ /[.]/) {
+    elsif ($path->stringify =~ /[.]/) {
         warn "Fields with wildcards cannot be explained yet!\n";
         return
     }
 
     my $tag = $path->fields;
 
-    # Take positions as occurrences to allow PICA Plain syntax
-    my $occ = $path->occurrences // $path->positions;
-    my ($someocc) = grep {$_ > 0} split '-', $occ;
-    my $id = field_identifier($schema, [$tag, $someocc]);
+    my ($firstocc) = grep {$_ > 0} split '-', $path->occurrences;
+    my $id = field_identifier($schema, [$tag, $firstocc]);
 
     my $def = $schema->{fields}{$id};
     if (defined $path->subfields && $def) {

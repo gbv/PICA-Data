@@ -63,4 +63,11 @@ is $path->occurrences, undef;
 is $path->subfields,   '0';
 is $path->positions,   undef;
 
+is(PICA::Path->new('123X/0-3', position_as_occurrence => 1)->stringify,
+    '123X[0-3]', 'position_as_occurrence');
+is(PICA::Path->new('123X/9-10', position_as_occurrence => 1)->stringify,
+    '123X[9-10]', 'position_as_occurrence');
+is(PICA::Path->new('123X/42', position_as_occurrence => 1)->stringify,
+    '123X[42]', 'position_as_occurrence');
+
 done_testing;

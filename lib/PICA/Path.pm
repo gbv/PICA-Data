@@ -10,52 +10,60 @@ use Scalar::Util qw(reftype);
 use overload '""' => \&stringify;
 
 sub new {
-    my ($class, $path) = @_;
+    my ($class, $path, %options) = @_;
 
     confess "invalid pica path" if $path !~ /
-        ([012.][0-9.][0-9.][A-Z@.])         # tag
-        (\[([0-9.]{2,3}|[0-9]+-[0-9]+)\])?  # occurrence
-        (\$?([_A-Za-z0-9]+))?               # subfields
-        (\/(\d+)?(-(\d+)?)?)?               # position
+        ([012.][0-9.][0-9.][A-Z@.])     # tag
+        (\[([0-9.]{2,3}|\d+-\d+)\])?    # occurrence
+        (\$?([_A-Za-z0-9]+))?           # subfields
+        (\/(\d+)?(-(\d+)?)?)?           # position
     /x;
 
     my $field      = $1;
-    my $occurrence = $3 !~ /^0+$/ ? $3 : undef;
+    my $occurrence = $3;
     my $subfield   = defined $5 ? "[$5]" : "[_A-Za-z0-9]";
 
     my @position;
-    if (defined $6) {    # from, to
-        my ($from, $dash, $to, $length) = ($7, $8, $9, 0);
-
-        if ($dash) {
-            confess "invalid pica path" unless defined($from // $to);    # /-
-        }
-
-        if (defined $to) {
-            if (!$from and $dash) {                                      # /-X
-                $from = 0;
-            }
-            $length = $to - $from + 1;
+    if (defined $6) {    # position
+        if (!defined $occurrence && $options{position_as_occurrence}) {
+            $occurrence = $7 . $8;
         }
         else {
-            if ($8) {
-                $length = undef;
+            my ($from, $dash, $to, $length) = ($7, $8, $9, 0);
+
+            if ($dash) {
+                confess "invalid pica path" unless defined($from // $to); # /-
+            }
+
+            if (defined $to) {
+                if (!$from and $dash) {    # /-X
+                    $from = 0;
+                }
+                $length = $to - $from + 1;
             }
             else {
-                $length = 1;
+                if ($8) {
+                    $length = undef;
+                }
+                else {
+                    $length = 1;
+                }
             }
-        }
 
-        if (!defined $length or $length >= 1) {
-            unless (!$from and !defined $length) {    # /0-
-                @position = ($from, $length);
+            if (!defined $length or $length >= 1) {
+                unless (!$from and !defined $length) {    # /0-
+                    @position = ($from, $length);
+                }
             }
         }
     }
 
     $field = qr{$field};
 
-    if (defined $occurrence) {
+    if ($occurrence =~ /^0+$/) {
+        $occurrence = undef;
+    }
+    elsif (defined $occurrence) {
         if ($occurrence =~ /-/) {
             my ($from, $to) = map {1 * $_} split '-', $occurrence;
             if ($from eq $to) {
@@ -572,7 +580,7 @@ Option C<nested_arrays> creates a list for every field found:
 
 =head1 METHODS
 
-=head2 new( $expression )
+=head2 new( $expression [, position_as_occurrence => 1 ] )
 
 Create a PICA path by parsing the path expression. The expression consists of
 
@@ -599,6 +607,9 @@ the first), and character ranges (such as C<2-4>, C<-3>, C<2->...) are
 supported.
 
 =back
+
+If option C<position_as_occurrence> is set, positions will be read as
+occurrences, e.g. C</2-4> is read as C<[2-4]>.
 
 =head2 match_record( $record, %options )
 
