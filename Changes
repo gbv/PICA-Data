@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.25 2021-06-16T14:18:46Z
     - Implement occurrence ranges (#96) 
     - Add option position_as_occurrence (see #66)
 
