@@ -6,6 +6,7 @@ our $VERSION = '1.25';
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
 use Pod::Usage;
 use PICA::Data qw(pica_parser pica_writer);
+use PICA::Patch qw(pica_diff pica_patch);
 use PICA::Schema qw(field_identifier);
 use PICA::Schema::Builder;
 use Getopt::Long qw(:config bundling);
@@ -38,8 +39,8 @@ my %COLORS
 sub new {
     my ($class, @argv) = @_;
 
-    my $interactive = -t *STDOUT;                           ## no critic
-    my $command = (!@argv && $interactive) ? 'help' : '';
+    my $interactive = -t *STDOUT;                               ## no critic
+    my $command     = (!@argv && $interactive) ? 'help' : '';
 
     my $number = 0;
     if (my ($i) = grep {$argv[$_] =~ /^-(\d+)$/} (0 .. @argv - 1)) {
@@ -65,8 +66,6 @@ sub new {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
     }
-    $opt->{error} = "$command not implemented yet"
-        if $command =~ /diff|patch/;
 
     GetOptionsFromArray(
         \@argv,       $opt,           'from|f=s', 'to|t:s',
@@ -128,7 +127,21 @@ sub new {
         }
     }
 
+    $opt->{annotate} = 1 if $command eq 'diff';
+    $opt->{annotate} = 0 if $command eq 'patch';
+
     $opt->{schema} = load_schema($opt->{schema}) if $opt->{schema};
+
+    if ($command =~ qr{diff|patch}) {
+        unshift @argv, '-' if @argv == 1;
+        $opt->{error} = "$command requires two input files" if @argv != 2;
+
+        if ($command eq 'diff') {
+
+            # only Plain and JSON support annotations
+            $opt->{to} = 'plain' unless $TYPES{lc $opt->{to}} eq 'JSON';
+        }
+    }
 
     $opt->{input} = @argv ? \@argv : ['-'];
 
@@ -150,6 +163,20 @@ sub new {
     bless $opt, $class;
 }
 
+sub parser_from_input {
+    my ($self, $in, $format) = @_;
+
+    if ($in eq '-') {
+        $in = *STDIN;
+        binmode $in, ':encoding(UTF-8)';
+    }
+    else {
+        die "File not found: $in\n" unless -e $in;
+    }
+
+    return pica_parser($format || $self->{from}, $in, bless => 1);
+}
+
 sub load_schema {
     my ($schema) = @_;
     my $json;
@@ -168,10 +195,10 @@ sub load_schema {
 }
 
 sub run {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $command = $self->{command};
-    my @pathes = @{$self->{path} || []};
-    my $schema = $self->{schema};
+    my @pathes  = @{$self->{path} || []};
+    my $schema  = $self->{schema};
 
     # commands that don't parse any input data
     if ($self->{error}) {
@@ -185,7 +212,7 @@ sub run {
     }
     elsif ($command eq 'version') {
         say $PICA::Data::VERSION;
-        exit
+        exit;
     }
     elsif ($command eq 'explain') {
         explain($schema, $_) for @pathes;
@@ -202,7 +229,7 @@ sub run {
     if ($self->{to}) {
         $writer = pica_writer(
             $self->{to},
-            color => ($self->{color} ? \%COLORS : undef),
+            color    => ($self->{color} ? \%COLORS : undef),
             schema   => $schema,
             annotate => $self->{annotate},
         );
@@ -260,23 +287,48 @@ sub run {
         last if $number and $stats->{records} >= $number;
     };
 
-    foreach my $in (@{$self->{input}}) {
-        if ($in eq '-') {
-            $in = *STDIN;
-            binmode $in, ':encoding(UTF-8)';
-        }
-        else {
-            die "File not found: $in\n" unless -e $in;
-        }
-
-        my $parser = pica_parser($self->{from}, $in, bless => 1);
-
-        while (my $record = $parser->next) {
-            if ($command eq 'split') {
-                $process->($_) for $record->split;
+    if ($command eq 'diff') {
+        my @parser = map {$self->parser_from_input($_)} @{$self->{input}};
+        while (1) {
+            my $a = $parser[0]->next;
+            my $b = $parser[1]->next;
+            if ($a or $b) {
+                $writer->write(pica_diff($a || [], $b || []));
             }
             else {
-                $process->($record);
+                last;
+            }
+        }
+    }
+    elsif ($command eq 'patch') {
+        my $parser = $self->parser_from_input($self->{input}[0]);
+
+        # TODO: allow to read diff in PICA/JSON
+        my $patches = $self->parser_from_input($self->{input}[1], 'plain');
+        my $diff;
+        while (my $record = $parser->next) {
+            $diff = $patches->next || $diff;    # keep latest diff
+            die "Missing patch to apply in $self->{input}[1]\n" unless $diff;
+
+            my $changed = eval {pica_patch($record, $diff)};
+            if (!$changed || $@) {
+                warn $@;
+            }
+            else {
+                $writer->write($changed || []);
+            }
+        }
+    }
+    else {
+        foreach my $in (@{$self->{input}}) {
+            my $parser = $self->parser_from_input($in);
+            while (my $record = $parser->next) {
+                if ($command eq 'split') {
+                    $process->($_) for $record->split;
+                }
+                else {
+                    $process->($record);
+                }
             }
         }
     }
@@ -328,7 +380,7 @@ sub explain {
     }
     elsif ($path->stringify =~ /[.]/) {
         warn "Fields with wildcards cannot be explained yet!\n";
-        return
+        return;
     }
 
     my $tag = $path->fields;

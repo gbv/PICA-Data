@@ -46,6 +46,14 @@ Optional (C<o>/C<*>), mandatory (C<.>/C<+>), repeatable (C<+>/C<*>).
 
 Validate data against an Avram schema (C<-s/--schema>).
 
+=head2 diff
+
+Compare PICA records from two inputs. Output is always annotated PICA Plain.
+
+=head2 patch
+
+Apply modifications given in annotated PICA Plain.
+
 =head2 build
 
 Build an Avram schema from input data, optionally based on an existing schema
