@@ -6,7 +6,7 @@ our $VERSION = '1.25';
 use PICA::Schema qw(field_identifier);
 
 use Exporter 'import';
-our @EXPORT_OK = qw(pica_diff pica_patch);
+our @EXPORT_OK   = qw(pica_diff pica_patch);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 # Compare full fields, ignoring annotation of the latter
@@ -76,7 +76,7 @@ sub pica_patch {
         die "invalid PICA Patch annotation: $_\n" if $_ !~ /^[ +-]$/;
     }
 
-    my ($i, $j);
+    my ($i, $j) = (0, 0);
 PATCH: while ($i < @$fields && $j < @$diff) {
         my $cur;
         my $next = field_identifier($diff->[$j]);
@@ -88,14 +88,23 @@ PATCH: while ($i < @$fields && $j < @$diff) {
                 if ($ann eq '-') {
                     splice @$fields, $i, 1;
                     last PATCH if $j++ == @$diff or $i == @$fields;
-                    next;
+
+                }
+                else {
+                    $i++;
+                    $j++;
+                    last PATCH if $i >= @$fields or $j >= @$diff;
                 }
 
-                # Don't add fully identical fields so also skip '+'
-            }
+                $next = field_identifier($diff->[$j]);
+                $ann  = annotation($diff->[$j]);
 
-            # keep current field
-            last PATCH if ++$i == @$fields;
+            }
+            else {
+
+                # keep current field
+                last PATCH if ++$i == @$fields;
+            }
         }
 
         # current field is ahead
@@ -134,9 +143,12 @@ This file contains the implementation of diff and patch algorithm for PICA+
 records.  See functions C<pica_diff> and C<pica_patch> (or object methods
 C<diff> and C<patch>) of L<PICA::Data> for usage.
 
-Both diff and patch use annotated PICA records to express differences between
-PICA records or changes to be applied to a PICA record (which is basically the
-same). Fields can be annotated with:
+=head1 FORMAT
+
+The difference between two records or the change to be applied to a record is
+referred to as B<diff>, B<delta> or B<patch>. In any case the format must
+encode a set of modifications. PICA Patch format encodes modifications to PICA
+records in form of annotated PICA records. PICA fields can be annotated with:
 
 =over
 
@@ -154,12 +166,26 @@ To denote a field that should be kept as it is.
 
 =back
 
-Modification of a field is expressed by removal of the old version followed by
+Modification of a field can be encoded by removal of the old version followed by
 addition of the new version.
 
-Records are always sorted before application of diff or patch.
+=head1 APPLICATION
 
-Modification of records that span multiple levels or records that subsume
-multiple sub-records is I<not recommended>.
+Records are always sorted before application of diff or patch. It is I<not
+recommended> to diff or patch records that subsumes multiple sub-records on
+level 1 or level 2.
+
+Fields are not added with a patch if the records already contains a fully
+identical field.
+
+=head1 FUNCTIONS
+
+=head2 pica_diff( $before, $after )
+
+Return the difference between two records as annotated record.
+
+=head2 pica_patch( $record, $diff )
+
+Apply a difference given as annotated PICA and return the result as new record.
 
 =cut

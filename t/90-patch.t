@@ -15,6 +15,13 @@ is_patch("001A \$x.", "+ 001A \$y.", "001A \$x.\n001A \$y.", 'add same field id'
 is_patch("002A \$x.", "+ 001A \$y.", "001A \$y.\n002A \$x.", 'add before first field');
 is_patch("001A \$x.", "- 001A \$x.\n+ 001A \$y.", "001A \$y.", 'replace field id');
 
+is_patch("003@ \$01", "  003@ \$01", "003@ \$01", 'nothing changed');
+is_patch("003@ \$01\n099X \$01", "  003@ \$01", "003@ \$01\n099X \$01", 'nothing changed');
+is_patch("001A \$x.\n003@ \$01", "  003@ \$01", "001A \$x.\n003@ \$01", 'nothing changed');
+
+# TODO: ignore non-existing fields to remove
+
+
 # TODO: test keeping same fields before and after modifications
 # my $s = "000A \$0.";
 # is_patch("$s\n001A \$x.", "  $s\n+ 001A \$y.", "$s\n001A \$x.\n001A \$y.", 'add same field id');
