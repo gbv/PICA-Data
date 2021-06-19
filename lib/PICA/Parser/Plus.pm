@@ -1,7 +1,7 @@
 package PICA::Parser::Plus;
 use v5.14.1;
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 
 use charnames qw(:full);
 use Carp qw(carp croak);

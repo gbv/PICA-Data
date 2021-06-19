@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.26 2021-06-19T16:51:01Z
     - Support diff/patch in CLI
     - Support option --unknown in build/fields/explain 
 
