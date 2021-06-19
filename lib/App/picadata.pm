@@ -130,7 +130,10 @@ sub new {
     $opt->{annotate} = 1 if $command eq 'diff';
     $opt->{annotate} = 0 if $command eq 'patch';
 
-    $opt->{schema} = load_schema($opt->{schema}) if $opt->{schema};
+    if ($opt->{schema}) {
+        $opt->{schema} = load_schema($opt->{schema});
+        $opt->{schema}{ignore_unknown} = $opt->{unknown};
+    }
 
     if ($command =~ qr{diff|patch}) {
         unshift @argv, '-' if @argv == 1;
@@ -153,6 +156,9 @@ sub new {
 
     $opt->{to} = $opt->{from}
         if !$opt->{to} and $command =~ /(convert|split|diff|patch)/;
+    $opt->{to} = 'plain'
+        if !$opt->{to} && $command eq 'validate' && $opt->{annotate};
+
     if ($opt->{to}) {
         $opt->{to} = $TYPES{lc $opt->{to}}
             or $opt->{error} = "unknown serialization type: " . $opt->{to};
@@ -215,10 +221,11 @@ sub run {
         exit;
     }
     elsif ($command eq 'explain') {
-        explain($schema, $_) for @pathes;
+        $self->explain($schema, $_) for @pathes;
         unless (@pathes) {
             while (<STDIN>) {
-                explain($schema, $2) if $_ =~ /^([^0-9a-z]\s+)?([^ ]+)/;
+                $self->explain($schema, $2)
+                    if $_ =~ /^([^0-9a-z]\s+)?([^ ]+)/;
             }
         }
         exit;
@@ -344,12 +351,13 @@ sub run {
         my $fields = $builder->schema->{fields};
         for my $id (sort keys %$fields) {
             if ($command eq 'fields') {
-                document($id, $self->{abbrev} ? 0 : $fields->{$id});
+                $self->document($id, $self->{abbrev} ? 0 : $fields->{$id});
             }
             else {
                 my $sfs = $fields->{$id}->{subfields} || {};
                 for (keys %$sfs) {
-                    document("$id\$$_", $self->{abbrev} ? 0 : $sfs->{$_});
+                    $self->document("$id\$$_",
+                        $self->{abbrev} ? 0 : $sfs->{$_});
                 }
             }
         }
@@ -371,11 +379,12 @@ sub parse_path {
 }
 
 sub explain {
-    my $schema = $_[0];
-    my $path   = parse_path($_[1]);
+    my $self   = shift;
+    my $schema = shift;
+    my $path   = parse_path($_[0]);
 
     if (!$path) {
-        warn "invalid PICA Path: $_[1]\n";
+        warn "invalid PICA Path: $_[0]\n";
         return;
     }
     elsif ($path->stringify =~ /[.]/) {
@@ -392,16 +401,16 @@ sub explain {
     if (defined $path->subfields && $def) {
         my $sfdef = $def->{subfields} || {};
         for (split '', $path->subfields) {
-            document("$id\$$_", $sfdef->{$_}, 1);
+            $self->document("$id\$$_", $sfdef->{$_}, 1);
         }
     }
     else {
-        document($id, $def, 1);
+        $self->document($id, $def, 1);
     }
 }
 
 sub document {
-    my ($id, $def, $warn) = @_;
+    my ($self, $id, $def, $warn) = @_;
     if ($def) {
         my $status = ' ';
         if ($def->{required}) {
@@ -413,11 +422,13 @@ sub document {
         my $doc = "$id\t$status\t" . $def->{label} // '';
         say $doc =~ s/[\r\n]+/ /mgr;
     }
-    elsif ($warn) {
-        warn "$id unknown\n";
-    }
-    else {
-        say $id;
+    elsif (!$self->{unknown}) {
+        if ($warn) {
+            warn "$id\t?\n";
+        }
+        else {
+            say $id;
+        }
     }
 }
 
