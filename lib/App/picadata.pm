@@ -263,7 +263,7 @@ sub run {
         $record = $record->sort if $self->{order};
 
         $record = {record => $record->fields(@pathes)} if @pathes;
-        next unless @{$record->{record}};    # ignore empty records
+        return unless @{$record->{record}};    # ignore empty records
 
         # TODO: also validate on other commands?
         if ($command eq 'validate') {
@@ -329,12 +329,10 @@ sub run {
     else {
         foreach my $in (@{$self->{input}}) {
             my $parser = $self->parser_from_input($in);
-            while (my $record = $parser->next) {
-                if ($command eq 'split') {
-                    $process->($_) for $record->split;
-                }
-                else {
-                    $process->($record);
+            while (my $next = $parser->next) {
+                for ($command eq 'split' ? $next->split : $next) {
+                    $process->($_);
+                    last if $number and $stats->{records} >= $number;
                 }
             }
         }
