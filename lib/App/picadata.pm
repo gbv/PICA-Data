@@ -262,8 +262,8 @@ sub run {
 
         $record = $record->sort if $self->{order};
 
-        $record = {record => $record->fields(@pathes)} if @pathes;
-        return unless @{$record->{record}};    # ignore empty records
+        $record->{record} = $record->fields(@pathes) if @pathes;
+        return if $record->empty;
 
         # TODO: also validate on other commands?
         if ($command eq 'validate') {
@@ -285,9 +285,10 @@ sub run {
         $builder->add($record)  if $builder;
 
         if ($command eq 'count') {
-            $stats->{holdings} += @{$record->holdings};
-            $stats->{items}    += @{$record->items};
-            $stats->{fields}   += @{$record->{record}};
+            $stats->{holdings}
+                += grep {@{$_->fields('1...')}} @{$record->holdings};
+            $stats->{items}  += grep {!$_->empty} @{$record->items};
+            $stats->{fields} += @{$record->{record}};
         }
         $stats->{records}++;
 

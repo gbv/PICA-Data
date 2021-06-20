@@ -7,7 +7,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw(pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_title pica_holdings pica_items
     pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id
-    pica_diff pica_patch);
+    pica_diff pica_patch pica_empty);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
@@ -62,7 +62,7 @@ sub pica_value {
     my ($record, $path) = @_;
 
     $record = $record->{record} if reftype $record eq 'HASH';
-    $path = eval {PICA::Path->new($path)} unless ref $path;
+    $path   = eval {PICA::Path->new($path)} unless ref $path;
     return unless defined $path;
 
     foreach my $field (@$record) {
@@ -224,6 +224,11 @@ sub pica_id {
     return $_[0]->{_id} if reftype $_[0] eq 'HASH';
 }
 
+sub pica_empty {
+    my $fields = reftype $_[0] eq 'HASH' ? $_[0]->{record} : $_[0];
+    return !@$fields;
+}
+
 sub pica_annotation {
     my $field = shift;
 
@@ -257,6 +262,7 @@ sub pica_annotation {
 *values   = *pica_values;
 *string   = *pica_string;
 *id       = *pica_id;
+*empty    = *pica_empty;
 *diff     = *pica_diff = *PICA::Patch::pica_diff;
 *patch    = *pica_patch = *PICA::Patch::pica_patch;
 
@@ -675,6 +681,10 @@ where the id of each record contains the EPN (subfield C<203@/**0>).
 =head2 id
 
 Returns the record id, if given.
+
+=head2 empty
+
+Tell whether the record is empty (no fields).
 
 =head1 METHODS
 

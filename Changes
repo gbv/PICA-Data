@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add accessor: empty. Fixes counting.
 
 1.26 2021-06-19T16:51:01Z
     - Support diff/patch in CLI
