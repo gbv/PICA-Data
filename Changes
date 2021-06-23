@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add method to get subfields as multihash (#98)
 
 1.27 2021-06-23T07:23:14Z
     - Add accessor: empty. Fixes counting.
