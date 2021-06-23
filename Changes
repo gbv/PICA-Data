@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.27 2021-06-23T07:23:14Z
     - Add accessor: empty. Fixes counting.
     - Remove parser option 'bless', always return blessed record (#107, BREAKING CHANGE)
 

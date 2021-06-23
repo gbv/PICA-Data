@@ -31,7 +31,7 @@ PICA::Data - PICA record processing
           my $items    = pica_items($record);
           ...
 
-          # object accessors (if parser option 'bless' enabled)
+          # object accessors
           my $ppn      = $record->id;
           my $ppn      = $record->value('003@0');
           my $ddc      = $record->match('045Ue', split => 1, nested_array => 1);
@@ -42,7 +42,7 @@ PICA::Data - PICA record processing
           # write record
           $writer->write($record);
           
-          # write record via method (if blessed)
+          # write methods
           $record->write($writer);
           $record->write( xml => @options );
           $record->write; # default "plain" writer
@@ -118,8 +118,7 @@ corresponding parser class or `undef`.
 
 ## pica\_xml\_struct( $xml, %options )
 
-Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into an (optionally
-blessed) PICA record structure.
+Convert PICA-XML, expressed in [XML::Struct](https://metacpan.org/pod/XML::Struct) structure into a PICA::Data object.
 
 ## pica\_writer( $type \[, @options\] )
 
@@ -162,7 +161,7 @@ expression. The following are virtually equivalent:
 
     pica_values($record, $path);
     $path->record_subfields($record);
-    $record->values($path); # if $record is blessed
+    $record->values($path);
 
 ## pica\_fields( $record\[, $path...\] )
 
@@ -171,7 +170,7 @@ one ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
-    $record->fields($path); # if $record is blessed
+    $record->fields($path);
 
 ## pica\_title( $record )
 
@@ -205,12 +204,12 @@ Get or set a PICA field annotation. Use `undef` to remove annotation.
 ## pica\_diff( $before, $after )
 
 Return the difference between two records as annotated record. Also available
-as method `diff`.
+as method `diff`. See [PICA::Patch](https://metacpan.org/pod/PICA::Patch) for details.
 
 ## pica\_patch( $record, $diff )
 
 Return a new record by application of a difference given as annotated PICA.
-Also available as method `patch`.
+Also available as method `patch`. See [PICA::Patch](https://metacpan.org/pod/PICA::Patch) for details.
 
 # ACCESSORS
 
@@ -250,16 +249,19 @@ where the id of each record contains the EPN (subfield `203@/**0`).
 
 Returns the record id, if given.
 
+## empty
+
+Tell whether the record is empty (no fields).
+
 # METHODS
 
 ## write( \[ $type \[, @options\] \] | $writer )
 
 Write PICA record with given [PICA::Writer::...](https://metacpan.org/pod/PICA::Writer::Base) or
-[PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) by default. This method is a shortcut for blessed
-record objects:
+[PICA::Writer::Plain](https://metacpan.org/pod/PICA::Writer::Plain) by default. This are equivalent:
 
     pica_writer( xml => $file )->write( $record );
-    $record->write( xml => $file ); # equivalent if $record is blessed 
+    $record->write( xml => $file );
 
 ## string( \[ $type \] )
 
@@ -276,7 +278,7 @@ Calculate a new record by application of an annotated PICA record. Annotations
 `+` and `-` denote fields to be added or removed. Fields with blank
 annotations are check to exist in the original record.
 
-The records should not contains multiple records of level 1 and/or level 2.
+The records should not contain multiple records of level 1 and/or level 2.
 
 # CONTRIBUTORS
 
