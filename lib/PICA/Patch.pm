@@ -6,7 +6,7 @@ our $VERSION = '1.26';
 use PICA::Schema qw(field_identifier);
 
 use Exporter 'import';
-our @EXPORT_OK   = qw(pica_diff pica_patch);
+our @EXPORT_OK = qw(pica_diff pica_patch);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 # Compare full fields, ignoring annotation of the latter
@@ -169,6 +169,25 @@ To denote a field that should be kept as it is.
 Modification of a field can be encoded by removal of the old version followed by
 addition of the new version.
 
+=head1 EXAMPLE
+
+Given a PICA record with two fields: 
+
+  | 003@ $012345
+  | 021A $aA book
+
+A diff to modify the second field could be this:
+
+  | - 021A $aA book
+  | + 021A $aAn interesting book
+
+The diff could be extended with the first field to make sure it can only
+applied if the first field exists in the record:
+
+  |   003@ $012345
+  | - 021A $aA book
+  | + 021A $aAn interesting book
+
 =head1 APPLICATION
 
 Records are always sorted before application of diff or patch. It is I<not
@@ -187,5 +206,6 @@ Return the difference between two records as annotated record.
 =head2 pica_patch( $record, $diff )
 
 Apply a difference given as annotated PICA and return the result as new record.
+This function may die with an error method if the diff cannot be applied.
 
 =cut

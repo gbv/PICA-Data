@@ -627,12 +627,12 @@ Get or set a PICA field annotation. Use C<undef> to remove annotation.
 =head2 pica_diff( $before, $after )
 
 Return the difference between two records as annotated record. Also available
-as method C<diff>.
+as method C<diff>. See L<PICA::Patch> for details.
 
 =head2 pica_patch( $record, $diff )
 
 Return a new record by application of a difference given as annotated PICA.
-Also available as method C<patch>.
+Also available as method C<patch>. See L<PICA::Patch> for details.
 
 =head1 ACCESSORS
 
@@ -701,7 +701,7 @@ Calculate a new record by application of an annotated PICA record. Annotations
 C<+> and C<-> denote fields to be added or removed. Fields with blank
 annotations are check to exist in the original record.
 
-The records should not contains multiple records of level 1 and/or level 2.
+The records should not contain multiple records of level 1 and/or level 2.
 
 =head1 CONTRIBUTORS
 
