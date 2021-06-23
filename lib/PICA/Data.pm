@@ -62,7 +62,7 @@ sub pica_value {
     my ($record, $path) = @_;
 
     $record = $record->{record} if reftype $record eq 'HASH';
-    $path   = eval {PICA::Path->new($path)} unless ref $path;
+    $path = eval {PICA::Path->new($path)} unless ref $path;
     return unless defined $path;
 
     foreach my $field (@$record) {
@@ -90,12 +90,9 @@ sub pica_items {
                 }
                 push @record, shift @fields;
             }
-            push @items, {record => \@record, _id => $epn};
+            push @items, bless {record => \@record, _id => $epn},
+                'PICA::Data';
         }
-    }
-
-    if (blessed($_[0])) {
-        bless $_, blessed($_[0]) for @items;
     }
 
     return \@items;
@@ -130,7 +127,7 @@ sub pica_title {
     my $ppn = pica_value($record, '003@0');
     $record->{_id} = $ppn if defined $ppn;
 
-    return blessed($_[0]) ? bless $record, blessed($_[0]) : $record;
+    return bless $record, 'PICA::Data';
 }
 
 sub pica_holdings {
@@ -186,9 +183,7 @@ sub pica_holdings {
             };
     }
 
-    if (blessed($_[0])) {
-        bless $_, blessed($_[0]) for @holdings;
-    }
+    bless $_, 'PICA::Data' for @holdings;
 
     return \@holdings;
 }
@@ -345,9 +340,7 @@ sub _pica_module {
 sub write {
     my $pica   = shift;
     my $writer = $_[0];
-    unless (blessed $writer) {
-        $writer = pica_writer(@_ ? @_ : 'plain');
-    }
+    $writer = pica_writer(@_ ? @_ : 'plain') unless blessed $writer;
     $writer->write($pica);
 }
 
@@ -371,9 +364,7 @@ sub pica_xml_struct {
     }
 
     my ($id) = map {$_->[-1]} grep {$_->[0] =~ '003@'} @$record;
-    $record = {_id => $id, record => $record};
-    bless $record, 'PICA::Data' if !!$options{bless};
-    return $record;
+    return bless {_id => $id, record => $record}, 'PICA::Data';
 }
 
 1;
@@ -418,7 +409,7 @@ PICA::Data - PICA record processing
         my $items    = pica_items($record);
         ...
 
-        # object accessors (if parser option 'bless' enabled)
+        # object accessors
         my $ppn      = $record->id;
         my $ppn      = $record->value('003@0');
         my $ddc      = $record->match('045Ue', split => 1, nested_array => 1);
@@ -429,7 +420,7 @@ PICA::Data - PICA record processing
         # write record
         $writer->write($record);
         
-        # write record via method (if blessed)
+        # write methods
         $record->write($writer);
         $record->write( xml => @options );
         $record->write; # default "plain" writer
@@ -526,8 +517,7 @@ corresponding parser class or C<undef>.
 
 =head2 pica_xml_struct( $xml, %options )
 
-Convert PICA-XML, expressed in L<XML::Struct> structure into an (optionally
-blessed) PICA record structure.
+Convert PICA-XML, expressed in L<XML::Struct> structure into a PICA::Data object.
 
 =head2 pica_writer( $type [, @options] )
 
@@ -594,7 +584,7 @@ expression. The following are virtually equivalent:
 
     pica_values($record, $path);
     $path->record_subfields($record);
-    $record->values($path); # if $record is blessed
+    $record->values($path);
 
 =head2 pica_fields( $record[, $path...] )
 
@@ -603,7 +593,7 @@ one ore more PICA path expression. The following are virtually equivalent:
 
     pica_fields($record, $path);
     $path->record_fields($record);
-    $record->fields($path); # if $record is blessed
+    $record->fields($path);
 
 =head2 pica_title( $record )
 
@@ -691,11 +681,10 @@ Tell whether the record is empty (no fields).
 =head2 write( [ $type [, @options] ] | $writer )
 
 Write PICA record with given L<PICA::Writer::...|PICA::Writer::Base> or
-L<PICA::Writer::Plain> by default. This method is a shortcut for blessed
-record objects:
+L<PICA::Writer::Plain> by default. This are equivalent:
 
     pica_writer( xml => $file )->write( $record );
-    $record->write( xml => $file ); # equivalent if $record is blessed 
+    $record->write( xml => $file );
 
 =head2 string( [ $type ] )
 

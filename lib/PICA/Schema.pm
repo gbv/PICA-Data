@@ -3,12 +3,13 @@ use v5.14.1;
 
 our $VERSION = '1.26';
 
-use Exporter 'import';
-our @EXPORT_OK = qw(field_identifier check_value clean_pica);
-
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
+use PICA::Data;
 use PICA::Error;
+
+use Exporter 'import';
+our @EXPORT_OK = qw(field_identifier check_value clean_pica);
 
 sub new {
     my ($class, $schema) = @_;
