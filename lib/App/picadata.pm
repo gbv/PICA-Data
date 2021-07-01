@@ -291,8 +291,6 @@ sub run {
             $stats->{fields} += @{$record->{record}};
         }
         $stats->{records}++;
-
-        last if $number and $stats->{records} >= $number;
     };
 
     if ($command eq 'diff') {
@@ -306,6 +304,7 @@ sub run {
             else {
                 last;
             }
+            last if $number && $number <= ++$stats->{record};
         }
     }
     elsif ($command eq 'patch') {
@@ -325,15 +324,17 @@ sub run {
             else {
                 $writer->write($changed || []);
             }
+
+            last if $number && $number <= ++$stats->{record};
         }
     }
     else {
-        foreach my $in (@{$self->{input}}) {
+    RECORD: foreach my $in (@{$self->{input}}) {
             my $parser = $self->parser_from_input($in);
             while (my $next = $parser->next) {
                 for ($command eq 'split' ? $next->split : $next) {
                     $process->($_);
-                    last if $number and $stats->{records} >= $number;
+                    last RECORD if $number and $stats->{records} >= $number;
                 }
             }
         }
@@ -371,10 +372,7 @@ sub run {
 }
 
 sub parse_path {
-    my $path = eval {PICA::Path->new($_[0], position_as_occurrence => 1)};
-    if ($path) {
-    }
-    return $path;
+    eval {PICA::Path->new($_[0], position_as_occurrence => 1)};
 }
 
 sub explain {
