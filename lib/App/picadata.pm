@@ -148,16 +148,23 @@ sub new {
 
     $opt->{input} = @argv ? \@argv : ['-'];
 
-    $opt->{from}
-        = ($opt->{input}[0] =~ /\.([a-z]+)$/ && $TYPES{lc $1}) ? $1 : 'plain'
-        unless $opt->{from};
-    $opt->{from} = $TYPES{lc $opt->{from}}
-        or $opt->{error} = "unknown serialization type: " . $opt->{from};
+    if ($opt->{from}) {
+        $opt->{from} = $TYPES{lc $opt->{from}}
+            or $opt->{error} = "unknown serialization type: " . $opt->{from};
+    }
 
-    $opt->{to} = $opt->{from}
-        if !$opt->{to} and $command =~ /(convert|split|diff|patch)/;
-    $opt->{to} = 'plain'
-        if !$opt->{to} && $command eq 'validate' && $opt->{annotate};
+    # default output format
+    unless ($opt->{to}) {
+        if ($command =~ /(convert|split|diff|patch)/) {
+            $opt->{to} = $opt->{from};
+            $opt->{to} ||= $TYPES{lc $1}
+                if $opt->{input}->[0] =~ /\.([a-z]+)$/;
+            $opt->{to} ||= 'plain';
+        }
+        elsif ($command eq 'validate' && $opt->{annotate}) {
+            $opt->{to} = 'plain';
+        }
+    }
 
     if ($opt->{to}) {
         $opt->{to} = $TYPES{lc $opt->{to}}
@@ -180,7 +187,10 @@ sub parser_from_input {
         die "File not found: $in\n" unless -e $in;
     }
 
-    return pica_parser($format || $self->{from}, $in, bless => 1);
+    $format ||= $self->{from};
+    $format ||= $TYPES{lc $1} if $in =~ /\.([a-z]+)$/;
+
+    return pica_parser($format || 'plain', $in);
 }
 
 sub load_schema {
