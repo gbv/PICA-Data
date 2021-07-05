@@ -23,6 +23,7 @@ sub parse {
         (\[(?<occurrence>[0-9.]{2,3}|\d+-\d+)\])?
         (\$?(?<subfields>[_A-Za-z0-9]+))?
         (\/(\d+)?(-(\d+)?)?)? # position
+        (?<conditions>{.+})?
     /x;
 
     my $field      = $+{tag};
@@ -64,6 +65,9 @@ sub parse {
         }
     }
 
+    my @conditions = map {parse_condition($_) || return} split '}{',
+        ($+{conditions} // '');
+
     $field = qr{$field};
 
     if ($occurrence =~ /^0+$/) {
@@ -93,7 +97,8 @@ sub parse {
         field      => $field,
         occurrence => $occurrence,
         subfield   => $subfield,
-        position   => \@position
+        position   => \@position,
+        conditions => \@conditions,
     };
 }
 
@@ -275,6 +280,8 @@ sub stringify {
     my $pos = $self->positions;
     $str .= "/$pos" if defined $pos;
 
+    # TODO: conditions
+
     $str;
 }
 
@@ -321,6 +328,10 @@ sub positions {
     return $pos;
 }
 
+sub conditions {
+    ...;
+}
+
 1;
 __END__
 
@@ -344,7 +355,7 @@ PICA::Path - PICA path expression to match field and subfield values
 
 PICA path expressions can be used to match fields and subfields of
 L<PICA::Data> records or equivalent record structures. An instance of
-PICA::Path is a blessed array reference, consisting of the following fields:
+PICA::Path consists of:
 
 =over
 
@@ -368,6 +379,10 @@ substring start position
 =item
 
 substring end position
+
+=item
+
+optional conditions to check subfields
 
 =back
 
@@ -721,6 +736,10 @@ Return the stringified occurrences expression or undefined.
 =head2 positions
 
 Return the stringified position or undefined.
+
+=head2 conditions
+
+Return the stringified conditions or undefined.
 
 =head1 SEE ALSO
 
