@@ -48,6 +48,7 @@
          "requires" : {
             "Carp" : "0",
             "Exporter" : "0",
+            "Hash::MultiValue" : "0",
             "IO::File" : "1.14",
             "IO::Handle" : "0",
             "List::Util" : "1.33",
@@ -74,16 +75,16 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/GBV/PICA-Data/issues"
+         "web" : "https://github.com/gbv/PICA-Data/issues"
       },
-      "homepage" : "https://github.com/GBV/PICA-Data",
+      "homepage" : "https://github.com/gbv/PICA-Data",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/GBV/PICA-Data.git",
-         "web" : "https://github.com/GBV/PICA-Data"
+         "url" : "git://github.com/gbv/PICA-Data.git",
+         "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "1.27",
+   "version" : "1.28",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",

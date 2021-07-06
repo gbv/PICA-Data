@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.28 2021-07-06T09:52:24Z
     - Add method to get subfields as multihash (#98)
     - picadata: fix option --number (#111)
     - picadata: support parsing multiple formats (#112)
