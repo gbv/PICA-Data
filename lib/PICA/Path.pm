@@ -11,7 +11,7 @@ use overload '""' => \&stringify;
 
 sub new {
     my $class = shift;
-    my $self  = parse(@_) or confess "invalid pica path";
+    my $self = parse(@_) or confess "invalid pica path";
     bless $self, $class;
 }
 
@@ -65,7 +65,7 @@ sub parse {
         }
     }
 
-    my @conditions = map {parse_condition($_) || return} split '}{',
+    my @conditions = map {parse_condition($_) || return} split /\}\{/,
         ($+{conditions} // '');
 
     $field = qr{$field};
