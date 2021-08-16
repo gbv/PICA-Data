@@ -39,7 +39,8 @@ my %COLORS
 sub new {
     my ($class, @argv) = @_;
 
-    my $command = (!@argv && -t *STDIN) ? 'help' : '';    ## no critic
+    my $terminal = -t *STDIN;                            ## no critic
+    my $command = (!@argv && $terminal) ? 'help' : '';
 
     my $number = 0;
     if (my ($i) = grep {$argv[$_] =~ /^-(\d+)$/} (0 .. @argv - 1)) {
@@ -133,6 +134,19 @@ sub new {
     if ($opt->{schema}) {
         $opt->{schema} = load_schema($opt->{schema});
         $opt->{schema}{ignore_unknown} = $opt->{unknown};
+
+        if ($command eq 'explain' && !@path && !@argv && $terminal) {
+            while (my ($id, $field) = each %{$opt->{schema}{fields} || {}}) {
+                push @{$opt->{path}}, $id;
+
+                # see <https://github.com/gbv/k10plus-avram-api/issues/12>
+                my $sf
+                    = ref $field->{subfields} eq 'HASH'
+                    ? $field->{subfields}
+                    : {};
+                push @{$opt->{path}}, map {"$id\$$_"} keys %$sf;
+            }
+        }
     }
 
     if ($command =~ qr{diff|patch}) {
