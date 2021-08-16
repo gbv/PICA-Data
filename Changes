@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - picadata: Fix UTF-8 output of schema labels
 
 1.29 2021-07-22T08:51:03Z
     - picadata: Fix detection of terminal

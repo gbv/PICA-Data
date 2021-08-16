@@ -207,7 +207,7 @@ sub load_schema {
             or die "Failed to open schema file: $schema\n";
         $json = join "\n", <$fh>;
     }
-    return PICA::Schema->new(decode_json($json));
+    return PICA::Schema->new(JSON::PP->new->decode($json));
 }
 
 sub run {
@@ -427,7 +427,7 @@ sub document {
             $status = $def->{repeatable} ? '*' : 'o';
         }
         my $doc = "$id\t$status\t" . $def->{label} // '';
-        say $doc =~ s/[\r\n]+/ /mgr;
+        say $doc =~ s/[\s\r\n]+/ /mgr;
     }
     elsif (!$self->{unknown}) {
         if ($warn) {
