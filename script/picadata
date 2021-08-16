@@ -24,6 +24,10 @@ Convert, analyze and validate PICA+ data from the command line.
 
 Convert between PICA+ serialization formats (the default command).
 
+=head2 select
+
+Select subfield values and/or limit record to fields given by pathes.
+
 =head2 split
 
 Split records into multiple records for each level. Implies C<-o>.

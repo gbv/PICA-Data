@@ -61,7 +61,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert count split fields subfields sf explain validate build diff patch help version);
+        qw(convert select count split fields subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -87,19 +87,13 @@ sub new {
         push @path, shift @argv;
     }
 
-    if (@path) {
-        @path = map {parse_path($_)}
-            grep {$_ ne ""} map {split /\s*[\|,]\s*/, $_} @path;
-
-        if ($command ne 'explain') {
-            if (all {$_->subfields ne ""} @path) {
-                $command = 'select' unless $command;
-            }
-            elsif (any {$_->subfields ne ""} @path) {
-                $opt->{error}
-                    = "PICA Path must either all select fields or all select subfields!";
-            }
-        }
+    @path = map {parse_path($_)}
+        grep {$_ ne ""} map {split /\s*[\|,]\s*/, $_} @path;
+    if (@path && all {$_->subfields ne ""} @path) {
+        $command = 'select' unless $command;
+    }
+    elsif ($command eq 'select') {
+        $command = 'convert';
     }
 
     $opt->{order} = 1 if $command =~ /(diff|patch|split)/;
@@ -135,17 +129,20 @@ sub new {
 
         if ($command eq 'explain' && !@path && !@argv && $terminal) {
             while (my ($id, $field) = each %{$opt->{schema}{fields} || {}}) {
-                push @{$opt->{path}}, $id;
+                push @path, parse_path($id);
 
                 # see <https://github.com/gbv/k10plus-avram-api/issues/12>
                 my $sf
                     = ref $field->{subfields} eq 'HASH'
                     ? $field->{subfields}
                     : {};
-                push @{$opt->{path}}, map {"$id\$$_"} keys %$sf;
+                push @path, map {parse_path("$id\$$_")} keys %$sf;
             }
         }
     }
+
+    # all path expressions have been initialized as PICA::Path objects
+    $opt->{path} = \@path;
 
     if ($command =~ qr{diff|patch}) {
         unshift @argv, '-' if @argv == 1;
@@ -223,10 +220,10 @@ sub load_schema {
 }
 
 sub run {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $command = $self->{command};
+    my $schema  = $self->{schema};
     my @pathes = @{$self->{path} || []};
-    my $schema = $self->{schema};
 
     # commands that don't parse any input data
     if ($self->{error}) {
@@ -246,8 +243,16 @@ sub run {
         $self->explain($schema, $_) for @pathes;
         unless (@pathes) {
             while (<STDIN>) {
-                $self->explain($schema, $2)
-                    if $_ =~ /^([^0-9a-z]\s+)?([^ ]+)/;
+                if ($_ =~ /^([^0-9a-z]\s+)?([^ ]+)/) {
+                    my $path = eval {parse_path($_)};
+                    if ($path) {
+                        $self->explain($schema, $path);
+                    }
+                    else {
+                        warn "invalid PICA Path: $_\n";
+                    }
+
+                }
             }
         }
         exit;
@@ -275,17 +280,21 @@ sub run {
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
     my $invalid = 0;
 
+    my @selectFields    = grep {$_->subfields eq ""} @pathes;
+    my @selectSubfields = grep {$_->subfields ne ""} @pathes;
+
     my $process = sub {
         my $record = shift;
 
-        if ($command eq 'select') {
-            say $_ for map {@{$record->match($_, split => 1) // []}} @pathes;
+        if ($command eq 'select' && @selectSubfields) {
+            say $_
+                for map {@{$record->match($_, split => 1) // []}}
+                @selectSubfields;
         }
 
         $record = $record->sort if $self->{order};
 
-        # filter record to fields
-        $record->{record} = $record->fields(@pathes) if @pathes;
+        $record->{record} = $record->fields(@selectFields) if @selectFields;
         return if $record->empty;
 
         # TODO: also validate on other commands?
@@ -400,15 +409,9 @@ sub parse_path {
 }
 
 sub explain {
-    my $self   = shift;
-    my $schema = shift;
-    my $path   = eval {parse_path($_[0])};
+    my ($self, $schema, $path) = @_;
 
-    if (!$path) {
-        warn "invalid PICA Path: $_[0]\n";
-        return;
-    }
-    elsif ($path->stringify =~ /[.]/) {
+    if ($path->stringify =~ /[.]/) {
         warn "Fields with wildcards cannot be explained yet!\n";
         return;
     }
