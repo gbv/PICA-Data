@@ -88,10 +88,8 @@ sub new {
     }
 
     if (@path) {
-        @path = map {
-            my $p = parse_path($_);
-            $p || die "invalid PICA Path: $_\n";
-        } grep {$_ ne ""} map {split /\s*\|\s*/, $_} @path;
+        @path = map {parse_path($_)}
+            grep {$_ ne ""} map {split /\s*[\|,]\s*/, $_} @path;
 
         if ($command ne 'explain') {
             if (all {$_->subfields ne ""} @path) {
@@ -286,6 +284,7 @@ sub run {
 
         $record = $record->sort if $self->{order};
 
+        # filter record to fields
         $record->{record} = $record->fields(@pathes) if @pathes;
         return if $record->empty;
 
@@ -396,13 +395,14 @@ sub run {
 }
 
 sub parse_path {
-    eval {PICA::Path->new($_[0], position_as_occurrence => 1)};
+    eval {PICA::Path->new($_[0], position_as_occurrence => 1)}
+        || die "invalid PICA Path: $_[0]\n";
 }
 
 sub explain {
     my $self   = shift;
     my $schema = shift;
-    my $path   = parse_path($_[0]);
+    my $path   = eval {parse_path($_[0])};
 
     if (!$path) {
         warn "invalid PICA Path: $_[0]\n";
