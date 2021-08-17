@@ -54,7 +54,7 @@ sub next {
     while (my $record = $self->_next_record) {
         next unless @$record;
 
-        # get last 003@ $0 as _id
+        # get last 003@ $0 as _id (TODO: _id for level 1 and 2?)
         my $id;
         if (my ($field) = grep {($_->[0] // '') =~ '003@'} @$record) {
             for (my $i = 2; $i < @$field; $i += 2) {
