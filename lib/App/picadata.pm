@@ -61,7 +61,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert select count split fields subfields sf explain validate build diff patch help version);
+        qw(convert get count split fields subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -90,10 +90,7 @@ sub new {
     @path = map {parse_path($_)}
         grep {$_ ne ""} map {split /\s*[\|,]\s*/, $_} @path;
     if (@path && all {$_->subfields ne ""} @path) {
-        $command = 'select' unless $command;
-    }
-    elsif ($command eq 'select') {
-        $command = 'convert';
+        $command = 'get' unless $command;
     }
 
     $opt->{order} = 1 if $command =~ /(diff|patch|split)/;
@@ -280,21 +277,21 @@ sub run {
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
     my $invalid = 0;
 
-    my @selectFields    = grep {$_->subfields eq ""} @pathes;
-    my @selectSubfields = grep {$_->subfields ne ""} @pathes;
+    my @getFields    = grep {$_->subfields eq ""} @pathes;
+    my @getSubfields = grep {$_->subfields ne ""} @pathes;
 
     my $process = sub {
         my $record = shift;
 
-        if ($command eq 'select' && @selectSubfields) {
+        if ($command eq 'get' && @getSubfields) {
             say $_
                 for map {@{$record->match($_, split => 1) // []}}
-                @selectSubfields;
+                @getSubfields;
         }
 
         $record = $record->sort if $self->{order};
 
-        $record->{record} = $record->fields(@selectFields) if @selectFields;
+        $record->{record} = $record->fields(@getFields) if @getFields;
         return if $record->empty;
 
         # TODO: also validate on other commands?
