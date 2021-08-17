@@ -61,7 +61,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert get count split fields subfields sf explain validate build diff patch help version);
+        qw(convert get count levels fields subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -93,7 +93,7 @@ sub new {
         $command = 'get' unless $command;
     }
 
-    $opt->{order} = 1 if $command =~ /(diff|patch|split)/;
+    $opt->{order} = 1 if $command =~ /(diff|patch|levels)/;
 
     unless ($command) {
         if ($opt->{schema} && !$opt->{annotate}) {
@@ -161,7 +161,7 @@ sub new {
 
     # default output format
     unless ($opt->{to}) {
-        if ($command =~ /(convert|split|diff|patch)/) {
+        if ($command =~ /(convert|levels|diff|patch)/) {
             $opt->{to} = $opt->{from};
             $opt->{to} ||= $TYPES{lc $1}
                 if $opt->{input}->[0] =~ /\.([a-z]+)$/;
@@ -361,7 +361,7 @@ sub run {
     RECORD: foreach my $in (@{$self->{input}}) {
             my $parser = $self->parser_from_input($in);
             while (my $next = $parser->next) {
-                for ($command eq 'split' ? $next->split : $next) {
+                for ($command eq 'levels' ? $next->split : $next) {
                     $process->($_);
                     last RECORD if $number and $stats->{records} >= $number;
                 }

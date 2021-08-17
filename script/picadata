@@ -28,7 +28,7 @@ Convert between PICA+ serialization formats (the default command).
 
 Print subfield values.
 
-=head2 split
+=head2 levels
 
 Split records into multiple records for each level. Implies C<-o>.
 
