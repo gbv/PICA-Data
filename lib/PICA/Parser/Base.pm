@@ -1,7 +1,7 @@
 package PICA::Parser::Base;
 use v5.14.1;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype);

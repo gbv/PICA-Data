@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.30 2021-08-17T16:46:36Z
     - picadata: Fix UTF-8 output of schema labels
     - picadata: allow to explain full Avram schema
     - picadata: add command 'get'
