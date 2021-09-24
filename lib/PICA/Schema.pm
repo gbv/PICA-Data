@@ -261,12 +261,14 @@ sub abbreviated {
     my ($self) = @_;
     my $abbr = dclone($self->TO_JSON);
     delete $abbr->{total};
+    delete $_->{records};
     for my $field (values %{$abbr->{fields} // {}}) {
         delete $field->{tag};
         delete $field->{occurrence};
         delete $field->{total};
         for my $sf (values %{$field->{subfields} // {}}) {
             delete $_->{code};
+            delete $_->{records};
         }
     }
     return $abbr;
@@ -445,7 +447,8 @@ C<check>. Returns a L<PICA::Error> on schema violation.
 =head2 abbreviated
 
 Return an abbreviated data structure of the schema without inferable and
-calculated fields such as C<tag>, C<occurrence>, C<code>, and C<total>.
+calculated fields such as C<tag>, C<occurrence>, C<code>, C<total> and
+C<records>.
 
 =head1 FUNCTIONS
 

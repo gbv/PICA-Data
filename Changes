@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - add record count to schema builder
 
 1.30 2021-08-17T16:46:36Z
     - picadata: Fix UTF-8 output of schema labels
