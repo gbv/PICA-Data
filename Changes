@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+1.31 2021-09-24T08:34:41Z
     - picadata: add command 'filter'
     - add PICA Path method alias 'match'
     - add record count to schema builder

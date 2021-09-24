@@ -1,7 +1,7 @@
 package PICA::Schema;
 use v5.14.1;
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
