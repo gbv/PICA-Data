@@ -61,7 +61,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert get count levels fields subfields sf explain validate build diff patch help version);
+        qw(convert get count levels fields filter subfields sf explain validate build diff patch help version);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -161,7 +161,7 @@ sub new {
 
     # default output format
     unless ($opt->{to}) {
-        if ($command =~ /(convert|levels|diff|patch)/) {
+        if ($command =~ /(convert|levels|filter|diff|patch)/) {
             $opt->{to} = $opt->{from};
             $opt->{to} ||= $TYPES{lc $1}
                 if $opt->{input}->[0] =~ /\.([a-z]+)$/;
@@ -291,7 +291,15 @@ sub run {
 
         $record = $record->sort if $self->{order};
 
-        $record->{record} = $record->fields(@getFields) if @getFields;
+        if ($command eq 'filter' && @pathes) {
+            my @values
+                = map {@{$record->match($_, split => 1) // []}} @pathes;
+            return unless @values;
+        }
+        else {
+            # reduce record to selected fields
+            $record->{record} = $record->fields(@getFields) if @getFields;
+        }
         return if $record->empty;
 
         # TODO: also validate on other commands?
