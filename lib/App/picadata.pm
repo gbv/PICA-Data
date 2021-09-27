@@ -33,8 +33,12 @@ my %TYPES = (
     ndjson => 'JSON',
 );
 
-my %COLORS
-    = (tag => 'blue', occurrence => 'blue', code => 'red', value => 'green');
+my %COLORS = (
+    tag        => 'magenta',
+    occurrence => 'magenta',
+    code       => 'red',
+    value      => 'green'
+);
 
 sub new {
     my ($class, @argv) = @_;
