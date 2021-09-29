@@ -230,7 +230,7 @@ sub check_value {
 }
 
 sub field_identifier {
-    my $fields = ref $_[0] eq 'PICA::Schema' ? shift->{fields} : undef;
+    my $fields = reftype $_[0] eq 'HASH' ? shift->{fields} : undef;
     my ($tag, $occ) = @{$_[0]};
 
     $occ

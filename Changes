@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - fix treatment of occurrence ranges in schema builder
 
 1.32 2021-09-29T09:44:13Z
     - picadata: change color blue to magenta

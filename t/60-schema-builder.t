@@ -81,4 +81,9 @@ delete $fields->{'144Z'};
 
 is_deeply $builder->schema->{fields}, $fields, '->schema removes fields with total=0';
 
+$builder = PICA::Schema::Builder->new( fields => { '045Q/01-09' => { } } );
+$builder->add([[qw(045Q 01 0 0)]]);
+
+is_deeply [ keys %{$builder->schema->{fields}} ], ['045Q/01-09'], 'occurrence ranges';
+
 done_testing;

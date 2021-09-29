@@ -3,7 +3,6 @@ use v5.14.1;
 
 our $VERSION = '1.32';
 
-use PICA::Schema qw(field_identifier);
 use Scalar::Util qw(reftype);
 use Storable qw(dclone);
 
@@ -24,7 +23,7 @@ sub add {
     foreach (@$record) {
         my ($tag, $occ, @content) = @$_;
 
-        my $id = field_identifier($_);
+        my $id = $self->field_identifier($_);
 
         # check whether field is repeated within this record
         if ($field_identifiers{$id}) {
