@@ -1,7 +1,7 @@
 package PICA::Writer::Plain;
 use v5.14.1;
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 
 use charnames qw(:full);
 use Term::ANSIColor;

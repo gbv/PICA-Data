@@ -2,7 +2,7 @@ package PICA::Parser::Plain;
 use v5.14.1;
 use utf8;
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 
 use charnames ':full';
 use Carp qw(carp croak);
