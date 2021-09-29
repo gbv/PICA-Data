@@ -117,6 +117,12 @@ sub check_field {
         return ();
     }
 
+    return check_subfields($field, $spec, %opts);
+}
+
+sub check_subfields {
+    my ($field, $spec, %opts) = @_;
+
     my %errors;
     if ($spec->{subfields}) {
         my $order;
@@ -167,7 +173,6 @@ sub check_field {
             }
         }
     }
-
     return %errors ? PICA::Error->new($field, subfields => \%errors) : ();
 }
 
@@ -189,41 +194,68 @@ sub check_annotation {
     }
 }
 
-sub check_value {
-    my ($value, $schedule, %opts) = @_;
+sub check_pattern {
+    my ($value, $pattern) = @_;
 
     # TODO: check compatible with ECMA 262 (2015) regular expression grammar
-    if ($schedule->{pattern} and $value !~ /$schedule->{pattern}/) {
-        return {value => $value, pattern => $schedule->{pattern},};
+    if ($pattern and $value !~ /$pattern/) {
+        return {value => $value, pattern => $pattern};
     }
+}
 
-    # check positions and codes
-    my $positions = $schedule->{positions} // {};
-    foreach my $pos (keys %$positions) {
+sub check_positions {
+    my ($value, $positions, %opts) = @_;
+
+    return unless $positions;
+
+    for my $pos (keys %$positions) {
+        my $def = $positions->{$pos};
+
         my @p = split '-', $pos;
 
         if (length $value < int $p[-1]) {
             return {value => $value, position => $pos,};
         }
 
-        my $def = $positions->{$pos};
-        if ($def->{codes}) {
-            my $codes      = $def->{codes};
-            my $deprecated = $def->{'deprecated-codes'} // {};
-            my $c          = substr $value, $p[0] - 1,
-                (@p > 1 ? $p[1] - $p[0] : 0) + 1;
-            if (!defined $codes->{$c}) {
-                if (!$deprecated->{$c}) {
-                    return {value => $value, position => $pos};
-                }
-                elsif (!$opts{allow_deprecated}
-                    && !$opts{allow_deprecated_codes})
-                {
-            # TODO: there is no way to see that an invalid value is deprecated
-                    return {value => $value, position => $pos};
-                }
-            }
+        my $val = substr $value, $p[0] - 1, (@p > 1 ? $p[1] - $p[0] : 0) + 1;
+
+        if (my $error = check_pattern($val, $def->{pattern})) {
+            return {%$error, position => $pos};
         }
+
+        if (check_code($val, $def, %opts)) {
+            return {value => $val, position => $pos};
+        }
+    }
+}
+
+sub check_code {
+    my ($code, $def, %opts) = @_;
+
+    # code list only given as URI
+    return unless ref $def->{codes};
+
+    # code is defined
+    return if exists $def->{codes}{$code};
+
+    # code is deprecated and we allow deprecated codes
+    if ($opts{allow_deprecated} || $opts{allow_deprecated_codes}) {
+        my $deprecated = $def->{'deprecated-codes'};
+        return ref $deprecated && !(exists $deprecated->{$code});
+    }
+
+    return 1;
+}
+
+sub check_value {
+    my ($value, $schedule, %opts) = @_;
+
+    if (my $error = check_pattern($value, $schedule->{pattern})) {
+        return $error;
+    }
+
+    if (my $error = check_positions($value, $schedule->{positions}, %opts)) {
+        return $error;
     }
 
     return;
@@ -325,8 +357,9 @@ sub clean_pica {
             }
         }
 
-        my $msg = check_annotation($field, %options);
-        $error->($msg, $field) if $msg;
+        if (my $msg = check_annotation($field, %options)) {
+            $error->($msg, $field);
+        }
 
         next if $options{ignore_subfields};
 
@@ -488,6 +521,10 @@ plain occurrence.
 
 Check a subfield value against a subfield schedule. On malformed values returns
 a L<subfield error|PICA::Error/SUBFIELD ERRORS> without C<message> key.
+
+=head2 check_pattern( $value, $pattern )
+
+Check a value against a pattern and return an error on failure.
 
 =head1 LIMITATIONS
 
