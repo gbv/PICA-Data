@@ -78,6 +78,7 @@ is_deeply $builder->{fields}, $fields;
 
 $builder->{fields}{'144Z'}{total} = 0;
 delete $fields->{'144Z'};
+
 is_deeply $builder->schema->{fields}, $fields, '->schema removes fields with total=0';
 
 done_testing;

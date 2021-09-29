@@ -11,7 +11,7 @@ use parent 'PICA::Schema';
 
 sub new {
     my $class = shift;
-    bless {fields => {}, total => 0, @_}, $class;
+    bless {fields => {}, records => 0, @_}, $class;
 }
 
 sub add {
@@ -40,7 +40,7 @@ sub add {
             $fields->{$id}
                 = {total => 0, records => 0, tag => $tag, subfields => {},};
             $fields->{$id}{occurrence} = $occ if $occ > 0 && length $id gt 4;
-            $fields->{$id}{required} = \1 unless $self->{total};
+            $fields->{$id}{required} = \1 unless $self->{records};
         }
 
         my $subfields = $fields->{$id}{subfields};
@@ -82,7 +82,7 @@ sub add {
         delete $fields->{$_}{required};
     }
 
-    $self->{total}++;
+    $self->{records}++;
 }
 
 sub schema {
@@ -121,7 +121,7 @@ field that have been used in any of the inspected records. The schema can tell:
 
 =item
 
-the C<total> number of inspected records
+the number of inspected C<records>
 
 =item
 

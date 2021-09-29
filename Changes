@@ -2,6 +2,8 @@ Revision history for PICA::Data
 
 {{$NEXT}}
     - picadata: change color blue to magenta
+    - schema builder: rename 'total' number to 'records'
+      to align with Avram specification 0.7.0
 
 1.31 2021-09-24T08:34:41Z
     - picadata: add command 'filter'
