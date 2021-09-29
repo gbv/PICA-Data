@@ -1,7 +1,7 @@
 package PICA::Writer::JSON;
 use v5.14.1;
 
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 
 use Scalar::Util qw(reftype);
 use JSON::PP;
