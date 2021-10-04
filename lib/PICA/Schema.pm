@@ -13,6 +13,7 @@ our @EXPORT_OK = qw(field_identifier check_value clean_pica);
 
 sub new {
     my ($class, $schema) = @_;
+    cleanup_field_schedule($schema->{fields});
     bless $schema, $class;
 }
 
@@ -261,8 +262,30 @@ sub check_value {
     return;
 }
 
+sub cleanup_field_schedule {
+    my ($fields) = @_;
+
+    # allow ..../00 as field identifier
+    for (grep {$_ =~ qr{/00$}} keys %$fields) {
+        my $tag = substr $_, 0, 4;
+        if ($fields->{$tag}) {
+            warn "duplicated field $_ is removed from schedule\n";
+            delete $fields->{$_};
+        }
+        else {
+            $fields->{$tag} = delete $fields->{$_};
+        }
+    }
+
+    # TODO: detect overlap of ranges
+}
+
 sub field_identifier {
+
+    $_[0]->{_ranges} = 1 if reftype $_[0] eq 'HASH';
+
     my $fields = reftype $_[0] eq 'HASH' ? shift->{fields} : undef;
+
     my ($tag, $occ) = @{$_[0]};
 
     $occ
@@ -273,7 +296,7 @@ sub field_identifier {
     if ($fields && !exists $fields->{"$tag/$occ"}) {
 
         # TODO: we could create an index to speed up this slow lookup
-        for my $id (keys %$fields) {
+        for my $id (sort keys %$fields) {
             return $id
                 if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
         }

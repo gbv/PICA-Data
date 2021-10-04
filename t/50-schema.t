@@ -54,4 +54,10 @@ foreach (@{$tests->{tests}}) {
         }, 'PICA::Error'], "report malformed data";
 }
 
+{
+    my $a = PICA::Schema->new({ fields => { '021A/00' => {} } });
+    my $b = PICA::Schema->new({ fields => { '021A' => {} } });
+    is_deeply $a, $b, 'normalize occurrence zero';
+}
+
 done_testing;
