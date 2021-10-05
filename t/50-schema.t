@@ -60,4 +60,17 @@ foreach (@{$tests->{tests}}) {
     is_deeply $a, $b, 'normalize occurrence zero';
 }
 
+{
+    my $fields = {
+        '222Xx0' => {},
+        '222Xx1-4' => {},
+        '222Xx00-04' => {},
+    };
+    my $schema = PICA::Schema->new({ fields => $fields });
+    is $schema->field_identifier([qw(222X 0 x 0)]), '222Xx0', 'x-counter';
+    is $schema->field_identifier([qw(222X 0 y 0)]), '222X', 'no x-counter';
+    is $schema->field_identifier([qw(222X 0 x 2)]), '222Xx1-4', 'x-counter';
+    is $schema->field_identifier([qw(222X 0 x 01)]), '222Xx00-04', 'x-counter';
+}
+
 done_testing;

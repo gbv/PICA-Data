@@ -277,7 +277,7 @@ sub cleanup_field_schedule {
         }
     }
 
-    # TODO: detect overlap of ranges
+    # TODO: detect overlap of ranges (not required by Avram specification)
 }
 
 sub field_identifier {
@@ -286,22 +286,45 @@ sub field_identifier {
 
     my $fields = reftype $_[0] eq 'HASH' ? shift->{fields} : undef;
 
-    my ($tag, $occ) = @{$_[0]};
+    my ($tag, $occ, @sf) = @{$_[0]};
+    my $level = substr $tag, 0, 1;
 
-    $occ
-        = (substr($tag, 0, 1) ne '2' && $occ > 0)
-        ? sprintf("%02d", $occ)
-        : '';
+    $occ = ($level ne '2' && $occ > 0) ? sprintf("%02d", $occ) : '';
 
-    if ($fields && !exists $fields->{"$tag/$occ"}) {
+    if ($fields) {
+        return "$tag/$occ" if exists $fields->{"$tag/$occ"};
 
-        # TODO: we could create an index to speed up this slow lookup
-        for my $id (sort keys %$fields) {
-            return $id
-                if $id =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2;
+# Find matching occurrence range
+        # (TODO: create an index to speed up this slow lookup?)
+
+        return $_
+            for grep {$_ =~ /^$tag\/(..)-(..)$/ && $occ >= $1 && $occ <= $2}
+            sort keys %$fields;
+
+        if ($level eq '2') {
+
+            # get value of first subfield $x
+            my $x;
+            for my $i (0 .. $#sf) {
+                if ($i % 2 && $sf[$i - 1] eq 'x') {
+                    $x = $sf[$i];
+                    last;
+                }
+            }
+
+            # find field definition with matching field counter
+            if ($x =~ /^[0-9][0-9]?$/) {
+                return "${tag}x$x" if exists $fields->{"${tag}x$x"};
+
+                return $_
+                    for grep {
+                           $_ =~ /^${tag}x(..?)-(..?)$/
+                        && $x >= $1
+                        && $x <= $2
+                        && length $1 == length $x
+                    } sort keys %$fields;
+            }
         }
-
-        # TODO: support x fields with field counter
     }
 
     return $occ ne '' ? "$tag/$occ" : $tag;
