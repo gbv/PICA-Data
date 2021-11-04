@@ -64,4 +64,16 @@ is_deeply $record->subfields('01..')->mixed, {
     y => ''
   }, 'subfields';
 
+is_deeply pica_field('123A', a => 0, b => '', c => 1), ['123A', undef, a => 0, c => 1], 'pica_field';
+is_deeply pica_field('123A/00', a => 0), ['123A', undef, a => 0], 'pica_field';
+is_deeply pica_field('123A/1', a => 0), ['123A', '01', a => 0], 'pica_field';
+
+$record = PICA::Data->new;
+$record->append('037A/01', a => 'hello', b => 'world', x => undef, y => '');
+$record->append('037A', 1, a => 'hello', b => 'world');
+is_deeply $record->fields, [
+    ['037A', '01', a => 'hello', b => 'world'],
+    ['037A', '01', a => 'hello', b => 'world'],
+], 'append';
+
 done_testing;

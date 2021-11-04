@@ -7,7 +7,7 @@ use Exporter 'import';
 our @EXPORT_OK
     = qw(pica_data pica_parser pica_writer pica_path pica_xml_struct
     pica_match pica_values pica_value pica_fields pica_subfields
-    pica_title pica_holdings pica_items
+    pica_title pica_holdings pica_items pica_field
     pica_split pica_annotation pica_sort pica_guess clean_pica pica_string pica_id
     pica_diff pica_patch pica_empty);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
@@ -60,8 +60,64 @@ sub pica_values {
     return $path->record_subfields($record);
 }
 
+sub pica_field {
+    my $tag = shift;
+
+    # simplify migration from PICA::Record
+    return pica_field($tag->{_tag}, $tag->{_occurrence},
+        @{$tag->{_subfields}})
+        if ref $tag eq 'PICA::Field';
+
+    my $occ = '';
+
+    if (@_ % 2) {
+        $occ = shift // '';
+        croak "invalid tag: $tag"        if $tag !~ qr/^[0-2]\d{2}[A-Z@]$/;
+        croak "invalid occurrence: $occ" if $occ !~ qr/^\d+$/;
+    }
+    elsif ($tag =~ m/^([0-2]\d{2}[A-Z@])(\/(\d+))?$/) {
+        $tag = $1;
+        $occ = $3;
+    }
+
+    if ($occ > 0) {
+        if ($occ < 99) {
+            $occ = sprintf('%02d', $occ);
+        }
+        elsif (substr($tag, 0, 1) eq '2') {
+            $occ = sprintf('%03d', $occ);
+        }
+        else {
+            croak "invalid occurrence: $occ";
+        }
+    }
+    else {
+        $occ = undef;
+    }
+
+    croak "missing subfields" unless @_;
+
+    my @field = ($tag, $occ);
+
+    while (@_) {
+        my $code  = shift;
+        my $value = shift;
+
+        croak "invalid subfield code: $code" if $code !~ /^[A-Za-z0-9]$/;
+
+        if (defined $value and $value ne '') {
+            push @field, $code, $value;
+        }
+    }
+
+    return \@field;
+}
+
 sub pica_fields {
     my $record = shift;
+    croak "missing record. Did you mean pica_field instead of pica_fields?"
+        unless ref $record;
+
     $record = $record->{record} if reftype $record eq 'HASH';
 
     return $record unless @_;
@@ -273,6 +329,11 @@ sub pica_annotation {
     else {
         return $len % 2 ? $field->[$len - 1] : undef;
     }
+}
+
+sub append {
+    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
+    push @$fields, pica_field(@_);
 }
 
 *fields    = *pica_fields;
@@ -659,7 +720,7 @@ available as C<_id> Also available as accessor C<items>.
 
 =head2 pica_split( $record)
 
-Returns the record splitted into multiple records for each level.
+Returns the record splitted into individual records for each level.
 
 =head2 pica_sort( $record )
 
@@ -742,6 +803,18 @@ L<PICA::Writer::Plain> by default. This are equivalent:
 
 Serialize PICA record in a given format (C<plain> by default). This method can
 also be used as function C<pica_string>.
+
+=head2 append( $tag, [$occurrence,] @subfields )
+
+Add a field to the end of the record. An occurrence can be specified as part of
+the tag or as second argument. Subfields with empty value are ignored, so the
+following are equivalent:
+
+    $record->append('037A/01', a => 'hello', b => 'world', x => undef, y => '');
+    $record->append('037A', 1, a => 'hello', b => 'world');
+
+To simplify migration from L<PICA::Record> the field may also be given as
+instance of L<PICA::Field> but this feature may be removed in a future version.
 
 =head2 diff( $record )
 
