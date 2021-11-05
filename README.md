@@ -199,7 +199,7 @@ available as `_id` Also available as accessor `items`.
 
 ## pica\_split( $record)
 
-Returns the record splitted into multiple records for each level.
+Returns the record splitted into individual records for each level.
 
 ## pica\_sort( $record )
 
@@ -282,6 +282,18 @@ Write PICA record with given [PICA::Writer::...](https://metacpan.org/pod/PICA::
 
 Serialize PICA record in a given format (`plain` by default). This method can
 also be used as function `pica_string`.
+
+## append( $tag, \[$occurrence,\] @subfields )
+
+Add a field to the end of the record. An occurrence can be specified as part of
+the tag or as second argument. Subfields with empty value are ignored, so the
+following are equivalent:
+
+    $record->append('037A/01', a => 'hello', b => 'world', x => undef, y => '');
+    $record->append('037A', 1, a => 'hello', b => 'world');
+
+To simplify migration from [PICA::Record](https://metacpan.org/pod/PICA::Record) the field may also be given as
+instance of [PICA::Field](https://metacpan.org/pod/PICA::Field) but this feature may be removed in a future version.
 
 ## diff( $record )
 
