@@ -4,8 +4,13 @@ use utf8;
 
 our $VERSION = '1.34';
 
+require Exporter;
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(pica_field_matcher);
+
 use Carp qw(confess);
 use Scalar::Util qw(reftype);
+use List::Util qw(any);
 
 use overload '""' => \&stringify;
 
@@ -321,6 +326,14 @@ sub positions {
     }
 
     return $pos;
+}
+
+sub pica_field_matcher {
+    my @pathes = map {ref $_ ? $_ : PICA::Path->new($_)} @_;
+    sub {
+        my $field = shift;
+        any {$_->match_field($field)} @pathes;
+    };
 }
 
 1;
@@ -719,6 +732,16 @@ Return the stringified occurrences expression or undefined.
 =head2 positions
 
 Return the stringified position or undefined.
+
+=head1 FUNCTIONS
+
+=head2 pica_field_matcher( $path [, $path...] )
+
+Return a function that tells whether a field matches any of given PICA Path
+expressions:
+
+  my $matcher = pica_field_matcher("012X","012Y");
+  if ($matcher->($field)) { ... }
 
 =head1 SEE ALSO
 

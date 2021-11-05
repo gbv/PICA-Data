@@ -20,7 +20,7 @@ use Scalar::Util qw(reftype blessed);
 use Encode qw(decode);
 use List::Util qw(first any);
 use IO::Handle;
-use PICA::Path;
+use PICA::Path qw(pica_field_matcher);
 use Hash::MultiValue;
 
 use sort 'stable';
@@ -122,16 +122,42 @@ sub pica_fields {
 
     return $record unless @_;
 
-    my @pathes = map {
-        ref $_ ? $_ : eval {PICA::Path->new($_)}
-    } @_;
+    my $matcher = eval {pica_field_matcher(@_)};
+    return [] unless $matcher;
 
-    return [
-        grep {
-            my $cur = $_;
-            any {$_->match_field($cur)} @pathes
-        } @$record
-    ];
+    return [grep {$matcher->($_)} @$record];
+}
+
+sub pica_append {
+    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
+    push @$fields, pica_field(@_);
+
+    # TODO: update _id?
+}
+
+sub pica_remove {
+    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
+    my $matcher = pica_field_matcher(@_);
+
+    # modify in_place
+    splice @$fields, 0, @$fields, grep {!$matcher->($_)} @$fields;
+
+    # TODO: update _id?
+}
+
+sub pica_update {
+    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
+    my $value = pica_field(@_);
+
+    my $path = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
+
+    for (my $i = 0; $i < @$fields; $i++) {
+        if ($path->match_field($fields->[$i])) {
+            $fields->[$i] = $value;
+        }
+    }
+
+    # TODO: update _id?
 }
 
 sub pica_subfields {
@@ -331,11 +357,6 @@ sub pica_annotation {
     }
 }
 
-sub append {
-    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
-    push @$fields, pica_field(@_);
-}
-
 *fields    = *pica_fields;
 *subfields = *pica_subfields;
 *title     = *pica_title;
@@ -351,6 +372,9 @@ sub append {
 *empty     = *pica_empty;
 *diff      = *pica_diff = *PICA::Patch::pica_diff;
 *patch     = *pica_patch = *PICA::Patch::pica_patch;
+*append    = *pica_append;
+*remove    = *pica_remove;
+*update    = *pica_update;
 
 use PICA::Patch;
 use PICA::Parser::XML;

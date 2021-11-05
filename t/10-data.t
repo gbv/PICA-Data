@@ -1,5 +1,6 @@
 use strict;
 use Test::More;
+use Test::Exception;
 
 use PICA::Data ':all';
 
@@ -38,6 +39,7 @@ is_deeply $record->fields('003@', '010@'),
 is $record->id, '12345', '->id';
 
 is_deeply $record->fields('?!*~'), [], 'invalid PICA path';
+# throws_ok { $record->fields('?!*~') } qr/invalid pica path/, 'invalid PICA Path';
 is scalar @{pica_fields($record, '1...')}, 5, 'pica_fields';
 
 my $field = ['000@', '', '0', '0'];
@@ -71,9 +73,15 @@ is_deeply pica_field('123A/1', a => 0), ['123A', '01', a => 0], 'pica_field';
 $record = PICA::Data->new;
 $record->append('037A/01', a => 'hello', b => 'world', x => undef, y => '');
 $record->append('037A', 1, a => 'hello', b => 'world');
+$record->append('123X/00', x => 1);
 is_deeply $record->fields, [
     ['037A', '01', a => 'hello', b => 'world'],
     ['037A', '01', a => 'hello', b => 'world'],
+    ['123X', undef, x => 1],
 ], 'append';
+
+$record->update('123X', x => 2);
+$record->remove('037.');
+is_deeply $record->fields, [ ['123X', undef, x => 2], ], 'update and remove';
 
 done_testing;
