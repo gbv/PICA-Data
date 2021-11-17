@@ -3,6 +3,7 @@
 PICA::Data - PICA record processing
 
 [![Unix build Status](https://travis-ci.com/gbv/PICA-Data.png)](https://travis-ci.com/gbv/PICA-Data)
+[![Linux build status](https://github.com/gbv/PICA-Data/actions/workflows/linux.yml/badge.svg)](https://github.com/gbv/PICA-Data/actions/workflows/linux.yml)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/5qjak74x7mjy7ne6?svg=true)](https://ci.appveyor.com/project/nichtich/pica-data)
 [![Coverage Status](https://coveralls.io/repos/gbv/PICA-Data/badge.svg)](https://coveralls.io/r/gbv/PICA-Data)
 [![Kwalitee Score](http://cpants.cpanauthors.org/dist/PICA-Data.png)](http://cpants.cpanauthors.org/dist/PICA-Data)
