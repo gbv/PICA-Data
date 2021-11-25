@@ -43,8 +43,8 @@ my %COLORS = (
 sub new {
     my ($class, @argv) = @_;
 
-    my $terminal = -t *STDIN;                            ## no critic
-    my $command = (!@argv && $terminal) ? 'help' : '';
+    my $terminal = -t *STDIN;                             ## no critic
+    my $command  = (!@argv && $terminal) ? 'help' : '';
 
     my $number = 0;
     if (my ($i) = grep {$argv[$_] =~ /^-(\d+)$/} (0 .. @argv - 1)) {
@@ -79,7 +79,7 @@ sub new {
         'version|V',
     ) or pod2usage(2);
 
-    $opt->{number} = $number;
+    $opt->{number}   = $number;
     $opt->{annotate} = 0 if $noAnnotate;
     $opt->{color}
         = !$opt->{mono} && ($opt->{color} || -t *STDOUT);    ## no critic
@@ -224,7 +224,7 @@ sub run {
     my ($self)  = @_;
     my $command = $self->{command};
     my $schema  = $self->{schema};
-    my @pathes = @{$self->{path} || []};
+    my @pathes  = @{$self->{path} || []};
 
     # commands that don't parse any input data
     if ($self->{error}) {
@@ -264,7 +264,7 @@ sub run {
     if ($self->{to}) {
         $writer = pica_writer(
             $self->{to},
-            color => ($self->{color} ? \%COLORS : undef),
+            color    => ($self->{color} ? \%COLORS : undef),
             schema   => $schema,
             annotate => $self->{annotate},
         );
@@ -328,7 +328,7 @@ sub run {
         if ($command eq 'count') {
             $stats->{holdings}
                 += grep {@{$_->fields('1...')}} @{$record->holdings};
-            $stats->{items} += grep {!$_->empty} @{$record->items};
+            $stats->{items}  += grep {!$_->empty} @{$record->items};
             $stats->{fields} += @{$record->{record}};
         }
         $stats->{records}++;
@@ -453,6 +453,7 @@ sub document {
             $status = $def->{repeatable} ? '*' : 'o';
         }
         my $doc = "$id\t$status\t" . $def->{label} // '';
+        utf8::decode($doc);
         say $doc =~ s/[\s\r\n]+/ /mgr;
     }
     elsif (!$self->{unknown}) {

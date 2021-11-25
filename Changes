@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Fix Unicode output of field labels
 
 1.35 2021-11-05T10:13:05Z
     - Add methods to append, update and remove fields in record (#118)
