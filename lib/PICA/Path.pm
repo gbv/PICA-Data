@@ -16,7 +16,7 @@ use overload '""' => \&stringify;
 
 sub new {
     my $class = shift;
-    my $self = parse(@_) or confess "invalid pica path";
+    my $self  = parse(@_) or confess "invalid pica path";
     bless $self, $class;
 }
 
@@ -26,7 +26,7 @@ sub parse {
     return if $path !~ /^
         (?<tag>[012.][0-9.][0-9.][A-Z@.])
         (\[(?<occurrence>[0-9.]{2,3}|\d+-\d+)\])?
-        (\$?(?<subfields>[_A-Za-z0-9]+))?
+        ([\$.]?(?<subfields>[_A-Za-z0-9]+))?
         (\/(\d+)?(-(\d+)?)?)? # position
     /x;
 
