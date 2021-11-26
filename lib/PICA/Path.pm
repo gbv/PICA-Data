@@ -20,19 +20,29 @@ sub new {
     bless $self, $class;
 }
 
+our $TAG       = '(?<tag>[012.][0-9.][0-9.][A-Z@.])';
+our $SUBFIELDS = '([\$.]?(?<subfields>[A-Za-z0-9]+|\*))?';
+our $POSITION  = '(?<position>\/(\d+)?(-(\d+)?)?)?';
+
 sub parse {
     my ($path, %options) = @_;
 
     return if $path !~ /^
-        (?<tag>[012.][0-9.][0-9.][A-Z@.])
+        $TAG
         (\[(?<occurrence>[0-9.]{2,3}|\d+-\d+)\])?
-        ([\$.]?(?<subfields>[_A-Za-z0-9]+))?
-        (\/(\d+)?(-(\d+)?)?)? # position
+        $SUBFIELDS
+        $POSITION
     /x;
 
     my $field      = $+{tag};
     my $occurrence = $+{occurrence};
-    my $subfield = defined $+{subfields} ? "[$+{subfields}]" : "[_A-Za-z0-9]";
+    my $subfield   = $+{subfields};
+    if ($subfield eq '*') {
+        $subfield = qr{[A-Za-z0-9]};
+    }
+    elsif (defined $subfield) {
+        $subfield = qr{[$subfield]};
+    }
 
     my @position;
     if (defined $6) {    # position
@@ -91,8 +101,6 @@ sub parse {
             $occurrence = qr{$occurrence};
         }
     }
-
-    $subfield = qr{$subfield};
 
     return {
         field      => $field,
@@ -280,7 +288,9 @@ sub stringify {
     }
 
     my $pos = $self->positions;
-    $str .= "/$pos" if defined $pos;
+    if (defined $pos) {
+        $str .= defined $subfields ? "/$pos" : "\$*/$pos";
+    }
 
     $str;
 }
@@ -296,12 +306,15 @@ sub occurrences {
 }
 
 sub subfields {
+    return unless defined $_[0]->{subfield};
     my $subfields = unescape($_[0]->{subfield});
-    if (defined $subfields and $subfields ne '[_A-Za-z0-9]') {
+    if ($subfields eq '[A-Za-z0-9]') {
+        return '*';
+    }
+    else {
         $subfields =~ s/\[|\]//g;
         return $subfields;
     }
-    return;
 }
 
 sub positions {
@@ -621,7 +634,7 @@ e.g. C<[12]>, C<[0.]> or C<[102]>.
 
 =item
 
-An optional list of subfields. Allowed subfield codes include C<_A-Za-z0-9>.
+An optional list of subfields. Allowed subfield codes include C<A-Za-z0-9>.
 
 =item
 
