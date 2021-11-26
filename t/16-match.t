@@ -363,6 +363,8 @@ note('Referencing the whole record');
             ["http://example.org/", "A", "B", "C",],
             ["Title",               "Supplement"],
             [1600, 1700, 1800, 1900, 2000,],
+            ["001"],
+            ["002"],
             ["003", "004"],
             ["005"]
         ],

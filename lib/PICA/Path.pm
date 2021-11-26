@@ -49,11 +49,11 @@ sub parse {
         $subfield = qr{[$subfield]};
     }
 
-    if ($occurrence =~ /^0*$/) {
-        $occurrence = undef;
-    }
-    elsif ($occurrence eq '*') {
+    if ($occurrence eq '*' or (!$occurrence && $field =~ /^[2.]/)) {
         $occurrence = '*';
+    }
+    elsif ($occurrence =~ /^0*$/) {
+        $occurrence = undef;
     }
     elsif ($occurrence =~ /-/) {
         my ($from, $to) = map {1 * $_} split '-', $occurrence;
@@ -284,7 +284,9 @@ sub stringify {
     my $str = $self->fields;
 
     my $occurrence = $self->occurrences;
-    $str .= "/$occurrence" if defined $occurrence;
+    if (defined $occurrence) {
+        $str .= "/$occurrence" unless $str =~ /^[2.]/ and $occurrence eq '*';
+    }
 
     my $subfields = $self->subfields;
     if (defined $subfields) {
@@ -578,19 +580,19 @@ Option C<nested_arrays> creates a list for every field found:
 Field C<045F> is repeated and has occurrences.
     
     # get subfield from field with specific occurrence
-    $path = PICA::Path->new('045F[01]$a');
+    $path = PICA::Path->new('045F/01$a');
     $match = $path->match($record);
     # $match = '001'
     
     # get subfield from field with wildcard for occurrence
-    $path = PICA::Path->new('045F[0.]$a');
+    $path = PICA::Path->new('045F/0.$a');
     $match = $path->match($record);
     # $match = '001002'
 
 Option C<split> creates a list out of subfields:
 
     # split subfields to list
-    $path = PICA::Path->new('045F[0.]$a');
+    $path = PICA::Path->new('045F/0.$a');
     $match = $path->match($record, split => 1);
     # $match = ['001', '002']
 
@@ -601,26 +603,26 @@ The dot (.) is a wildcard for field tags, occurrence and subfield codes.
 The path C<.....> means take any subfield from any field.
 
     # get all subfields from all fields
-    $path = PICA::Path->new('....$.');
+    $path = PICA::Path->new('..../*$.');
     $match = $path->match($record);
     # $match = '1234-56781011-1213http://example.org/ABCTitleSupplement16001700180019002000001002003004005'
     
     # get specific subfield from all fields
-    $path = PICA::Path->new('....$a');
+    $path = PICA::Path->new('..../*$a');
     $match = $path->match($record);
     # $match = 'Title001002'
 
 Option C<split> creates a list out of subfields:
 
     # split subfields to list
-    $path = PICA::Path->new('....$a');
+    $path = PICA::Path->new('..../*$a');
     $match = $path->match($record, split => 1);
     # $match = ['Title', '001', '002']
 
 Option C<nested_arrays> creates a list for every field found:
 
     # split fields to lists
-    $path = PICA::Path->new('....');
+    $path = PICA::Path->new('..../*');
     $match = $path->match($record, split => 1, nested_arrays => 1);
     # $match = [['1234-5678'], ['1011-1213'], [ 'http://example.org/', 'A', 'B', 'C', ], [ 'Title', 'Supplement' ], [ 1600, 1700, 1800, 1900, 2000, ], ['001'], ['002'], [ '003', '004' ], ['005']]
 
@@ -641,7 +643,8 @@ or C<@>.  The character C<.> can be used as wildcard.
 
 An optional occurrence, given by two or three digits (or C<.> as wildcard) in
 brackets, e.g. C<[12]>, C<[0.]> or C<[102]> or following a slash (e.g. C</12>,
-C</0.>...). Use a star for any occurrence (C</*>).
+C</0.>...). Use a star for any occurrence (C</*>). The star can be omitted if
+the first character of the tag is C<2> or C<.>.
 
 =item
 
