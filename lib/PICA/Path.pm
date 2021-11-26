@@ -20,23 +20,28 @@ sub new {
     bless $self, $class;
 }
 
-our $TAG       = '(?<tag>[012.][0-9.][0-9.][A-Z@.])';
-our $SUBFIELDS = '([\$.]?(?<subfields>[A-Za-z0-9]+|\*))?';
-our $POSITION  = '(?<position>\/(\d+)?(-(\d+)?)?)?';
+our $TAG        = '(?<tag>[012.][0-9.][0-9.][A-Z@.])';
+our $SUBFIELDS  = '(?<subfields>[A-Za-z0-9]+|\*)';
+our $POSITION   = '(?<position>(\d+)?(-(\d+)?)?)';
+our $OCCURRENCE = '(?<occurrence>(\d+-\d+|[0-9.]{1,3}|\*))';
 
 sub parse {
-    my ($path, %options) = @_;
+    my ($path) = @_;
 
-    return if $path !~ /^
+    my $pattern = qr{^
         $TAG
-        (\[(?<occurrence>[0-9.]{2,3}|\d+-\d+)\])?
-        $SUBFIELDS
-        $POSITION
-    /x;
+        (\[$OCCURRENCE\] | \/$OCCURRENCE)?
+        ([\$.]?$SUBFIELDS)?
+        (\/$POSITION)?
+    $}x;
+
+    return if $path !~ $pattern;
 
     my $field      = $+{tag};
     my $occurrence = $+{occurrence};
     my $subfield   = $+{subfields};
+    my $position   = $+{position};
+
     if ($subfield eq '*') {
         $subfield = qr{[A-Za-z0-9]};
     }
@@ -44,69 +49,65 @@ sub parse {
         $subfield = qr{[$subfield]};
     }
 
-    my @position;
-    if (defined $6) {    # position
-        if (!defined $occurrence && $options{position_as_occurrence}) {
-            $occurrence = $7 . $8;
-        }
-        else {
-            my ($from, $dash, $to, $length) = ($7, $8, $9, 0);
-
-            if ($dash) {
-                return unless defined($from // $to);    # /-
-            }
-
-            if (defined $to) {
-                if (!$from and $dash) {                 # /-X
-                    $from = 0;
-                }
-                $length = $to - $from + 1;
-            }
-            else {
-                if ($8) {
-                    $length = undef;
-                }
-                else {
-                    $length = 1;
-                }
-            }
-
-            if (!defined $length or $length >= 1) {
-                unless (!$from and !defined $length) {    # /0-
-                    @position = ($from, $length);
-                }
-            }
-        }
-    }
-
-    $field = qr{$field};
-
-    if ($occurrence =~ /^0+$/) {
+    if ($occurrence =~ /^0*$/) {
         $occurrence = undef;
     }
-    elsif (defined $occurrence) {
-        if ($occurrence =~ /-/) {
-            my ($from, $to) = map {1 * $_} split '-', $occurrence;
-            if ($from eq $to) {
-                $occurrence = qr{$from};
-            }
-            elsif ($from < $to) {
-                $occurrence = [$from, $to];
-            }
-            else {
-                return;
-            }
+    elsif ($occurrence eq '*') {
+        $occurrence = '*';
+    }
+    elsif ($occurrence =~ /-/) {
+        my ($from, $to) = map {1 * $_} split '-', $occurrence;
+        if ($from eq $to) {
+            $occurrence = qr{$from};
+        }
+        elsif ($from < $to) {
+            $occurrence = [$from, $to];
         }
         else {
-            $occurrence = qr{$occurrence};
+            return;
+        }
+    }
+    elsif (defined $occurrence) {
+        $occurrence = qr{$occurrence};
+    }
+
+    my @pos;
+    if (defined $position) {
+        $position =~ $POSITION;
+
+        my ($from, $dash, $to, $length) = ($2, $3, $4, 0);
+
+        if ($dash) {
+            return unless defined($from // $to);    # /-
+        }
+
+        if (defined $to) {
+            if (!$from and $dash) {                 # /-X
+                $from = 0;
+            }
+            $length = $to - $from + 1;
+        }
+        else {
+            if ($dash) {
+                $length = undef;
+            }
+            else {
+                $length = 1;
+            }
+        }
+
+        if (!defined $length or $length >= 1) {
+            unless (!$from and !defined $length) {    # /0-
+                @pos = ($from, $length);
+            }
         }
     }
 
     return {
-        field      => $field,
+        field      => qr{$field},
         occurrence => $occurrence,
         subfield   => $subfield,
-        position   => \@position
+        position   => \@pos
     };
 }
 
@@ -178,13 +179,19 @@ sub match_field {
     my ($self, $field) = @_;
 
     return if $field->[0] !~ $self->{field};
-    if (my $spec = $self->{occurrence}) {
+
+    my $spec = $self->{occurrence};
+
+    if ($spec ne '*') {
         my $occ = $field->[1];
-        if (ref $spec eq 'ARRAY') {
+        if (!$spec) {
+            return if $occ > 0;
+        }
+        elsif (ref $spec eq 'ARRAY') {
             return if $occ < $spec->[0] or $occ > $spec->[1];
         }
         else {
-            return unless ($spec > 0 && $occ =~ $spec);
+            return if $occ !~ $spec;
         }
     }
 
@@ -277,7 +284,7 @@ sub stringify {
     my $str = $self->fields;
 
     my $occurrence = $self->occurrences;
-    $str .= "[$occurrence]" if defined $occurrence;
+    $str .= "/$occurrence" if defined $occurrence;
 
     my $subfields = $self->subfields;
     if (defined $subfields) {
@@ -289,7 +296,10 @@ sub stringify {
 
     my $pos = $self->positions;
     if (defined $pos) {
-        $str .= defined $subfields ? "/$pos" : "\$*/$pos";
+        $str
+            .= (defined $subfields || defined $occurrence)
+            ? "/$pos"
+            : "\$*/$pos";
     }
 
     $str;
@@ -616,7 +626,7 @@ Option C<nested_arrays> creates a list for every field found:
 
 =head1 METHODS
 
-=head2 new( $expression [, position_as_occurrence => 1 ] )
+=head2 new( $expression )
 
 Create a PICA path by parsing the path expression. The expression consists of
 
@@ -629,8 +639,9 @@ or C<@>.  The character C<.> can be used as wildcard.
 
 =item
 
-An optional occurrence, given by two or three digits (or C<.> as wildcard) in brackets,
-e.g. C<[12]>, C<[0.]> or C<[102]>.
+An optional occurrence, given by two or three digits (or C<.> as wildcard) in
+brackets, e.g. C<[12]>, C<[0.]> or C<[102]> or following a slash (e.g. C</12>,
+C</0.>...). Use a star for any occurrence (C</*>).
 
 =item
 
@@ -643,9 +654,6 @@ the first), and character ranges (such as C<2-4>, C<-3>, C<2->...) are
 supported.
 
 =back
-
-If option C<position_as_occurrence> is set, positions will be read as
-occurrences, e.g. C</2-4> is read as C<[2-4]>.
 
 =head2 match( $record, %options )
 

@@ -413,8 +413,7 @@ sub run {
 }
 
 sub parse_path {
-    eval {PICA::Path->new($_[0], position_as_occurrence => 1)}
-        || die "invalid PICA Path: $_[0]\n";
+    eval {PICA::Path->new($_[0])} || die "invalid PICA Path: $_[0]\n";
 }
 
 sub explain {

@@ -13,7 +13,7 @@ our @EXPORT_OK
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $ILN_PATH = PICA::Path->new('101@a');
-our $EPN_PATH = PICA::Path->new('203@/..0');
+our $EPN_PATH = PICA::Path->new('203@/*$0');
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype blessed);
@@ -136,7 +136,7 @@ sub pica_append {
 }
 
 sub pica_remove {
-    my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
+    my $fields  = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
     my $matcher = pica_field_matcher(@_);
 
     # modify in_place
@@ -147,7 +147,7 @@ sub pica_remove {
 
 sub pica_update {
     my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
-    my $value = pica_field(@_);
+    my $value  = pica_field(@_);
 
     my $path = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
 
@@ -173,7 +173,7 @@ sub pica_value {
     my ($record, $path) = @_;
 
     $record = $record->{record} if reftype $record eq 'HASH';
-    $path = eval {PICA::Path->new($path)} unless ref $path;
+    $path   = eval {PICA::Path->new($path)} unless ref $path;
     return unless defined $path;
 
     foreach my $field (@$record) {

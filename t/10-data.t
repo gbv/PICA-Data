@@ -13,14 +13,15 @@ foreach ('019@', pica_path('019@')) {
 
 bless $record, 'PICA::Data';
 my %map = (
-    '019@/0-1' => ['XB'],
-    '019@/1'   => ['B'],
-    '019@/5'   => [],
-    '019@/3-'  => ['CN'],
-    '019@/-1'  => ['XB'],
-    '019@x'    => [],
-    '1...b'    => ['9330', 'test$'],
-    '?+#'      => [],
+    '019@$*/0-1' => ['XB'],
+    '019@$*/1'   => ['B'],
+    '019@$*/5'   => [],
+    '019@$*/3-'  => ['CN'],
+    '019@$*/-1'  => ['XB'],
+    '019@x'      => [],
+    '1...b'      => ['9330'],
+    '1.../*b'    => ['9330', 'test$'],
+    '?+#'        => [],
 );
 foreach (keys %map) {
     is_deeply [$record->values($_)], $map{$_}, "->values($_)";
@@ -40,7 +41,7 @@ is $record->id, '12345', '->id';
 
 is_deeply $record->fields('?!*~'), [], 'invalid PICA path';
 # throws_ok { $record->fields('?!*~') } qr/invalid pica path/, 'invalid PICA Path';
-is scalar @{pica_fields($record, '1...')}, 5, 'pica_fields';
+is scalar @{pica_fields($record, '1.../*')}, 5, 'pica_fields';
 
 my $field = ['000@', '', '0', '0'];
 my $annotated = [@$field, ' '];
@@ -81,7 +82,7 @@ is_deeply $record->fields, [
 ], 'append';
 
 $record->update('123X', x => 2);
-$record->remove('037.');
+$record->remove('037./*');
 is_deeply $record->fields, [ ['123X', undef, x => 2], ], 'update and remove';
 
 done_testing;

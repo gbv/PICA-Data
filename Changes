@@ -4,6 +4,8 @@ Revision history for PICA::Data
     - Fix Unicode output of field labels
     - PICA Path: allow dot alternative to $
     - PICA Path: allow star as subfield wildcard
+    - PICA Path: field without occurrence will only match occurrence zero, use /* for any occurrence
+    - Remove option position_as_occurrence, use '/' for occurences by default
 
 1.35 2021-11-05T10:13:05Z
     - Add methods to append, update and remove fields in record (#118)
