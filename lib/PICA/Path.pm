@@ -141,7 +141,7 @@ sub match {
             = $args{pluck}
             ? $self->match_subfields($field, pluck => 1)
             : $self->match_subfields($field);
-        next unless defined $matched_subfields[0];
+        next unless grep { defined $_ } @matched_subfields;
         if ($args{split}) {
             if ($args{nested_arrays}) {
                 push @matches, \@matched_subfields;
