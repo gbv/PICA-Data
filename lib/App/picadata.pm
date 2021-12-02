@@ -443,6 +443,10 @@ sub explain {
 
 sub document {
     my ($self, $id, $def, $warn) = @_;
+
+    my $writer
+        = pica_writer('plain', color => ($self->{color} ? \%COLORS : undef));
+
     if ($def) {
         my $status = ' ';
         if ($def->{required}) {
@@ -451,7 +455,14 @@ sub document {
         else {
             $status = $def->{repeatable} ? '*' : 'o';
         }
-        my $doc = "$id\t$status\t" . $def->{label} // '';
+
+        my ($field, $subfield) = split '\$', $id;
+        $writer->write_identifier([split '/', $field]);
+        if (defined $subfield) {
+            $writer->write_subfield($subfield, '');
+        }
+
+        my $doc = "\t$status\t" . $def->{label} // '';
         utf8::decode($doc);
         say $doc =~ s/[\s\r\n]+/ /mgr;
     }
