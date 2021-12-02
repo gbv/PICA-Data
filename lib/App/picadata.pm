@@ -15,6 +15,7 @@ use Scalar::Util qw(reftype);
 use JSON::PP;
 use List::Util qw(any all);
 use Text::Abbrev;
+use Term::ANSIColor;
 
 my %TYPES = (
     bin    => 'Binary',
@@ -461,8 +462,10 @@ sub document {
         if (defined $subfield) {
             $writer->write_subfield($subfield, '');
         }
+        print "\t";
+        print $self->{color} ? colored($status, $COLORS{value}) : $status;
 
-        my $doc = "\t$status\t" . $def->{label} // '';
+        my $doc = "\t" . $def->{label} // '';
         utf8::decode($doc);
         say $doc =~ s/[\s\r\n]+/ /mgr;
     }
