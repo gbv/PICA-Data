@@ -48,6 +48,9 @@ sub parse {
     elsif (defined $subfield) {
         $subfield = qr{[$subfield]};
     }
+    elsif (defined $position) {
+        $subfield = qr{[A-Za-z0-9]};
+    }
 
     if ($occurrence eq '*' or (!$occurrence && $field =~ /^[2.]/)) {
         $occurrence = '*';
@@ -141,7 +144,7 @@ sub match {
             = $args{pluck}
             ? $self->match_subfields($field, pluck => 1)
             : $self->match_subfields($field);
-        next unless grep { defined $_ } @matched_subfields;
+        next unless grep {defined $_} @matched_subfields;
         if ($args{split}) {
             if ($args{nested_arrays}) {
                 push @matches, \@matched_subfields;

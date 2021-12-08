@@ -7,7 +7,7 @@ my %pathes = (
     '003.$abc' => '003.$abc',
     '003.abc'  => '003.$abc',
     '001B$0'   => '001B$0',    
-    '123A[0.]/1-3' => '123A/0./1-3',
+    '123A[0.]/1-3' => '123A/0.$*/1-3',
     '123+'         => undef,
     '300@'         => undef,
     '003$$'        => undef,
@@ -73,7 +73,7 @@ while (my ($field, $test) = splice @match, 0, 2) {
 my $path = PICA::Path->new('123A[0.]/1-3');
 is $path->fields,      '123A';
 is $path->occurrences, '0.';
-is $path->subfields,   undef;
+is $path->subfields,   '*';
 is $path->positions,   '1-3';
 
 $path = PICA::Path->new('00..$0');
