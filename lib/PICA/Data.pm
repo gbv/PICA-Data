@@ -233,7 +233,7 @@ sub cmp_level2 {
 sub pica_title {
     my ($fields) = @_;
 
-    my $record = {record => [sort_fields(pica_fields($_[0], "0..."))]};
+    my $record = {record => [sort_fields(pica_fields($_[0], "0.../*"))]};
 
     my $ppn = pica_value($record, '003@0');
     $record->{_id} = $ppn if defined $ppn;

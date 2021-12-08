@@ -46,7 +46,7 @@ foreach (@{$tests->{tests}}) {
             }
         }
     });
-    is scalar($schema->check($record)), 73, "report errors only once";
+    is scalar($schema->check($record)), 77, "report errors only once";
 
     $record = [undef,['003@','','0','123']];
     is_deeply [ $schema->check($record) ], [bless {
