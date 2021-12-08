@@ -81,8 +81,16 @@ is_deeply $record->fields, [
     ['123X', undef, x => 1],
 ], 'append';
 
-$record->update('123X', x => 2);
+$record->update('123X', x => 1);
 $record->remove('037./*');
-is_deeply $record->fields, [ ['123X', undef, x => 2], ], 'update and remove';
+is_deeply $record->fields, [ ['123X', undef, x => 1], ], 'update and remove';
+$record->update('123X$y', 2);
+is_deeply $record->fields, [ ['123X', undef, x => 1, y => 2], ], 'update subfield';
+$record->update('123X$x', 0);
+is_deeply $record->fields, [ ['123X', undef, x => 0, y => 2], ], 'update subfield';
+$record->update('123X$*', 1);
+is_deeply $record->fields, [ ['123X', undef, x => 1, y => 1], ], 'update subfields';
+
+dies_ok { $record->update('123X', 1) };
 
 done_testing;

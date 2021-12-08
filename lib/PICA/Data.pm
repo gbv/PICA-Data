@@ -131,8 +131,6 @@ sub pica_fields {
 sub pica_append {
     my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
     push @$fields, pica_field(@_);
-
-    # TODO: update _id?
 }
 
 sub pica_remove {
@@ -145,17 +143,36 @@ sub pica_remove {
 
 sub pica_update {
     my $fields = reftype $_[0] eq 'HASH' ? shift->{record} : shift;
-    my $value  = pica_field(@_);
+    if (@_ == 2) {
+        my $path    = PICA::Path->new(shift);
+        my $sfregex = $path->{subfield} or croak "missing subfields";
+        my $value   = shift;
 
-    my $path = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
-
-    for (my $i = 0; $i < @$fields; $i++) {
-        if ($path->match_field($fields->[$i])) {
-            $fields->[$i] = $value;
+        for (my $i = 0; $i < @$fields; $i++) {
+            if ($path->match_field($fields->[$i])) {
+                my $f      = $fields->[$i];
+                my $append = $path->subfields =~ /^[A-Za-z0-9]$/;
+                for (my $j = 2; $j < @$f; $j += 2) {
+                    if ($f->[$j] =~ $sfregex) {
+                        $f->[$j + 1] = $value;
+                        $append = 0;
+                    }
+                }
+                push @$f, $path->subfields, $value if $append;
+            }
         }
     }
+    else {
+        my $value = pica_field(@_);
 
-    # TODO: update _id?
+        my $path = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
+
+        for (my $i = 0; $i < @$fields; $i++) {
+            if ($path->match_field($fields->[$i])) {
+                $fields->[$i] = $value;
+            }
+        }
+    }
 }
 
 sub pica_subfields {
@@ -772,7 +789,7 @@ Append a new field to the end of the record.
 =head2 pica_update( $record, ... )
 
 Change an existing field. This method can be used like method C<append> or with
-two arguments (path and value) to replace a subfield value.
+two arguments (path and value) to replace or add a subfield value.
 
 =head2 pica_remove( $record, $path [, $path..] )
 
@@ -860,7 +877,10 @@ are ignored.
 
 =head2 update( ... )
 
-Can be used like method C<append> but replaces an existing field.
+Can be used like method C<append> but replaces an existing field. Alternatively
+changes selected subfields if called with two arguments:
+
+    $record->update('012X$a', 1); # set or add subfield $a to 1, keep other subfields
 
 =head2 diff( $record )
 
