@@ -141,8 +141,6 @@ sub pica_remove {
 
     # modify in_place
     splice @$fields, 0, @$fields, grep {!$matcher->($_)} @$fields;
-
-    # TODO: update _id?
 }
 
 sub pica_update {
@@ -767,6 +765,20 @@ as method C<diff>. See L<PICA::Patch> for details.
 Return a new record by application of a difference given as annotated PICA.
 Also available as method C<patch>. See L<PICA::Patch> for details.
 
+=head2 pica_append( $record, $tag, [$occurrence,] @subfields )
+
+Append a new field to the end of the record.
+
+=head2 pica_update( $record, ... )
+
+Change an existing field. This method can be used like method C<append> or with
+two arguments (path and value) to replace a subfield value.
+
+=head2 pica_remove( $record, $path [, $path..] )
+
+Remove all fields matching given PICA Path expressions. Subfields and positions
+in the path are ignored.
+
 =head1 ACCESSORS
 
 All accessors of C<PICA::Data> are also available as L</FUNCTIONS>, prefixed
@@ -840,6 +852,15 @@ following are equivalent:
 
 To simplify migration from L<PICA::Record> the field may also be given as
 instance of L<PICA::Field> but this feature may be removed in a future version.
+
+=head2 remove( $path [, $path..] )
+
+Remove all fields matching given PICA Path expressions. Subfields and positions
+are ignored.
+
+=head2 update( ... )
+
+Can be used like method C<append> but replaces an existing field.
 
 =head2 diff( $record )
 

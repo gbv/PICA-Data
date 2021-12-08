@@ -770,6 +770,8 @@ expressions:
   my $matcher = pica_field_matcher("012X","012Y");
   if ($matcher->($field)) { ... }
 
+Subfields and positions in PICA Path expressions are ignored.
+
 =head1 SEE ALSO
 
 L<Catmandu::Fix::pica_map>
