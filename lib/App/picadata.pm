@@ -5,7 +5,7 @@ our $VERSION = '1.35';
 
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
 use Pod::Usage;
-use PICA::Data qw(pica_parser pica_writer);
+use PICA::Data qw(pica_parser pica_writer pica_annotation);
 use PICA::Patch qw(pica_diff pica_patch);
 use PICA::Schema qw(field_identifier);
 use PICA::Schema::Builder;
@@ -63,10 +63,11 @@ sub new {
         build   => sub {$command = 'build'},
         count   => sub {$command = 'count'},     # for backwards compatibility
         path    => \@path,
+        modify  => [],
     };
 
     my %cmd = abbrev
-        qw(convert get count levels fields filter subfields sf explain validate build diff patch help version);
+        qw(convert get count levels fields filter subfields sf explain validate build diff patch help version modify);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -76,7 +77,7 @@ sub new {
         \@argv,       $opt,           'from|f=s', 'to|t:s',
         'schema|s=s', 'annotate|A|a', 'abbrev|B', 'build|b',
         'unknown|u!', 'count|c',      'order|o',  'path|p=s',
-        "number|n:i", 'color|C',      'mono|M',   'help|h|?',
+        'number|n:i', 'color|C',      'mono|M',   'help|h|?',
         'version|V',
     ) or pod2usage(2);
 
@@ -86,6 +87,13 @@ sub new {
         = !$opt->{mono} && ($opt->{color} || -t *STDOUT);    ## no critic
 
     delete $opt->{$_} for qw(count build help version);
+
+    if ($command eq 'modify') {
+        die "missing path argument!\n" unless @argv;
+        push @{$opt->{modify}}, parse_path(shift @argv);
+        die "missing value argument!\n" unless @argv;
+        push @{$opt->{modify}}, shift @argv;
+    }
 
     my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+|/[0-9.-]+)?';
     while (@argv && $argv[0] =~ /^$pattern(\s*\|\s*($pattern)?)*$/) {
@@ -166,7 +174,7 @@ sub new {
 
     # default output format
     unless ($opt->{to}) {
-        if ($command =~ /(convert|levels|filter|diff|patch)/) {
+        if ($command =~ /(convert|levels|filter|diff|patch|modify)/) {
             $opt->{to} = $opt->{from};
             $opt->{to} ||= $TYPES{lc $1}
                 if $opt->{input}->[0] =~ /\.([a-z]+)$/;
@@ -306,6 +314,26 @@ sub run {
             $record->{record} = $record->fields(@getFields) if @getFields;
         }
         return if $record->empty;
+
+        if ($command eq 'modify') {
+            if ($self->{annotate}) {
+
+                # can't annotate an already annoted record
+                pica_annotation($_, undef) for @{$record->{record}};
+            }
+            my $before = [map {[@$_]} @{$record->{record}}];    # deep copy
+            my @modify = @{$self->{modify}};
+
+            while (@modify) {
+                my $path  = shift @modify;
+                my $value = shift @modify;
+                $record->update($path, $value);
+            }
+
+            if ($self->{annotate}) {
+                $record = pica_diff($before, $record);
+            }
+        }
 
         # TODO: also validate on other commands?
         if ($command eq 'validate') {

@@ -8,6 +8,7 @@ Revision history for PICA::Data
     - Remove option position_as_occurrence, use '/' for occurences by default
     - picadata: colorize output of (sub)fields schedules
     - Document methods to append, update and remove fields and extend update method
+    - picadata: add command 'modify'
 
 1.35 2021-11-05T10:13:05Z
     - Add methods to append, update and remove fields in record (#118)
