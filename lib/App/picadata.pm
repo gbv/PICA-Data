@@ -333,7 +333,7 @@ sub run {
             }
 
             if ($self->{annotate}) {
-                $record = pica_diff($before, $record);
+                $record = pica_diff($before, $record, keep => 1);
             }
         }
 
