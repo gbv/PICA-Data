@@ -146,27 +146,46 @@ sub pica_update {
     if (@_ == 2) {
         my $path    = PICA::Path->new(shift);
         my $sfregex = $path->{subfield} or croak "missing subfields";
-        my $value   = shift;
+        my $value   = shift // '';
 
         for (my $i = 0; $i < @$fields; $i++) {
             if ($path->match_field($fields->[$i])) {
-                my $f      = $fields->[$i];
-                my $append = $path->subfields =~ /^[A-Za-z0-9]$/;
-                for (my $j = 2; $j < @$f; $j += 2) {
-                    if ($f->[$j] =~ $sfregex) {
-                        $f->[$j + 1] = $value;
-                        $append = 0;
+                my $f = $fields->[$i];
+                if ($value ne '') {
+
+                    # replace subfield value
+                    my $append = $path->subfields =~ /^[A-Za-z0-9]$/;
+                    for (my $j = 2; $j < @$f; $j += 2) {
+                        if ($f->[$j] =~ $sfregex) {
+                            $f->[$j + 1] = $value;
+                            $append = 0;
+                        }
+                    }
+                    push @$f, $path->subfields, $value if $append;
+                }
+                else {
+                    # remove subfield
+
+                    my @sf;
+                    for (my $j = 2; $j < @$f; $j += 2) {
+                        push @sf, $f->[$j], $f->[$j + 1]
+                            if $f->[$j] !~ $sfregex;
+                    }
+                    my $sfnum = @$f % 2 ? @$f - 3 : @$f - 2;
+                    if (@sf && @sf < $sfnum) {
+                        splice @$f, 2, $sfnum, @sf;
+                    }
+                    else {
+                        # field is empty, so remove it
+                        splice @$fields, $i--, 1;
                     }
                 }
-                push @$f, $path->subfields, $value if $append;
             }
         }
     }
-    else {
+    elsif (@_) {
         my $value = pica_field(@_);
-
-        my $path = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
-
+        my $path  = PICA::Path->new($value->[0] . '/' . ($value->[1] // '0'));
         for (my $i = 0; $i < @$fields; $i++) {
             if ($path->match_field($fields->[$i])) {
                 $fields->[$i] = $value;
@@ -789,7 +808,7 @@ Append a new field to the end of the record.
 =head2 pica_update( $record, ... )
 
 Change an existing field. This method can be used like method C<append> or with
-two arguments (path and value) to replace or add a subfield value.
+two arguments (path and value) to replace, add or remove a subfield value.
 
 =head2 pica_remove( $record, $path [, $path..] )
 
@@ -881,6 +900,8 @@ Can be used like method C<append> but replaces an existing field. Alternatively
 changes selected subfields if called with two arguments:
 
     $record->update('012X$a', 1); # set or add subfield $a to 1, keep other subfields
+
+Setting a subfield value to the empty string or C<undef> removes the subfield.
 
 =head2 diff( $record )
 
