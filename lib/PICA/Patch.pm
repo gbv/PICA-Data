@@ -1,7 +1,7 @@
 package PICA::Patch;
 use v5.14.1;
 
-our $VERSION = '1.35';
+our $VERSION = '2.00';
 
 use PICA::Schema qw(field_identifier);
 

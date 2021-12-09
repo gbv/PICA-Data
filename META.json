@@ -4,13 +4,13 @@
       "- Johann Rolschewski and Jakob Voss"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.1.7, CPAN::Meta::Converter version 2.150001",
+   "generated_by" : "Minilla/v3.1.11, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "PICA-Data",
    "no_index" : {
@@ -75,21 +75,22 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/GBV/PICA-Data/issues"
+         "web" : "https://github.com/gbv/PICA-Data/issues"
       },
-      "homepage" : "https://github.com/GBV/PICA-Data",
+      "homepage" : "https://github.com/gbv/PICA-Data",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/GBV/PICA-Data.git",
-         "web" : "https://github.com/GBV/PICA-Data"
+         "url" : "git://github.com/gbv/PICA-Data.git",
+         "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "1.35",
+   "version" : "2.00",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",
       "Johann Rolschewski <jorol@cpan.org>",
       "Nico Wagner <nwagner84@protonmail.com>"
    ],
+   "x_serialization_backend" : "JSON::PP version 4.04",
    "x_static_install" : 1
 }
