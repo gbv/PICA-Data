@@ -91,8 +91,10 @@ sub new {
     if ($command eq 'modify') {
         die "missing path argument!\n" unless @argv;
         push @{$opt->{modify}}, parse_path(shift @argv);
-        die "missing value argument!\n" unless @argv;
-        push @{$opt->{modify}}, shift @argv;
+        my $value = shift @argv;
+        die "missing value argument!\n" unless defined $value;
+        utf8::decode($value);
+        push @{$opt->{modify}}, $value;
     }
 
     my $pattern = '[012.][0-9.][0-9.][A-Z@.](\$[^|]+|/[0-9.-]+)?';
