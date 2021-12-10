@@ -1,7 +1,7 @@
 package PICA::Data;
 use v5.14.1;
 
-our $VERSION = '2.00';
+our $VERSION = '2.01';
 
 use Exporter 'import';
 our @EXPORT_OK
