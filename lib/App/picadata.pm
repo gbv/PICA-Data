@@ -67,7 +67,7 @@ sub new {
     };
 
     my %cmd = abbrev
-        qw(convert get count levels fields filter subfields sf explain validate build diff patch help version modify);
+        qw(convert get count levels fields filter subfields sf explain validate build diff patch help version modify join);
     if ($cmd{$argv[0]}) {
         $command = $cmd{shift @argv};
         $command =~ s/^sf$/subfields/;
@@ -176,7 +176,7 @@ sub new {
 
     # default output format
     unless ($opt->{to}) {
-        if ($command =~ /(convert|levels|filter|diff|patch|modify)/) {
+        if ($command =~ /(convert|levels|filter|diff|patch|modify|join)/) {
             $opt->{to} = $opt->{from};
             $opt->{to} ||= $TYPES{lc $1}
                 if $opt->{input}->[0] =~ /\.([a-z]+)$/;
@@ -287,6 +287,8 @@ sub run {
         ? PICA::Schema::Builder->new($schema ? %$schema : ())
         : undef;
 
+    my $joined = $command eq 'join' ? PICA::Data->new : undef;
+
     # additional options
     my $number  = $self->{number};
     my $stats   = {records => 0, holdings => 0, items => 0, fields => 0};
@@ -353,8 +355,13 @@ sub run {
             }
         }
 
-        $writer->write($record) if $writer;
-        $builder->add($record)  if $builder;
+        if ($joined) {
+            push @{$joined->{record}}, @{$record->{record}};
+        }
+        elsif ($writer) {
+            $writer->write($record);
+        }
+        $builder->add($record) if $builder;
 
         if ($command eq 'count') {
             $stats->{holdings}
@@ -412,7 +419,10 @@ sub run {
         }
     }
 
-    $writer->end() if $writer;
+    if ($writer) {
+        $writer->write($joined->sort) if $joined;
+        $writer->end();
+    }
 
     if ($command eq 'count') {
         $stats->{invalid} = $invalid;
