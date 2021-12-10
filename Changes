@@ -3,7 +3,7 @@ Revision history for PICA::Data
 {{$NEXT}}
     - picadata: keep unchanged fields with modify -a
     - picadata: add command 'join'
-    - Add PIXML parser
+    - Add PIXML parser und writer
 
 2.00 2021-12-09T09:29:42Z
     - Fix Unicode output of field labels

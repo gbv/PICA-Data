@@ -423,6 +423,7 @@ use PICA::Writer::Plus;
 use PICA::Writer::Plain;
 use PICA::Writer::Binary;
 use PICA::Writer::PPXML;
+use PICA::Writer::PIXML;
 use PICA::Writer::JSON;
 
 sub pica_parser {
@@ -720,9 +721,13 @@ L<PICA::Writer::JSON> for type C<json> (PICA JSON)
 
 L<PICA::Writer::XML> for type C<xml> or C<picaxml> (PICA-XML)
 
-=item 
+=item
 
 L<PICA::Writer::PPXML> for type C<ppxml> (PicaPlus-XML)
+
+=item
+
+L<PICA::Writer::PIXML> for type C<pixml> (PICA FOLIO Import XML)
 
 =back
 

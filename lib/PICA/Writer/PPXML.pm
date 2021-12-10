@@ -10,9 +10,6 @@ use PICA::Data;    # qw(pica_holdings pica_items);
 
 use parent 'PICA::Writer::XML';
 
-our $ILN = PICA::Path->new('101@$a');
-our $EPN = PICA::Path->new('203@$0');
-
 sub namespace {
     'http://www.oclcpica.org/xmlns/ppxml-1.0';
 }
