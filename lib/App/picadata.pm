@@ -30,6 +30,7 @@ my %TYPES = (
     normpp => 'Plus',
     xml    => 'XML',
     ppxml  => 'PPXML',
+    pixml  => 'PIXML',
     json   => 'JSON',
     ndjson => 'JSON',
 );

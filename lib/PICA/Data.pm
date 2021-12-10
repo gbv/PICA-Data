@@ -416,6 +416,7 @@ use PICA::Parser::Plus;
 use PICA::Parser::Plain;
 use PICA::Parser::Binary;
 use PICA::Parser::PPXML;
+use PICA::Parser::PIXML;
 use PICA::Parser::JSON;
 use PICA::Writer::XML;
 use PICA::Writer::Plus;
@@ -484,6 +485,9 @@ sub _pica_module {
     }
     elsif ($type =~ /^(pica)?ppxml$/) {
         "${base}::PPXML"->new(@_);
+    }
+    elsif ($type =~ /^pixml$/) {
+        "${base}::PIXML"->new(@_);
     }
     elsif ($type =~ /^(nd)?json$/) {
         "${base}::JSON"->new(@_);
@@ -669,6 +673,10 @@ L<PICA::Parser::XML> for type C<xml> or C<picaxml> (PICA-XML)
 =item 
 
 L<PICA::Parser::PPXML> for type C<ppxml> (PicaPlus-XML)
+
+=item
+
+L<PICA::Parser::PIXML> for type C<pixml> (PICA FOLIO Import XML)
 
 =back
 
