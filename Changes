@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Fix support of generic writer
 
 2.01 2021-12-10T13:00:56Z
     - picadata: keep unchanged fields with modify -a
