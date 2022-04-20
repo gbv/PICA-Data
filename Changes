@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add PICA Import format writer
 
 2.02 2022-03-24T08:13:38Z
     - Fix support of generic writer

@@ -27,11 +27,6 @@ sub END_OF_RECORD {
         : "\N{INFORMATION SEPARATOR THREE}";
 }
 
-sub write_subfield {
-    my ($self, $code, $value) = @_;
-    $self->{fh}->print($self->SUBFIELD_INDICATOR . $code . $value);
-}
-
 1;
 __END__
 

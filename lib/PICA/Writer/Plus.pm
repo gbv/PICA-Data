@@ -11,11 +11,6 @@ sub SUBFIELD_INDICATOR {"\N{INFORMATION SEPARATOR ONE}"}
 sub END_OF_FIELD       {"\N{INFORMATION SEPARATOR TWO}"}
 sub END_OF_RECORD      {"\N{LINE FEED}";}
 
-sub write_subfield {
-    my ($self, $code, $value) = @_;
-    $self->{fh}->print($self->SUBFIELD_INDICATOR . $code . $value);
-}
-
 1;
 __END__
 
