@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add option level to pica_split
 
 2.03 2022-04-20T10:23:58Z
     - Add PICA Import format writer
