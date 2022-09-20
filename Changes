@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+2.04 2022-09-20T09:31:32Z
     - Add option level to pica_split
     - Support writing annotated PICA / PICA Patch in normalized and binary form
 
