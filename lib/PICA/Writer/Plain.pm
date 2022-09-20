@@ -29,16 +29,12 @@ sub write_subfield {
     $self->{fh}->print($value);
 }
 
-sub write_annotation {
+sub write_start_field {
     my ($self, $field) = @_;
 
-    if (@$field % 2) {
-        $self->{fh}->print($field->[$#$field] . " ")
-            unless defined $self->{annotate} && !$self->{annotate};
-    }
-    elsif ($self->{annotate}) {
-        $self->{fh}->print("  ");
-    }
+    $self->write_annotation($field);
+    $self->write_identifier($field);
+    $self->{fh}->print(' ');
 }
 
 1;

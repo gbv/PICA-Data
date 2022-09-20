@@ -79,9 +79,7 @@ sub write_field {
 
     my $fh = $self->{fh};
 
-    $self->write_annotation($field);
-    $self->write_identifier($field);
-    $fh->print(' ');
+    $self->write_start_field($field);
     for (my $i = 3; $i < scalar @$field; $i += 2) {
         $self->write_subfield($field->[$i - 1], $field->[$i]);
     }
@@ -90,8 +88,24 @@ sub write_field {
 }
 
 sub write_annotation {
+    my ($self, $field) = @_;
+    my $annotate = $self->{annotate};
 
-    # ignore field annotation by default
+    if (@$field % 2) {
+        $self->{fh}->print($field->[$#$field] . " ")
+            unless defined $annotate && !$annotate;
+    }
+    elsif ($annotate) {
+        $self->{fh}->print("  ");
+    }
+}
+
+sub write_start_field {
+    my ($self, $field) = @_;
+
+    $self->write_annotation($field);
+    $self->write_identifier($field);
+    $self->{fh}->print(' ');
 }
 
 sub write_subfield {
