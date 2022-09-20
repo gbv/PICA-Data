@@ -32,7 +32,8 @@ sub write_subfield {
 sub write_start_field {
     my ($self, $field) = @_;
 
-    $self->write_annotation($field);
+    my $annotation = $self->annotation($field);
+    $self->{fh}->print("$annotation ") if defined $annotation;
     $self->write_identifier($field);
     $self->{fh}->print(' ');
 }

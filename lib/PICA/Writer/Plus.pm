@@ -11,6 +11,14 @@ sub SUBFIELD_INDICATOR {"\N{INFORMATION SEPARATOR ONE}"}
 sub END_OF_FIELD       {"\N{INFORMATION SEPARATOR TWO}"}
 sub END_OF_RECORD      {"\N{LINE FEED}";}
 
+sub write_start_field {
+    my ($self, $field) = @_;
+
+    $self->write_identifier($field);
+    my $annotation = $self->annotation($field);
+    $self->{fh}->print("$annotation" || " ");
+}
+
 1;
 __END__
 

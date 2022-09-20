@@ -94,18 +94,6 @@ PLUS
     is $out, $PLUS, 'Plus Writer';
 }
 
-note 'PICA::Writer::Plus (annotated)';
-
-{
-    my $out = write_result('plus', { annotate => 1 }, @pica_records);
-    my $PLUS = <<'PLUS';
-  003@ 01041318383021A aHello $¥!
-  028C/01 dEmmaaGoldman
-PLUS
-
-    is $out, $PLUS, 'Plus Writer';
-}
-
 note 'PICA::Writer::XML';
 
 {
@@ -293,6 +281,9 @@ PLUS
 
     is pica_string([["123A",undef,"x","y"," "]], "plain", annotate => 0),
       "123A \$xy\n\n", "ignore annotation";
+
+    is pica_string([["123A",undef,"x","y","?"]], "plus"),
+      "123A?\x1Fxy\x1E\n", "plus with annotation";
 }
 
 is pica_string([]), '', 'empty record';

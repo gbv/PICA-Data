@@ -77,33 +77,26 @@ sub write_record {
 sub write_field {
     my ($self, $field) = @_;
 
-    my $fh = $self->{fh};
-
     $self->write_start_field($field);
+
     for (my $i = 3; $i < scalar @$field; $i += 2) {
         $self->write_subfield($field->[$i - 1], $field->[$i]);
     }
 
-    $fh->print($self->END_OF_FIELD);
+    $self->{fh}->print($self->END_OF_FIELD);
 }
 
-sub write_annotation {
+sub annotation {
     my ($self, $field) = @_;
-    my $annotate = $self->{annotate};
 
-    if (@$field % 2) {
-        $self->{fh}->print($field->[$#$field] . " ")
-            unless defined $annotate && !$annotate;
-    }
-    elsif ($annotate) {
-        $self->{fh}->print("  ");
-    }
+    return unless $self->{annotate} // @$field % 2;
+    return @$field % 2 ? $field->[$#$field] : " ";
 }
 
 sub write_start_field {
     my ($self, $field) = @_;
 
-    $self->write_annotation($field);
+    # ignore annotation by default
     $self->write_identifier($field);
     $self->{fh}->print(' ');
 }
@@ -204,9 +197,9 @@ L<PICA::Writer::Plus> using color names from L<Term::ANSIColor>, e.g.
 
 =head2 annotate
 
-Writer L<PICA::Writer::Plain> includes optional field annotations. Set this
-option to true to enforce field annotations (set to an empty space if missing)
-or to false to ignore them.
+Writer L<PICA::Writer::Plain> and L<PICA::Writer::Plus> includes optional field
+annotations. Set this option to true to enforce field annotations (set to an
+empty space if missing) or to false to ignore them.
 
 =head1 SEE ALSO
 
