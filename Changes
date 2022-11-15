@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+2.05 2022-11-15T07:41:31Z
     - Add functions pica_sort_subfields and parse_subfield_schedule
 
 2.04 2022-09-20T09:31:32Z
