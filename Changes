@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add functions pica_sort_subfields and parse_subfield_schedule
 
 2.04 2022-09-20T09:31:32Z
     - Add option level to pica_split
