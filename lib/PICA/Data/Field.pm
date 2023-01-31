@@ -1,7 +1,7 @@
 package PICA::Data::Field;
 use v5.14.1;
 
-our $VERSION = '2.05';
+our $VERSION = '2.06';
 
 use Carp qw(croak);
 use Hash::MultiValue;
