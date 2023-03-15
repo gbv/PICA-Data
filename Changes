@@ -1,6 +1,8 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+
+2.07 2023-03-15T12:15:00Z
     - Fix inclusion of PICA Import reader
 
 2.06 2023-01-31T09:15:07Z
