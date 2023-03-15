@@ -396,6 +396,7 @@ use PICA::Patch;
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
+use PICA::Writer::Import;
 use PICA::Parser::Binary;
 use PICA::Parser::PPXML;
 use PICA::Parser::PIXML;
