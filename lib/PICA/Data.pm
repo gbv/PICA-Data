@@ -121,7 +121,7 @@ sub pica_fields {
 
     $record = $record->{record} if reftype $record eq 'HASH';
 
-    return $record unless @_;
+    return [@$record] unless @_;
 
     my $matcher = eval {pica_field_matcher(@_)};
     return [] unless $matcher;
