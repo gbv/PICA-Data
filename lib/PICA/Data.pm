@@ -456,7 +456,7 @@ sub _pica_module {
     my $base = shift;
     my $type = lc(shift) // '';
 
-    if ($type =~ /^(pica)?plus$/) {
+    if ($type =~ /^(pica)?plus|norm(alized)$/) {
         "${base}::Plus"->new(@_);
     }
     elsif ($type eq 'binary') {
