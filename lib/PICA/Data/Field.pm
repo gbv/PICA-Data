@@ -133,11 +133,24 @@ sub set {
     push @$field, $code, $value;
 }
 
+sub clone {
+    bless $_[0]->TO_JSON, 'PICA::Data::Field';
+}
+
 sub TO_JSON {
     [@{$_[0]}];
 }
 
 1;
+
+=head1 NAME
+
+PICA::Data::Field - PICA+ Field
+
+=head1 DESCRIPTION
+
+A PICA::Data::Field is a blessed array reference with tag, occurrence,
+subfields, and optional annotation.
 
 =head1 METHODS
 
@@ -171,5 +184,9 @@ subfield values. Changing subfields this way won't work!
 =head2 set( $code => $value )
 
 Set or append a subfield.
+
+=head2 clone
+
+Return a copy of this field.
 
 =cut

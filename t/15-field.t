@@ -21,7 +21,9 @@ is_deeply $f, [qw(123A 02 a 2 ?)], 'array';
 is $f->annotation(''), undef, 'annotation';
 is $f->annotation, undef, 'annotation';
 
+my $f2 = $f->clone;
 $f->set(b => 0);
 is_deeply $f, [qw(123A 02 a 2 b 0)], 'set';
+is_deeply $f2, [qw(123A 02 a 2)], 'clone';
 
 done_testing;
