@@ -4,7 +4,7 @@
       "- Johann Rolschewski and Jakob Voss"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.1.21, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Minilla/v3.1.15, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
@@ -75,16 +75,16 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/gbv/pica-data/issues"
+         "web" : "https://github.com/gbv/PICA-Data/issues"
       },
-      "homepage" : "https://github.com/gbv/pica-data",
+      "homepage" : "https://github.com/gbv/PICA-Data",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/gbv/pica-data.git",
-         "web" : "https://github.com/gbv/pica-data"
+         "url" : "https://github.com/gbv/PICA-Data.git",
+         "web" : "https://github.com/gbv/PICA-Data"
       }
    },
-   "version" : "2.08",
+   "version" : "2.09",
    "x_contributors" : [
       "Carsten Klee <klee@cpan.org>",
       "Jakob Voß <jakob.voss@gbv.de>",
