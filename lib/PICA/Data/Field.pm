@@ -5,6 +5,7 @@ our $VERSION = '2.08';
 
 use Carp qw(croak);
 use Hash::MultiValue;
+use List::Util qw(first);
 
 sub new {
     my $class = shift;
@@ -133,6 +134,11 @@ sub set {
     push @$field, $code, $value;
 }
 
+sub equal {
+    my ($a, $b) = @_;
+    return (@$a == @$b && !defined first {$a->[$_] ne $b->[$_]} 0 .. $#{$b});
+}
+
 sub clone {
     bless $_[0]->TO_JSON, 'PICA::Data::Field';
 }
@@ -184,6 +190,10 @@ subfield values. Changing subfields this way won't work!
 =head2 set( $code => $value )
 
 Set or append a subfield.
+
+=head2 equal( $field )
+
+Check whether the field is equal to another field.
 
 =head2 clone
 
