@@ -27,9 +27,11 @@ foreach my $type (qw(Plain Plus JSON Binary XML PPXML PIXML)) {
 
     my $record = $parser->next;
     is_deeply $record, $first;
+    is $parser->count, 1;
 
-    ok $parser->next()->{_id} eq '67890', 'next record';    
+    ok $parser->next()->{_id} eq '67890', 'next record';
     ok !$parser->next, 'parsed all records';
+    is $parser->count, 2;
 
     foreach my $mode ('<', '<:utf8') {
         next
