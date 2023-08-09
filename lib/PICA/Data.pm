@@ -396,6 +396,7 @@ use PICA::Patch;
 use PICA::Parser::XML;
 use PICA::Parser::Plus;
 use PICA::Parser::Plain;
+use PICA::Parser::Import;
 use PICA::Parser::Binary;
 use PICA::Parser::PPXML;
 use PICA::Parser::PIXML;
@@ -654,6 +655,10 @@ L<PICA::Parser::Plain> for type C<plain> or C<picaplain> (human-readable PICA+)
 =item 
 
 L<PICA::Parser::Plus> for type C<plus> or C<picaplus> (normalized PICA+)
+
+=item 
+
+L<PICA::Parser::Import> for type C<import> (PICA Import format)
 
 =item
 

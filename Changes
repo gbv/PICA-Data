@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add PICA Import format parser (#129)
     - Add parser counter (method: count)
 
 2.09 2023-04-14T07:03:05Z
