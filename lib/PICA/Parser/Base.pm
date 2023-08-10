@@ -116,6 +116,8 @@ Use one of the following subclasses instead:
 
 =item L<PICA::Parser::Binary>
 
+=item L<PICA::Parser::Import>
+
 =item L<PICA::Parser::XML>
 
 =item L<PICA::Parser::PPXML>
