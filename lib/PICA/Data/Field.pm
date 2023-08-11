@@ -199,4 +199,8 @@ Check whether the field is equal to another field.
 
 Return a copy of this field.
 
+=head2 SEE ALSO
+
+Full records are processed as L<PICA::Data> objects.
+
 =cut
