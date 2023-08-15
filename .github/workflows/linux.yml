@@ -26,8 +26,9 @@ jobs:
         - '5.30'
         - '5.32'
         - '5.34'
+        - '5.36'
         include:
-          - perl-version: '5.36'
+          - perl-version: '5.38'
             os: ubuntu-latest
             coverage: true
     container:
