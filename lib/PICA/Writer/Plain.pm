@@ -49,6 +49,8 @@ PICA::Writer::Plain - Plain PICA+ format serializer
 
 See L<PICA::Writer::Base> for synopsis and details.
 
+This writer can be used to write PICA Patch format but L<PICA::Writer::Patch> should be used to ensure all fields are strictly annotated.
+
 The counterpart of this module is L<PICA::Parser::Plain>.
 
 =cut

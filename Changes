@@ -1,7 +1,9 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Add explicit PICA Patch parser and writer
     - Fix parsing plain $$ (#136)
+    - Avoid circular dependency
 
 2.11 2023-08-18T05:19:26Z
     - Add parser method: all

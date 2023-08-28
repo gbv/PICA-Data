@@ -161,4 +161,10 @@ my $annotated = "";
     }
 }
 
+{
+    my $patch = pica_parser(patch => \"003@ \$01\n+ 021A \$ax")->next;
+    is_deeply $patch->{record}, [['003@','','0','1',' '],['021A','','a','x','+']], 'patch parser';
+    throws_ok { pica_parser(patch => \"? 003@ \$01")->next } qr/Invalid annotation/;
+}
+
 done_testing;

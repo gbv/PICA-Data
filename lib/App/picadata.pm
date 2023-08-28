@@ -34,6 +34,7 @@ my %TYPES = (
     pixml  => 'PIXML',
     json   => 'JSON',
     ndjson => 'JSON',
+    patch  => 'Patch',
 );
 
 my %COLORS = (
