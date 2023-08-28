@@ -47,4 +47,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cpanm -n Devel::Cover::Report::Coveralls
+        git config --global --add safe.directory /__w/PICA-Data/PICA-Data
         perl Build.PL && ./Build build && cover -test -report coveralls
