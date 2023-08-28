@@ -49,45 +49,28 @@ sub _next_record {
             $occ  = $3;
             $data = $4;
         }
-        elsif ($self->{strict}) {
-            croak "ERROR: invalid PICA field structure \"$field\"";
-        }
-        else {
-            carp
-                "WARNING: invalid PICA field structure \"$field\". Skipped field";
-            next;
-        }
 
         if (!$self->{strict} && $data =~ /^ƒ/) {
             $data =~ s/\$/\$\$/g;
             $data =~ s/ƒ/\$/g;
         }
 
-        my @subfields = split /\$(\$+|.)/, $data;
-        shift @subfields;
-        push @subfields, '' if @subfields % 2;   # last subfield without value
-
-        if ($data =~ /\$\$/) {
-            my @tokens = (shift @subfields, shift @subfields);
-            while (@subfields) {
-                my $code  = shift @subfields;
-                my $value = shift @subfields;
-                if ($code =~ /^\$+$/) {
-                    my $length = length $code;
-                    $code =~ s/\$\$/\$/g;
-                    if ($length % 2) {
-                        $tokens[-1] .= "$code$value";
-                        next;
-                    }
-                    else {
-                        $tokens[-1] .= $code;
-                        $code  = substr $value, 0, 1;
-                        $value = substr $value, 1;
-                    }
-                }
-                push @tokens, $code, $value;
+        if ($data !~ /^(\$[^\$]([^\$]|\$\$)*)+$/) {
+            if ($self->{strict}) {
+                croak "ERROR: invalid PICA field structure \"$field\"";
             }
-            @subfields = @tokens;
+            else {
+                carp
+                    "WARNING: invalid PICA field structure \"$field\". Skipped field";
+                next;
+            }
+        }
+
+        my @subfields;
+        while ($data =~ m/\G\$([^\$])(([^\$]|\$\$)*)/g) {
+            my ($code, $value) = ($1, $2);
+            $value =~ s/\$\$/\$/g;
+            push @subfields, $code, $value;
         }
 
         push @subfields, $annotation if defined $annotation;

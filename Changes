@@ -1,6 +1,7 @@
 Revision history for PICA::Data
 
 {{$NEXT}}
+    - Fix parsing plain $$ (#136)
 
 2.11 2023-08-18T05:19:26Z
     - Add parser method: all
