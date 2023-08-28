@@ -30,6 +30,8 @@ sub sorted_fields {
         }
     }
 
+    $fields = [sort {cmp_fields($a, $b)} @$fields];
+
     return $fields;
 }
 
