@@ -8,14 +8,14 @@ sub new {
     my ($tag, $occ) = @{shift(@_)};
 
     my $error = {tag => $tag, @_};
-    $occ = 0 if substr($tag, 0, 1) eq 2;
+    $occ                 = 0    if substr($tag, 0, 1) eq 2;
     $error->{occurrence} = $occ if $occ;
 
     # add error messages
     my $id = join '/', grep {$_} $tag, $occ;
 
     while (my ($code, $sf) = each %{$error->{subfields} // {}}) {
-        $sf->{code} = $code;
+        $sf->{code}    = $code;
         $sf->{message} = _subfield_error_message($sf, $id);
     }
 
@@ -31,16 +31,13 @@ sub message {
 
 sub _subfield_error_message {
     my $error = shift;
-    my $id = (shift // '') . '$' . $error->{code};
+    my $id    = (shift // '') . '$' . $error->{code};
 
     if ($error->{required}) {
         "missing subfield $id";
     }
     elsif ($error->{repeated}) {
         "subfield $id is not repeatable";
-    }
-    elsif ($error->{deprecated}) {
-        "deprecated subfield $id";
     }
     elsif ($error->{position}) {
         "invalid value at position $error->{position} of subfield $id";
@@ -66,16 +63,13 @@ sub _field_error_message {
         "field $id is not repeatable";
     }
     elsif ($error->{subfields}) {
-        my %sf = %{$error->{subfields}};
+        my %sf      = %{$error->{subfields}};
         my $invalid = grep {$_->{message} !~ /^unknown/} values %sf;
         ($invalid ? "invalid" : "unknown")
             . " subfield"
             . (length keys %sf > 1 ? "s" : "")
             . " $id\$"
             . join '', sort keys %sf;
-    }
-    elsif ($error->{deprecated}) {
-        "deprecated field $id";
     }
     else {
         "unknown field $id";
@@ -115,10 +109,6 @@ Set if the field was required but missing.
 =item repeated
 
 Set if the non-repeatable field was repeated.
-
-=item deprecated
-
-Set if the field is valid but deprecated.
 
 =item subfields
 

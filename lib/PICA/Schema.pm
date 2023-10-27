@@ -81,31 +81,15 @@ sub check_field {
     my $id   = $opts{_field_id} || $self->field_identifier($field);
     my $spec = $self->{fields}{$id};
 
-    if ($opts{allow_deprecated}) {
-        $opts{allow_deprecated_fields}    = 1;
-        $opts{allow_deprecated_subfields} = 1;
-    }
-
     if ($opts{ignore_unknown}) {
         $opts{ignore_unknown_fields}    = 1;
         $opts{ignore_unknown_subfields} = 1;
     }
 
     if (!$spec) {    # field is not defined
-        $spec = $self->{'deprecated-fields'}{$id};
-        my $simple = [split('/', $id)];
-
-        if ($spec) {    # field is deprectaed
-            unless ($opts{allow_deprecated_fields}) {
-                return PICA::Error->new($simple, deprecated => 1);
-            }
-        }
-        elsif ($opts{ignore_unknown_fields}) {
-            return ();
-        }
-        else {
-            return PICA::Error->new($simple);
-        }
+        return $opts{ignore_unknown_fields}
+            ? ()
+            : PICA::Error->new([split('/', $id)]);
     }
 
     if ($opts{counter} && !$spec->{repeatable}) {
@@ -138,16 +122,8 @@ sub check_subfields {
             my ($code, $value) = splice @subfields, 0, 2;
             my $sfspec = $spec->{subfields}{$code};
 
-            if (!$sfspec) {    # subfield is not defined
-                $sfspec = $spec->{'deprecated-subfields'}{$code};
-                if ($sfspec) {    # subfield is deprecated
-                    unless ($opts{allow_deprecated_subfields}) {
-                        $errors{$code} = {deprecated => 1};
-                    }
-                }
-                elsif (!$opts{ignore_unknown_subfields}) {
-                    $errors{$code} = {};
-                }
+            if (!$sfspec && !$opts{ignore_unknown_subfields}) {
+                $errors{$code} = {};
             }
 
             if ($sfspec) {
@@ -240,15 +216,7 @@ sub check_code {
     return unless ref $def->{codes};
 
     # code is defined
-    return if exists $def->{codes}{$code};
-
-    # code is deprecated and we allow deprecated codes
-    if ($opts{allow_deprecated} || $opts{allow_deprecated_codes}) {
-        my $deprecated = $def->{'deprecated-codes'};
-        return ref $deprecated && !(exists $deprecated->{$code});
-    }
-
-    return 1;
+    return !(exists $def->{codes}{$code});
 }
 
 sub check_value {
@@ -505,22 +473,6 @@ Don't report subfields not included in the schema.
 
 Don't report fields and subfields not included in the schema.
 
-=item allow_deprecated_fields
-
-Don't report deprecated fields.
-
-=item allow_deprecated_subfields
-
-Don't report deprecated subfields.
-
-=item allow_deprecated_codes
-
-Don't report deprecated codes.
-
-=item allow_deprecated
-
-Don't report deprecated fields, subfields, and codes.
-
 =item allow_empty_subfields
 
 Don't report subfields with empty string values.
@@ -602,7 +554,7 @@ repeatability and whether the subfield is required.
 
 =head1 LIMITATIONS
 
-Fields types and deprecated (sub)fields in Avram Schemas are not fully supported yet.
+Full compliance with Avram Schema Format 1.0 has not been validated yet.
 
 =head1 SEE ALSO
 
